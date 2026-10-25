@@ -1,30 +1,4 @@
-Conversation Log
 
-He integrado ForensicMind CBR v2.0 (tanto como pestaña 10 dentro de LegalTech como módulo independiente en el menú lateral de app.py), y he iniciado la instalación de opencv-python y la prueba de compilación y ejecución. En cuanto termine la validación levantaré el servidor en http://localhost:8501.
-
-¡Listo! ForensicMind CBR v2.0 | Inteligencia Pericial ha sido integrado y validado sin errores dentro de app.py, conservando todos los módulos existentes:
-
-✅ Resumen de la Integración
-Dependencia OpenCV (cv2) instalada:
-Agregado opencv-python a requirements.txt e instalado en el entorno virtual.
-Motor y Bóveda boveda_forense_cbr.db Integrados:
-init_db: Tabla historial_casos con los 5 expedientes semilla (EXP-2026-001 a EXP-2026-005).
-calcular_similitud_coseno y escanear_anomalias_logs: Detección heurística de maniobras anti-forenses (sed -i, rm -rf, shred, PRIV_ESC, /etc/shadow, SFTP) y cálculo de similitud coseno.
-generar_lienzo_pericial_9_16: Generador de Ficha Visual Pericial en resolución estricta 1080×1920 px (9:16 vertical) con botón de descarga directa en formato .png.
-Doble Acceso en la Interfaz (render_modulo_forensicmind_cbr):
-Disponible como la Pestaña 10 ("🕵️♂️ ForensicMind CBR v2.0 (Logs & Lienzo 9:16)") dentro del módulo LegalTech.
-Disponible también directamente desde el Menú Lateral Izquierdo ("🕵️♂️ ForensicMind CBR v2.0 | Inteligencia Pericial").
-🌐 Servidor Activo
-URL Local: http://localhost:8501
-URL de Red: http://192.168.1.75:8501
-PIN de Acceso (Barra Lateral): 2026
-streamlit run app.py
-
-El servidor de Streamlit para app.py y motor_juridico_ia.py está activo y listo en tu navegador:
-
-URL Local: http://localhost:8501
-URL de Red: http://192.168.1.70:8501
-PIN de Acceso (Barra Lateral): 2026
 import streamlit as st
 import sqlite3
 import hashlib
