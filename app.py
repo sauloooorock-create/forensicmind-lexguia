@@ -4,7 +4,9 @@ import hashlib
 import re
 import math
 import io
+import os
 import json
+import base64
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -32,10 +34,10 @@ except ImportError:
     TfidfVectorizer = None
 
 # ==============================================================================
-# SELLO DE AUTORÍA Y ARQUITECTURA DEL SISTEMA
+# SELLO DE AUTORÍA Y CONFIGURACIÓN GLOBAL v7.0
 # ==============================================================================
 AUTOR_SISTEMA = "Ing. Industrial y de Sistemas Saúl Ángel Ortiz Rogel"
-MARCA_SISTEMA = "ForensicMind & LexGuía CBR v6.5 — IA Auto-Evolutiva & Respaldo Cloud"
+MARCA_SISTEMA = "ForensicMind & LexGuía CBR v7.0 — IA Auto-Inyectable & GitHub Sync"
 
 st.set_page_config(
     page_title=f"{MARCA_SISTEMA} | {AUTOR_SISTEMA}",
@@ -44,25 +46,54 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-DB_NAME = "boveda_juridica_cbr_v6.db"
+DB_NAME = "boveda_juridica_cbr_v7.db"
+BACKUP_JSON_FILE = "cerebro_autonomo_backup.json"
+
+# Lectura segura de credenciales de GitHub desde Streamlit Secrets (si existen)
+DEFAULT_GH_TOKEN = ""
+DEFAULT_GH_REPO = ""
+DEFAULT_GH_BRANCH = "main"
+try:
+    DEFAULT_GH_TOKEN = st.secrets.get("GITHUB_TOKEN", "")
+    DEFAULT_GH_REPO = st.secrets.get("GITHUB_REPO", "")
+    DEFAULT_GH_BRANCH = st.secrets.get("GITHUB_BRANCH", "main")
+except Exception:
+    pass
 
 # ==============================================================================
-# SELECTOR DE TEMA VISUAL Y CSS BLINDADO DE ALTO CONTRASTE (MÓVIL Y PC)
+# BARRA LATERAL: APARIENCIA Y CONFIGURACIÓN DE AUTO-SYNC GITHUB
 # ==============================================================================
 with st.sidebar:
-    st.markdown("### 🎨 Apariencia y Motor Neuronal")
+    st.markdown("### 🎨 Apariencia y Motor Autónomo v7.0")
     modo_visual = st.radio(
         "Estilo visual de la interfaz:",
         ["☀️ Ejecutivo Claro (Máxima Lectura en Celular)", "🌙 Oscuro Forense Blindado"],
         index=0
     )
     auto_entrenar_switch = st.checkbox(
-        "🧠 Auto-Aprendizaje Neuronal Activo (Aprender de cada consulta y búsqueda web)",
+        "🧠 Auto-Aprendizaje e Inyección Activa",
         value=True
     )
     buscar_web_switch = st.checkbox(
-        "🌐 Conectar a Internet en Vivo (Google Jurídico & Wikipedia Legal)",
+        "🌐 Búsqueda en Vivo en Internet (Google & Wikipedia)",
         value=True
+    )
+    st.markdown("---")
+    st.markdown("### ☁️ GitHub Auto-Sync (Memoria Eterna Gratuita)")
+    st.caption("Si configuras tu repositorio y token en `Secrets` o aquí, la IA guardará sola su cerebro en tu GitHub en cada consulta:")
+    gh_repo_input = st.text_input(
+        "Repositorio (usuario/nombre-repo):",
+        value=DEFAULT_GH_REPO,
+        placeholder="ej. saulortiz/forensicmind-lexguia"
+    )
+    gh_token_input = st.text_input(
+        "GitHub Token (ghp_...):",
+        value=DEFAULT_GH_TOKEN,
+        type="password"
+    )
+    gh_branch_input = st.text_input(
+        "Rama (Branch):",
+        value=DEFAULT_GH_BRANCH
     )
 
 if "Claro" in modo_visual:
@@ -78,7 +109,7 @@ if "Claro" in modo_visual:
             font-size: 1.02rem !important;
             opacity: 1 !important;
         }
-        textarea, input[type="text"], input[type="number"] {
+        textarea, input[type="text"], input[type="number"], input[type="password"] {
             background-color: #ffffff !important;
             color: #0f172a !important;
             -webkit-text-fill-color: #0f172a !important;
@@ -146,7 +177,7 @@ else:
         .stApp { background-color: #0b0f19 !important; color: #f8fafc !important; }
         .block-container { padding-top: 3.5rem !important; padding-bottom: 2.5rem !important; }
         h1, h2, h3, h4, h5, h6, p, li, label, [data-testid="stWidgetLabel"] p { color: #f8fafc !important; -webkit-text-fill-color: #f8fafc !important; font-weight: 600 !important; }
-        textarea, input[type="text"], input[type="number"] {
+        textarea, input[type="text"], input[type="number"], input[type="password"] {
             background-color: #ffffff !important;
             color: #0f172a !important;
             -webkit-text-fill-color: #0f172a !important;
@@ -234,20 +265,6 @@ ETAPAS_PROCESO = {
     ]
 }
 
-MEDIDAS_CAUTELARES = [
-    "Embargo preventivo de cuentas/bienes", "Medidas de protección urgentes",
-    "Retención de bienes / Pensión provisional", "Orden de no enajenar inmueble", "Suspensión del acto reclamado"
-]
-
-RESOLUCIONES_SENTENCIAS = [
-    "Laudo / Sentencia condenatoria", "Convenio conciliatorio ratificado (Cosa Juzgada)",
-    "Sentencia absolutoria", "Auto de vinculación / no vinculación", "Resolución interlocutoria"
-]
-
-RECURSOS_LEGALES = [
-    "Amparo directo / indirecto", "Apelación", "Nulidad de actuaciones / renuncia", "Habeas corpus", "Queja", "Revisión"
-]
-
 TABULADOR_HONORARIOS_RAMA = {
     "Casos Laborales": {
         "asesoria_min": 500, "asesoria_sug": 1000, "asesoria_max": 2000, "anticipo_sug": 0,
@@ -279,15 +296,6 @@ TABULADOR_HONORARIOS_RAMA = {
         "pct_sugerido": 20.0, "gastos_periciales_sug": 4500, "horas_promedio_despacho": 40,
         "via_gratuita": "CONDUSEF (contra bancos/financieras) o PROFECO — $0 MXN"
     }
-}
-
-CONCEPTOS_CLAVE = {
-    "Liquidación vs. Finiquito": "El FINIQUITO se paga siempre (incluso si renuncias: días trabajados, aguinaldo y vacaciones proporcionales). La LIQUIDACIÓN se paga cuando te despiden sin justificación (90 días de sueldo integrado + prima de antigüedad).",
-    "Salario Diario Integrado (SDI)": "Es el sueldo con el que se calcula tu indemnización de 90 días (Art. 84 y 89 LFT). Suma a tu salario diario la parte proporcional diaria de tu aguinaldo y de tu prima vacacional.",
-    "Cuota Litis (Porcentaje del Abogado)": "Acuerdo donde el abogado laboralista no te cobra anticipo, sino un porcentaje (20% a 30%) solo sobre el dinero que logre recuperar para ti.",
-    "Prescripción Laboral (60 Días)": "Tienes 60 días naturales desde el día siguiente al despido para acudir al Centro de Conciliación. Si dejas pasar más de 2 meses, pierdes el derecho a reclamar.",
-    "Cosa Juzgada": "Efecto definitivo de una sentencia firme o convenio ratificado ante el Centro de Conciliación contra el cual ya no cabe ningún recurso.",
-    "Debido Proceso (Due Process)": "Garantía constitucional de ser juzgado por un juez imparcial, con defensa técnica y sin pruebas obtenidas de forma ilegal."
 }
 
 ESCENARIOS_FRECUENTES = {
@@ -326,9 +334,181 @@ def expandir_lenguaje_coloquial(texto: str) -> str:
     return str(texto) + " " + " ".join(expansiones)
 
 # ==============================================================================
-# 3. CAPA DE PERSISTENCIA SQLITE + TABLA DE AUTO-APRENDIZAJE CONTINUO
+# 3. MOTOR DE AUTOINYECCIÓN PERPETUA Y SINCRONIZACIÓN AUTOMÁTICA CON GITHUB API
 # ==============================================================================
-def init_db():
+def inyectar_diccionario_cerebro_en_sqlite(data: dict, conn: sqlite3.Connection) -> dict:
+    """Inyecta un diccionario JSON de respaldo directamente en SQLite evitando duplicados."""
+    c = conn.cursor()
+    nuevos_mem = 0
+    nuevos_casos = 0
+
+    for m in data.get("memoria_neuronal_autonoma", []):
+        rel_orig = str(m.get("relato_original", "")).strip()
+        if not rel_orig:
+            continue
+        rel_exp = m.get("relato_expandido") or expandir_lenguaje_coloquial(rel_orig)
+        h_c = m.get("hash_consulta") or hashlib.sha256(rel_orig.lower().encode("utf-8")).hexdigest()
+        c.execute("""
+            INSERT OR IGNORE INTO memoria_neuronal_autonoma (
+                relato_original, relato_expandido, macro_rama, rama_derecho,
+                categoria_caso, tipo_caso, fuente_aprendizaje, confianza,
+                hash_consulta, fecha_aprendizaje
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            rel_orig,
+            rel_exp,
+            m.get("macro_rama", "Derecho Privado"),
+            m.get("rama_derecho", "Derecho Laboral"),
+            m.get("categoria_caso", "Casos Laborales"),
+            m.get("tipo_caso", "Despido injustificado"),
+            m.get("fuente_aprendizaje", "Auto-Inyección de Respaldo"),
+            float(m.get("confianza", 95.0)),
+            h_c,
+            m.get("fecha_aprendizaje", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        ))
+        if c.rowcount > 0:
+            nuevos_mem += 1
+
+    for cs in data.get("casos_juridicos_cbr", []):
+        cod = cs.get("codigo_caso")
+        if not cod:
+            continue
+        c.execute("""
+            INSERT OR IGNORE INTO casos_juridicos_cbr (
+                codigo_caso, macro_rama, rama_derecho, categoria_caso, tipo_caso,
+                titulo, actores_intervinientes, etapa_clave, medida_cautelar,
+                resolucion_obtenida, recurso_utilizado, evidencia_logs, hash_sha256,
+                resultado, accion_abogado, reaccion_juez, causa_raiz_fallo,
+                estrategia_ganadora, que_hacer_ciudadano, que_no_hacer_ciudadano, fecha_registro
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            cod,
+            cs.get("macro_rama", "Derecho Privado"),
+            cs.get("rama_derecho", "Derecho Laboral"),
+            cs.get("categoria_caso", "Casos Laborales"),
+            cs.get("tipo_caso", "Despido injustificado"),
+            cs.get("titulo", "Caso Restaurado"),
+            cs.get("actores_intervinientes", "Juez, Abogado"),
+            cs.get("etapa_clave", "1. Demanda"),
+            cs.get("medida_cautelar", "Embargo preventivo"),
+            cs.get("resolucion_obtenida", "Sentencia"),
+            cs.get("recurso_utilizado", "Amparo"),
+            cs.get("evidencia_logs", ""),
+            cs.get("hash_sha256", hashlib.sha256(str(cod).encode()).hexdigest()),
+            cs.get("resultado", "GANADO"),
+            cs.get("accion_abogado", ""),
+            cs.get("reaccion_juez", ""),
+            cs.get("causa_raiz_fallo", "N/A"),
+            cs.get("estrategia_ganadora", ""),
+            cs.get("que_hacer_ciudadano", ""),
+            cs.get("que_no_hacer_ciudadano", ""),
+            cs.get("fecha_registro", datetime.now().strftime("%Y-%m-%d"))
+        ))
+        if c.rowcount > 0:
+            nuevos_casos += 1
+
+    conn.commit()
+    return {"nuevos_memoria": nuevos_mem, "nuevos_casos": nuevos_casos}
+
+def descargar_cerebro_desde_github(repo: str, token: str, branch: str = "main") -> dict:
+    """Descarga el archivo `cerebro_autonomo_backup.json` desde tu repositorio de GitHub."""
+    if not repo or not token:
+        return {}
+    url = f"https://api.github.com/repos/{repo.strip()}/contents/{BACKUP_JSON_FILE}?ref={branch.strip()}"
+    headers = {
+        "Authorization": f"token {token.strip()}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "ForensicMindAutoSync/7.0"
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=5.0) as resp:
+            res_json = json.loads(resp.read().decode("utf-8"))
+            content_b64 = res_json.get("content", "")
+            if content_b64:
+                decoded = base64.b64decode(content_b64).decode("utf-8")
+                return json.loads(decoded)
+    except Exception:
+        pass
+    return {}
+
+def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", branch: str = "main") -> dict:
+    """
+    1. Crea/actualiza automáticamente la copia de respaldo local `cerebro_autonomo_backup.json`.
+    2. Si hay credenciales de GitHub configuradas, sube automáticamente el respaldo al repositorio
+       para que jamás se pierda aunque actualices o reinicies la aplicación en Streamlit Cloud.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    df_casos = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
+    df_mem = pd.read_sql_query("SELECT * FROM memoria_neuronal_autonoma", conn)
+    conn.close()
+
+    payload = {
+        "autor_arquitectura": AUTOR_SISTEMA,
+        "sistema": MARCA_SISTEMA,
+        "fecha_respaldo": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "total_casos_cbr": len(df_casos),
+        "total_memoria_autonoma": len(df_mem),
+        "casos_juridicos_cbr": df_casos.to_dict(orient="records"),
+        "memoria_neuronal_autonoma": df_mem.to_dict(orient="records")
+    }
+    raw_bytes = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+
+    # 1. Guardar respaldo en disco local del contenedor
+    try:
+        with open(BACKUP_JSON_FILE, "wb") as f:
+            f.write(raw_bytes)
+    except Exception:
+        pass
+
+    # 2. Si el usuario configuró su GitHub Token y Repo, hacer Auto-Commit a GitHub
+    if not repo or not token:
+        return {"local_ok": True, "github_ok": False, "msg": "Respaldo local autoinyectable actualizado."}
+
+    url_api = f"https://api.github.com/repos/{repo.strip()}/contents/{BACKUP_JSON_FILE}"
+    headers = {
+        "Authorization": f"token {token.strip()}",
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+        "User-Agent": "ForensicMindAutoSync/7.0"
+    }
+
+    sha_actual = None
+    try:
+        req_get = urllib.request.Request(f"{url_api}?ref={branch.strip()}", headers=headers)
+        with urllib.request.urlopen(req_get, timeout=4.5) as resp_get:
+            datos_existentes = json.loads(resp_get.read().decode("utf-8"))
+            sha_actual = datos_existentes.get("sha")
+    except Exception:
+        sha_actual = None
+
+    body_put = {
+        "message": f"Auto-Inyección IA ForensicMind v7.0 ({len(df_mem)} memorias | {len(df_casos)} casos)",
+        "content": base64.b64encode(raw_bytes).decode("utf-8"),
+        "branch": branch.strip()
+    }
+    if sha_actual:
+        body_put["sha"] = sha_actual
+
+    try:
+        req_put = urllib.request.Request(
+            url_api,
+            data=json.dumps(body_put).encode("utf-8"),
+            headers=headers,
+            method="PUT"
+        )
+        with urllib.request.urlopen(req_put, timeout=6.0) as resp_put:
+            if resp_put.status in (200, 201):
+                return {"local_ok": True, "github_ok": True, "msg": "☁️ Sincronizado automáticamente en tu GitHub."}
+    except Exception as e:
+        return {"local_ok": True, "github_ok": False, "msg": f"Guardado local OK (GitHub pendiente: {str(e)[:40]})"}
+
+    return {"local_ok": True, "github_ok": False, "msg": "Respaldo local actualizado."}
+
+# ==============================================================================
+# 4. INICIALIZACIÓN DE SQLITE + AUTOINYECCIÓN AUTOMÁTICA AL ARRANCAR
+# ==============================================================================
+def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str = "main"):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute("""
@@ -555,18 +735,31 @@ def init_db():
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, semillas)
     conn.commit()
+
+    # PASO A: Autoinyección desde el archivo local `cerebro_autonomo_backup.json` (si existe en el repo)
+    if os.path.exists(BACKUP_JSON_FILE):
+        try:
+            with open(BACKUP_JSON_FILE, "r", encoding="utf-8") as f_local:
+                data_local = json.load(f_local)
+                inyectar_diccionario_cerebro_en_sqlite(data_local, conn)
+        except Exception:
+            pass
+
+    # PASO B: Autoinyección remota desde GitHub API (una vez por sesión de arranque)
+    if "autoinyeccion_remota_lista" not in st.session_state and repo_gh and token_gh:
+        data_remota = descargar_cerebro_desde_github(repo_gh, token_gh, branch_gh)
+        if data_remota:
+            inyectar_diccionario_cerebro_en_sqlite(data_remota, conn)
+        st.session_state["autoinyeccion_remota_lista"] = True
+
     conn.close()
 
-init_db()
+init_db_and_autoinject(gh_repo_input, gh_token_input, gh_branch_input)
 
 # ==============================================================================
-# 4. EXPORTACIÓN E IMPORTACIÓN DEL CEREBRO NEURONAL (.JSON Y .CSV)
+# 5. FUNCIONES MANUALES DE EXPORTACIÓN / IMPORTACIÓN (.JSON Y .CSV)
 # ==============================================================================
 def exportar_cerebro_completo_json() -> bytes:
-    """
-    Exporta tanto la tabla de precedentes oficiales (`casos_juridicos_cbr`) como toda
-    la memoria aprendida (`memoria_neuronal_autonoma`) en un paquete JSON firmado con SHA-256.
-    """
     conn = sqlite3.connect(DB_NAME)
     df_casos = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
     df_mem = pd.read_sql_query("SELECT * FROM memoria_neuronal_autonoma", conn)
@@ -581,137 +774,34 @@ def exportar_cerebro_completo_json() -> bytes:
         "casos_juridicos_cbr": df_casos.to_dict(orient="records"),
         "memoria_neuronal_autonoma": df_mem.to_dict(orient="records")
     }
-    raw_bytes = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
-    return raw_bytes
+    return json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
 
 def exportar_memoria_autonoma_csv() -> bytes:
-    """Exporta las consultas y aprendizajes autónomos a CSV compatible con Excel."""
     conn = sqlite3.connect(DB_NAME)
     df_mem = pd.read_sql_query("SELECT * FROM memoria_neuronal_autonoma", conn)
     conn.close()
     return df_mem.to_csv(index=False).encode("utf-8-sig")
 
 def importar_cerebro_desde_archivo(uploaded_file) -> dict:
-    """
-    Restaura e inyecta registros desde un archivo .json o .csv subido por el usuario,
-    evitando duplicados y re-entrenando la Red Neuronal en caliente.
-    """
     nombre = uploaded_file.name.lower()
     raw = uploaded_file.read()
     conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    nuevos_mem = 0
-    nuevos_casos = 0
-
+    res = {"nuevos_memoria": 0, "nuevos_casos": 0}
     try:
         if nombre.endswith(".json"):
             data = json.loads(raw.decode("utf-8"))
-            lista_mem = data.get("memoria_neuronal_autonoma", [])
-            lista_casos = data.get("casos_juridicos_cbr", [])
-
-            for m in lista_mem:
-                rel_orig = str(m.get("relato_original", "")).strip()
-                if not rel_orig:
-                    continue
-                rel_exp = m.get("relato_expandido") or expandir_lenguaje_coloquial(rel_orig)
-                h_c = m.get("hash_consulta") or hashlib.sha256(rel_orig.lower().encode("utf-8")).hexdigest()
-                c.execute("""
-                    INSERT OR IGNORE INTO memoria_neuronal_autonoma (
-                        relato_original, relato_expandido, macro_rama, rama_derecho,
-                        categoria_caso, tipo_caso, fuente_aprendizaje, confianza,
-                        hash_consulta, fecha_aprendizaje
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    rel_orig,
-                    rel_exp,
-                    m.get("macro_rama", "Derecho Privado"),
-                    m.get("rama_derecho", "Derecho Laboral"),
-                    m.get("categoria_caso", "Casos Laborales"),
-                    m.get("tipo_caso", "Despido injustificado"),
-                    m.get("fuente_aprendizaje", "Restauración JSON"),
-                    float(m.get("confianza", 95.0)),
-                    h_c,
-                    m.get("fecha_aprendizaje", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                ))
-                if c.rowcount > 0:
-                    nuevos_mem += 1
-
-            for cs in lista_casos:
-                cod = cs.get("codigo_caso")
-                if not cod:
-                    continue
-                c.execute("""
-                    INSERT OR IGNORE INTO casos_juridicos_cbr (
-                        codigo_caso, macro_rama, rama_derecho, categoria_caso, tipo_caso,
-                        titulo, actores_intervinientes, etapa_clave, medida_cautelar,
-                        resolucion_obtenida, recurso_utilizado, evidencia_logs, hash_sha256,
-                        resultado, accion_abogado, reaccion_juez, causa_raiz_fallo,
-                        estrategia_ganadora, que_hacer_ciudadano, que_no_hacer_ciudadano, fecha_registro
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    cod,
-                    cs.get("macro_rama", "Derecho Privado"),
-                    cs.get("rama_derecho", "Derecho Laboral"),
-                    cs.get("categoria_caso", "Casos Laborales"),
-                    cs.get("tipo_caso", "Despido injustificado"),
-                    cs.get("titulo", "Caso Restaurado"),
-                    cs.get("actores_intervinientes", "Juez, Abogado"),
-                    cs.get("etapa_clave", "1. Demanda"),
-                    cs.get("medida_cautelar", "Embargo preventivo"),
-                    cs.get("resolucion_obtenida", "Sentencia"),
-                    cs.get("recurso_utilizado", "Amparo"),
-                    cs.get("evidencia_logs", ""),
-                    cs.get("hash_sha256", hashlib.sha256(str(cod).encode()).hexdigest()),
-                    cs.get("resultado", "GANADO"),
-                    cs.get("accion_abogado", ""),
-                    cs.get("reaccion_juez", ""),
-                    cs.get("causa_raiz_fallo", "N/A"),
-                    cs.get("estrategia_ganadora", ""),
-                    cs.get("que_hacer_ciudadano", ""),
-                    cs.get("que_no_hacer_ciudadano", ""),
-                    cs.get("fecha_registro", datetime.now().strftime("%Y-%m-%d"))
-                ))
-                if c.rowcount > 0:
-                    nuevos_casos += 1
-
+            res = inyectar_diccionario_cerebro_en_sqlite(data, conn)
         elif nombre.endswith(".csv"):
             df_up = pd.read_csv(io.BytesIO(raw))
-            for _, row in df_up.iterrows():
-                rel_orig = str(row.get("relato_original", "")).strip()
-                if not rel_orig or rel_orig == "nan":
-                    continue
-                rel_exp = str(row.get("relato_expandido", ""))
-                if not rel_exp or rel_exp == "nan":
-                    rel_exp = expandir_lenguaje_coloquial(rel_orig)
-                h_c = hashlib.sha256(rel_orig.lower().encode("utf-8")).hexdigest()
-                c.execute("""
-                    INSERT OR IGNORE INTO memoria_neuronal_autonoma (
-                        relato_original, relato_expandido, macro_rama, rama_derecho,
-                        categoria_caso, tipo_caso, fuente_aprendizaje, confianza,
-                        hash_consulta, fecha_aprendizaje
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    rel_orig,
-                    rel_exp,
-                    str(row.get("macro_rama", "Derecho Privado")),
-                    str(row.get("rama_derecho", "Derecho Laboral")),
-                    str(row.get("categoria_caso", "Casos Laborales")),
-                    str(row.get("tipo_caso", "Despido injustificado")),
-                    str(row.get("fuente_aprendizaje", "Restauración CSV")),
-                    float(row.get("confianza", 95.0)),
-                    h_c,
-                    str(row.get("fecha_aprendizaje", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                ))
-                if c.rowcount > 0:
-                    nuevos_mem += 1
-        conn.commit()
+            registros_csv = {"memoria_neuronal_autonoma": df_up.to_dict(orient="records")}
+            res = inyectar_diccionario_cerebro_en_sqlite(registros_csv, conn)
     finally:
         conn.close()
-
-    return {"nuevos_memoria": nuevos_mem, "nuevos_casos": nuevos_casos}
+    guardar_y_sincronizar_cerebro_autonomo(gh_repo_input, gh_token_input, gh_branch_input)
+    return res
 
 # ==============================================================================
-# 5. AGENTE DE BÚSQUEDA EN VIVO EN INTERNET (GOOGLE NEWS RSS + WIKIPEDIA API)
+# 6. AGENTE DE BÚSQUEDA EN VIVO EN INTERNET (GOOGLE NEWS RSS + WIKIPEDIA API)
 # ==============================================================================
 def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str, relato_usuario: str) -> dict:
     resultados_web = []
@@ -724,7 +814,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
             "https://es.wikipedia.org/w/api.php?action=query&list=search"
             f"&srsearch={urllib.parse.quote(termino_wiki)}&utf8=&format=json&srlimit=2"
         )
-        req_w = urllib.request.Request(url_wiki, headers={"User-Agent": "ForensicMindLegalBot/6.5"})
+        req_w = urllib.request.Request(url_wiki, headers={"User-Agent": "ForensicMindLegalBot/7.0"})
         with urllib.request.urlopen(req_w, timeout=4.0) as resp_w:
             data_w = json.loads(resp_w.read().decode("utf-8"))
             search_items = data_w.get("query", {}).get("search", [])
@@ -758,7 +848,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
             "https://news.google.com/rss/search?"
             f"q={urllib.parse.quote(palabras_clave_busqueda)}&hl=es-419&gl=MX&ceid=MX:es-419"
         )
-        req_g = urllib.request.Request(url_gnews, headers={"User-Agent": "ForensicMindLegalBot/6.5"})
+        req_g = urllib.request.Request(url_gnews, headers={"User-Agent": "ForensicMindLegalBot/7.0"})
         with urllib.request.urlopen(req_g, timeout=4.5) as resp_g:
             xml_data = resp_g.read()
             root = ET.fromstring(xml_data)
@@ -784,16 +874,19 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
     }
 
 # ==============================================================================
-# 6. MOTOR DE AUTO-APRENDIZAJE NEURONAL CONTINUO (RE-ENTRENAMIENTO EN CALIENTE)
+# 7. MOTOR DE AUTO-APRENDIZAJE CON AUTO-INYECCIÓN EN CALIENTE
 # ==============================================================================
 def registrar_experiencia_en_memoria_autonoma(
     relato_original: str,
     clasificacion: dict,
     fuente: str = "Consulta Ciudadana / Voz",
-    texto_web_extra: str = ""
-) -> bool:
+    texto_web_extra: str = "",
+    repo_gh: str = "",
+    token_gh: str = "",
+    branch_gh: str = "main"
+) -> dict:
     if not relato_original or len(relato_original.strip()) < 10:
-        return False
+        return {"aprendio": False, "sync_msg": ""}
     relato_combinado = f"{relato_original} {texto_web_extra}".strip()
     relato_exp = expandir_lenguaje_coloquial(relato_combinado)
     h_cons = hashlib.sha256(relato_original.strip().lower().encode("utf-8")).hexdigest()
@@ -827,7 +920,12 @@ def registrar_experiencia_en_memoria_autonoma(
         pass
     finally:
         conn.close()
-    return aprendio_nuevo
+
+    sync_status = {"msg": ""}
+    if aprendio_nuevo:
+        sync_status = guardar_y_sincronizar_cerebro_autonomo(repo_gh, token_gh, branch_gh)
+
+    return {"aprendio": aprendio_nuevo, "sync_msg": sync_status.get("msg", "")}
 
 def entrenar_red_neuronal_evolutiva():
     conn = sqlite3.connect(DB_NAME)
@@ -850,7 +948,7 @@ def entrenar_red_neuronal_evolutiva():
         textos_entrenamiento.append(str(m["relato_expandido"]))
         etiquetas_entrenamiento.append(f"{m['categoria_caso']}|{m['rama_derecho']}|{m['tipo_caso']}|{m['macro_rama']}")
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=2200)
+    vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=2400)
     X_vec = vectorizer.fit_transform(textos_entrenamiento)
 
     mlp = MLPClassifier(
@@ -869,7 +967,7 @@ def entrenar_red_neuronal_evolutiva():
     return vectorizer, mlp, stats_modelo
 
 # ==============================================================================
-# 7. CLASIFICADOR HÍBRIDO (MATRIZ COLOQUIAL + RED NEURONAL MLP EN EQUIPO)
+# 8. CLASIFICADOR HÍBRIDO (MATRIZ COLOQUIAL + RED NEURONAL MLP)
 # ==============================================================================
 def autoclasificar_caso_con_red_neuronal(relato: str, vectorizer_mlp, modelo_mlp) -> dict:
     relato_expandido = expandir_lenguaje_coloquial(relato)
@@ -933,7 +1031,7 @@ def autoclasificar_caso_con_red_neuronal(relato: str, vectorizer_mlp, modelo_mlp
     }
     macro, rama, cat, tipo = mapa_defaults[categoria_ganadora]
 
-    confianza_mlp = 91.5
+    confianza_mlp = 92.0
     if modelo_mlp is not None and vectorizer_mlp is not None:
         try:
             X_test = vectorizer_mlp.transform([relato_expandido])
@@ -943,13 +1041,13 @@ def autoclasificar_caso_con_red_neuronal(relato: str, vectorizer_mlp, modelo_mlp
             partes = pred.split("|")
             if len(partes) == 4:
                 if partes[0] == cat:
-                    confianza_mlp = round(min(99.6, max(89.0, max_p + 25.0)), 1)
+                    confianza_mlp = round(min(99.7, max(89.5, max_p + 25.0)), 1)
                     cat, rama, tipo, macro = partes[0], partes[1], partes[2], partes[3]
                 elif max_score_semantico == 0 and max_p > 45.0:
                     confianza_mlp = round(min(96.0, max_p + 15.0), 1)
                     cat, rama, tipo, macro = partes[0], partes[1], partes[2], partes[3]
                 else:
-                    confianza_mlp = round(min(98.9, 86.0 + min(12.9, max_score_semantico * 0.15)), 1)
+                    confianza_mlp = round(min(99.1, 86.5 + min(12.6, max_score_semantico * 0.15)), 1)
         except Exception:
             pass
 
@@ -972,7 +1070,7 @@ def autoclasificar_caso_con_red_neuronal(relato: str, vectorizer_mlp, modelo_mlp
     }
 
 # ==============================================================================
-# 8. EXTRACTOR COLOQUIAL DE SUELDO Y CALCULADORA LFT + HONORARIOS
+# 9. EXTRACTOR COLOQUIAL DE SUELDO Y CALCULADORA LFT + HONORARIOS
 # ==============================================================================
 def normalizar_texto_coloquial(texto: str) -> dict:
     texto_low = texto.lower().replace(",", "")
@@ -1128,7 +1226,7 @@ def calcular_cotizacion_honorarios_dual(
     }
 
 # ==============================================================================
-# 9. GUÍA MULTIRRAMA DE "QUÉ HACER" Y AUDITORÍA DE RIESGO COHERENTE
+# 10. GUÍA MULTIRRAMA DE "QUÉ HACER" Y AUDITORÍA DE RIESGO COHERENTE
 # ==============================================================================
 def obtener_plan_accion_ciudadano(categoria_caso: str, tipo_caso: str, rol_usuario: str = "Demandante") -> dict:
     if categoria_caso == "Casos Laborales":
@@ -1259,7 +1357,7 @@ def calcular_similitud_coseno(texto1: str, texto2: str) -> float:
     return round((float(numerador) / denominador) * 100, 1)
 
 # ==============================================================================
-# 10. DICTADO POR VOZ, WORD (.DOCX) Y FICHA VERTICAL 9:16
+# 11. DICTADO POR VOZ, WORD (.DOCX) Y FICHA VERTICAL 9:16
 # ==============================================================================
 def transcribir_audio_espanol(audio_bytes) -> str:
     if sr is None or audio_bytes is None:
@@ -1277,7 +1375,7 @@ def generar_dictamen_word_docx(codigo: str, relato: str, clasificacion: dict, au
     if Document is None:
         return b""
     doc = Document()
-    doc.add_heading("FORENSICMIND & LEXGUÍA CBR v6.5 — DICTAMEN JURÍDICO, FINANCIERO Y FORENSE", 0)
+    doc.add_heading("FORENSICMIND & LEXGUÍA CBR v7.0 — DICTAMEN JURÍDICO, FINANCIERO Y FORENSE", 0)
     doc.add_paragraph(f"Arquitectura y Sello de Autoría: {AUTOR_SISTEMA}")
     doc.add_paragraph(f"Expediente: {codigo} | Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     doc.add_paragraph(f"Sello SHA-256: {auditoria['hash_evidencia']}")
@@ -1306,7 +1404,7 @@ def generar_ficha_vertical_9_16(codigo: str, rama: str, caso: str, plan: dict, m
     img[:] = (24, 15, 10)
     cv2.rectangle(img, (25, 25), (1055, 1895), (240, 175, 50), 4)
     cv2.rectangle(img, (40, 40), (1040, 235), (45, 28, 16), -1)
-    cv2.putText(img, "FORENSICMIND & LEXGUIA v6.5", (65, 105), cv2.FONT_HERSHEY_DUPLEX, 1.6, (100, 220, 255), 3)
+    cv2.putText(img, "FORENSICMIND & LEXGUIA v7.0", (65, 105), cv2.FONT_HERSHEY_DUPLEX, 1.6, (100, 220, 255), 3)
     cv2.putText(img, limpiar_ascii(f"AUTOR: {AUTOR_SISTEMA.upper()}"), (65, 160), cv2.FONT_HERSHEY_DUPLEX, 0.78, (120, 230, 255), 2)
     cv2.putText(img, limpiar_ascii(f"EXPEDIENTE: {codigo} | {rama} ({caso})"), (70, 290), cv2.FONT_HERSHEY_DUPLEX, 0.9, (255, 255, 255), 2)
     cv2.rectangle(img, (70, 340), (1010, 480), (25, 48, 38), -1)
@@ -1326,13 +1424,13 @@ def generar_ficha_vertical_9_16(codigo: str, rama: str, caso: str, plan: dict, m
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 # ==============================================================================
-# 11. ENCABEZADO PRINCIPAL Y PESTAÑAS DE NAVEGACIÓN
+# 12. ENCABEZADO PRINCIPAL Y PESTAÑAS DE NAVEGACIÓN v7.0
 # ==============================================================================
 st.markdown(f"""
 <div class="author-banner">
     <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;">
         <div>
-            <span style="color:#fbbf24 !important; font-weight:800; font-size:13px; letter-spacing:0.8px;">🏛️ RED NEURONAL AUTO-EVOLUTIVA CON CONEXIÓN WEB Y RESPALDO CLOUD v6.5</span><br>
+            <span style="color:#fbbf24 !important; font-weight:800; font-size:13px; letter-spacing:0.8px;">🏛️ SISTEMA EXPERTO CON AUTOINYECCIÓN PERPETUA Y GITHUB AUTO-SYNC v7.0</span><br>
             <span style="color:#ffffff !important; font-size:21px; font-weight:900;">{MARCA_SISTEMA}</span>
         </div>
         <div>
@@ -1345,18 +1443,18 @@ st.markdown(f"""
 VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "🧠 1. Caso, Auto-Aprendizaje & Web Live",
+    "🧠 1. Caso, Autoinyección & Web Live",
     "💰 2. Liquidación (LFT) & Honorarios",
-    "🌐 3. Cerebro Autónomo, Respaldo & Web",
+    "☁️ 3. Cerebro Autónomo & GitHub Sync",
     "🔬 4. Casos Ganados vs. Perdidos",
     "➕ 5. Enseñar Nuevo Caso a la IA"
 ])
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 1: DIAGNÓSTICO NEURONAL COLOQUIAL + BÚSQUEDA WEB + AUTO-APRENDIZAJE
+# PESTAÑA 1: DIAGNÓSTICO NEURONAL COLOQUIAL + BÚSQUEDA WEB + AUTOINYECCIÓN
 # ------------------------------------------------------------------------------
 with tab1:
-    st.markdown("### 🗣️ Cuéntame qué pasó con tus propias palabras (La IA comprende lenguaje coloquial y aprende sola)")
+    st.markdown("### 🗣️ Cuéntame qué pasó con tus propias palabras (La IA comprende lenguaje coloquial y se autoinyecta sola)")
 
     col_esc, col_voz = st.columns([1.3, 1])
     with col_esc:
@@ -1385,7 +1483,7 @@ with tab1:
         height=135
     )
 
-    btn_analizar = st.button("🧠 Analizar Caso, Consultar Internet en Vivo y Entrenar Red Neuronal", use_container_width=True)
+    btn_analizar = st.button("🧠 Analizar Caso, Consultar Internet en Vivo y Autoinyectar en la Nube", use_container_width=True)
 
     clasificacion = autoclasificar_caso_con_red_neuronal(relato_usuario, VECTORIZER_VIVO, MODELO_VIVO)
     cat_activa = clasificacion["categoria"]
@@ -1399,15 +1497,18 @@ with tab1:
     if buscar_web_switch:
         info_web_vivo = buscar_informacion_juridica_en_internet(cat_activa, tipo_activo, relato_usuario)
 
-    aprendio_esta_consulta = False
+    res_autoinyeccion = {"aprendio": False, "sync_msg": ""}
     if auto_entrenar_switch and (btn_analizar or audio_input is not None or len(relato_usuario) > 25):
-        aprendio_esta_consulta = registrar_experiencia_en_memoria_autonoma(
+        res_autoinyeccion = registrar_experiencia_en_memoria_autonoma(
             relato_original=relato_usuario,
             clasificacion=clasificacion,
-            fuente="Consulta en Línea + Enriquecimiento Web",
-            texto_web_extra=info_web_vivo.get("corpus_web_extraido", "")
+            fuente="Consulta en Línea + Enriquecimiento Web v7.0",
+            texto_web_extra=info_web_vivo.get("corpus_web_extraido", ""),
+            repo_gh=gh_repo_input,
+            token_gh=gh_token_input,
+            branch_gh=gh_branch_input
         )
-        if aprendio_esta_consulta:
+        if res_autoinyeccion["aprendio"]:
             VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
 
     datos_normalizados = normalizar_texto_coloquial(relato_usuario)
@@ -1466,9 +1567,9 @@ with tab1:
         """, unsafe_allow_html=True)
 
     estado_aprendizaje_txt = (
-        f"🟢 ¡La Red Neuronal acaba de aprender y asimilar esta consulta en su memoria! ({STATS_IA['total_muestras']} experiencias totales | {STATS_IA['vocabulario_ngramas']} patrones lingüísticos)"
-        if aprendio_esta_consulta else
-        f"🧠 Red Neuronal Activa con {STATS_IA['total_muestras']} casos/consultas aprendidas y {STATS_IA['vocabulario_ngramas']} n-gramas en memoria."
+        f"🟢 ¡Nueva experiencia autoinyectada en `{BACKUP_JSON_FILE}`! {res_autoinyeccion['sync_msg']} ({STATS_IA['total_muestras']} muestras totales)"
+        if res_autoinyeccion["aprendio"] else
+        f"🧠 Cerebro Autoinyectable Activo con {STATS_IA['total_muestras']} experiencias y {STATS_IA['vocabulario_ngramas']} n-gramas."
     )
     st.markdown(f"""
     <div class="card-box">
@@ -1476,7 +1577,7 @@ with tab1:
         • <b>Rama Detectada:</b> {macro_activa} → <span class="step-badge">{rama_activa}</span> &nbsp;|&nbsp;
         <b>Categoría y Tipo:</b> <span class="win-badge">{cat_activa}: {tipo_activo}</span> &nbsp;|&nbsp;
         <b>Confianza Neuronal:</b> <b>{clasificacion['confianza']}%</b><br>
-        • <b>Estado del Aprendizaje Autónomo:</b> {estado_aprendizaje_txt}
+        • <b>Estado de Autoinyección Perpetua:</b> {estado_aprendizaje_txt}
     </div>
     """, unsafe_allow_html=True)
 
@@ -1484,7 +1585,7 @@ with tab1:
     m1.metric("Liquidación / Derechos LFT", f"${res_liq_rapido['gran_total_bruto']:,.2f}", f"SDI: ${res_liq_rapido['sdi']:,.2f}/día")
     m2.metric("Neto Libre (Tras Abogado)", f"${res_hon_rapido['monto_neto_libre_ciudadano']:,.2f}", f"Honorario est.: ${res_hon_rapido['honorarios_totales_abogado']:,.0f}")
     m3.metric("Confianza Red Neuronal", f"{clasificacion['confianza']}%", cat_activa)
-    m4.metric("Memoria Neuronal IA", f"{STATS_IA['total_muestras']} Casos", f"{STATS_IA['vocabulario_ngramas']} Palabras/Frases")
+    m4.metric("Memoria Autoinyectada", f"{STATS_IA['total_muestras']} Casos", f"{STATS_IA['vocabulario_ngramas']} N-Gramas")
 
     col_eco1, col_eco2 = st.columns(2)
     with col_eco1:
@@ -1579,19 +1680,19 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
-    bytes_docx = generar_dictamen_word_docx("SAOR-2026-V65", relato_usuario, clasificacion, auditoria, plan_activo, res_liq_rapido, res_hon_rapido)
+    bytes_docx = generar_dictamen_word_docx("SAOR-2026-V7", relato_usuario, clasificacion, auditoria, plan_activo, res_liq_rapido, res_hon_rapido)
     if bytes_docx:
         st.download_button(
             label=f"📄 Descargar Dictamen Completo en Word (.docx) — Sello: {AUTOR_SISTEMA}",
             data=bytes_docx,
-            file_name="Dictamen_ForensicMind_v65.docx",
+            file_name="Dictamen_ForensicMind_v7.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             use_container_width=True
         )
 
     with st.expander("📱 Generar Ficha Vertical 9:16 para Celular (1080x1920 px)", expanded=False):
         img_9_16 = generar_ficha_vertical_9_16(
-            "SAOR-2026-V65", rama_activa, tipo_activo, plan_activo,
+            "SAOR-2026-V7", rama_activa, tipo_activo, plan_activo,
             res_liq_rapido["gran_total_bruto"], res_hon_rapido["monto_neto_libre_ciudadano"], auditoria["hash_evidencia"]
         )
         c_i1, c_i2, c_i3 = st.columns([1, 1.2, 1])
@@ -1668,63 +1769,68 @@ with tab2:
     st.dataframe(res_liq_det["tabla_conceptos"].style.format({"Monto (MXN)": "${:,.2f}"}), use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 3: CEREBRO AUTÓNOMO, RESPALDO CLOUD (.JSON/.CSV) & BUSCADOR WEB
+# PESTAÑA 3: CEREBRO AUTÓNOMO, AUTOINYECCIÓN GITHUB SYNC & BUSCADOR WEB
 # ------------------------------------------------------------------------------
 with tab3:
-    st.subheader("🌐 Cerebro Autónomo de la Red Neuronal, Respaldo Cloud (.JSON / .CSV) y Buscador Web")
-    st.caption(f"Arquitectura de Persistencia Neuronal y Búsqueda en Vivo desarrollada por: {AUTOR_SISTEMA}")
+    st.subheader("☁️ Cerebro Autónomo, Autoinyección con GitHub Sync y Buscador Web Jurídico")
+    st.caption(f"Arquitectura de Persistencia Perpetua sin Costo de Servidores desarrollada por: {AUTOR_SISTEMA}")
 
-    # Bloque de Respaldo y Restauración en 1 Clic (Para no perder nada al reiniciar Streamlit)
-    st.markdown("#### 💾 1. Respaldar o Restaurar la Memoria Aprendida por la IA (Protección contra Reinicios Cloud)")
-    col_bk1, col_bk2, col_bk3 = st.columns([1, 1, 1.3])
+    estado_gh_box = (
+        f"🟢 **GitHub Auto-Sync Conectado al Repositorio:** `{gh_repo_input}` (Rama: `{gh_branch_input}`). Cada consulta nueva se autoinyecta en tu GitHub."
+        if (gh_repo_input and gh_token_input) else
+        "🟡 **Modo Autoinyección Local Activo:** El archivo `cerebro_autonomo_backup.json` se guarda e inyecta automáticamente en el servidor. Para que también se suba solo a tu GitHub sin perderse jamás, ingresa tu `GITHUB_REPO` y `GITHUB_TOKEN` en la barra lateral izquierda o en los `Secrets` de Streamlit."
+    )
+    st.info(estado_gh_box)
+
+    col_bk1, col_bk2, col_bk3, col_bk4 = st.columns([1, 1, 1, 1.2])
 
     with col_bk1:
+        if st.button("☁️ Forzar Sincronización a GitHub Ahora", use_container_width=True):
+            res_sync_manual = guardar_y_sincronizar_cerebro_autonomo(gh_repo_input, gh_token_input, gh_branch_input)
+            if res_sync_manual["github_ok"]:
+                st.success(res_sync_manual["msg"])
+            else:
+                st.warning(res_sync_manual["msg"])
+
+    with col_bk2:
         bytes_cerebro_json = exportar_cerebro_completo_json()
         st.download_button(
-            label="📥 Descargar Cerebro Completo (.JSON)",
+            label="📥 Descargar Cerebro (.JSON)",
             data=bytes_cerebro_json,
-            file_name=f"Cerebro_ForensicMind_{datetime.now().strftime('%Y%m%d')}.json",
+            file_name=BACKUP_JSON_FILE,
             mime="application/json",
             use_container_width=True
         )
-        st.caption("Incluye los Casos CBR + Toda la Memoria Aprendida de usuarios y de la Web.")
 
-    with col_bk2:
+    with col_bk3:
         bytes_mem_csv = exportar_memoria_autonoma_csv()
         st.download_button(
-            label="📊 Exportar Memoria Aprendida (.CSV / Excel)",
+            label="📊 Exportar a Excel (.CSV)",
             data=bytes_mem_csv,
-            file_name=f"Memoria_Neuronal_{datetime.now().strftime('%Y%m%d')}.csv",
+            file_name="Memoria_Neuronal_v7.csv",
             mime="text/csv",
             use_container_width=True
         )
-        st.caption("Ideal para auditar en Excel todas las consultas y frases coloquiales aprendidas.")
 
-    with col_bk3:
-        archivo_restaurar = st.file_uploader(
-            "📤 Restaurar / Inyectar Memoria a la IA (.json o .csv)",
-            type=["json", "csv"]
-        )
+    with col_bk4:
+        archivo_restaurar = st.file_uploader("📤 Inyectar Respaldo (.json / .csv)", type=["json", "csv"])
         if archivo_restaurar is not None:
-            if st.button("⚡ Inyectar Respaldo y Re-Entrenar Red Neuronal", use_container_width=True):
+            if st.button("⚡ Autoinyectar Archivo Subido", use_container_width=True):
                 res_imp = importar_cerebro_desde_archivo(archivo_restaurar)
                 VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
-                st.success(
-                    f"✅ ¡Cerebro Restaurado! Se inyectaron {res_imp['nuevos_memoria']} experiencias en la memoria autónoma "
-                    f"y {res_imp['nuevos_casos']} precedentes CBR. Total activo: {STATS_IA['total_muestras']} muestras."
-                )
+                st.success(f"✅ Inyectadas {res_imp['nuevos_memoria']} memorias y {res_imp['nuevos_casos']} casos.")
 
     st.markdown("---")
     col_web_search, col_mem_stats = st.columns([1.25, 1])
     with col_web_search:
-        st.markdown("#### 🌐 2. Buscador Web Jurídico en Vivo (Entrenamiento desde Internet)")
+        st.markdown("#### 🌐 Buscador Web Jurídico en Vivo (Entrenamiento desde Internet)")
         tema_buscar_web = st.text_input(
-            "🔎 Escribe cualquier tema legal o duda para buscar en Google Jurídico México y Wikipedia:",
+            "🔎 Escribe cualquier tema legal o noticia jurídica para buscar en Google y Wikipedia:",
             value="despido injustificado liquidacion 90 dias vacaciones Ley Federal del Trabajo"
         )
         cat_entrenar_web = st.selectbox("Categoría a la que pertenece este tema:", list(TIPOS_CASOS.keys()))
-        if st.button("🌐 Buscar en Internet e Inyectar Conocimiento en la Red Neuronal", use_container_width=True):
-            with st.spinner("Consultando Internet en vivo y re-entrenando Red Neuronal..."):
+        if st.button("🌐 Buscar en Internet y Autoinyectar en la Red Neuronal", use_container_width=True):
+            with st.spinner("Consultando Internet en vivo, re-entrenando IA y sincronizando respaldo..."):
                 res_busqueda_manual = buscar_informacion_juridica_en_internet(cat_entrenar_web, TIPOS_CASOS[cat_entrenar_web][0], tema_buscar_web)
                 if res_busqueda_manual["corpus_web_extraido"]:
                     mapa_cat = {
@@ -1735,13 +1841,16 @@ with tab3:
                         "Casos Mercantiles": ("Derecho Privado", "Derecho Mercantil", "Incumplimiento de contratos")
                     }
                     m_r, r_d, t_c = mapa_cat[cat_entrenar_web]
-                    registrar_experiencia_en_memoria_autonoma(
+                    res_reg = registrar_experiencia_en_memoria_autonoma(
                         relato_original=f"{tema_buscar_web} — {res_busqueda_manual['corpus_web_extraido']}",
                         clasificacion={"macro_rama": m_r, "rama": r_d, "categoria": cat_entrenar_web, "tipo": t_c, "confianza": 99.0},
-                        fuente="Auto-Entrenamiento desde Internet (Google/Wikipedia)"
+                        fuente="Auto-Entrenamiento desde Internet (Google/Wikipedia)",
+                        repo_gh=gh_repo_input,
+                        token_gh=gh_token_input,
+                        branch_gh=gh_branch_input
                     )
                     VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
-                    st.success("✅ ¡Conocimiento extraído de Internet e inyectado exitosamente en la Red Neuronal!")
+                    st.success(f"✅ ¡Conocimiento inyectado! {res_reg['sync_msg']}")
                 for rw in res_busqueda_manual["resultados"]:
                     st.markdown(f"""
                     <div class="web-box">
@@ -1757,14 +1866,14 @@ with tab3:
             conn
         )
         conn.close()
-        st.markdown("#### 🧠 3. Bitácora de Auto-Aprendizaje en Vivo")
+        st.markdown("#### 🧠 Bitácora de Autoinyección de tu IA")
         st.write(f"• **Experiencias totales en el modelo:** `{STATS_IA['total_muestras']}`")
         st.write(f"• **Consultas y búsquedas aprendidas:** `{len(df_mem_view)}`")
         st.write(f"• **Vocabulario neuronal activo:** `{STATS_IA['vocabulario_ngramas']}` n-gramas")
         if not df_mem_view.empty:
             st.dataframe(df_mem_view, use_container_width=True, hide_index=True)
         else:
-            st.info("Cada consulta analizada en la Pestaña 1 o buscada aquí aparecerá registrada automáticamente.")
+            st.info("Cada consulta analizada en la Pestaña 1 o buscada aquí se autoinyectará en esta bitácora.")
 
 # ------------------------------------------------------------------------------
 # PESTAÑA 4: BÓVEDA DE CASOS GANADOS VS PERDIDOS
@@ -1785,8 +1894,8 @@ with tab4:
 # PESTAÑA 5: ENSEÑAR NUEVO CASO OFICIAL A LA IA
 # ------------------------------------------------------------------------------
 with tab5:
-    st.subheader("➕ Enseñar Nuevo Precedente Oficial a la Bóveda y Red Neuronal")
-    with st.form("form_nuevo_v65"):
+    st.subheader("➕ Enseñar Nuevo Precedente Oficial a la Bóveda y Autoinyectar en GitHub")
+    with st.form("form_nuevo_v7"):
         c1, c2, c3 = st.columns(3)
         ncod = c1.text_input("Código (ej. EXP-LAB-2026-099)")
         ncat = c2.selectbox("Categoría de Caso", list(TIPOS_CASOS.keys()))
@@ -1795,7 +1904,7 @@ with tab5:
         nevid = st.text_area("Relato de Hechos (puedes incluir palabras coloquiales para entrenar a la IA)")
         nqh = st.text_area("✅ ¿Qué debe hacer el ciudadano?")
         nqnh = st.text_area("🚫 ¿Qué NO debe hacer jamás?")
-        if st.form_submit_button("💾 Guardar y Re-Entrenar Red Neuronal Ahora"):
+        if st.form_submit_button("💾 Guardar, Re-Entrenar IA y Autoinyectar Respaldo"):
             if ncod and ntit and nevid:
                 conn = sqlite3.connect(DB_NAME)
                 c = conn.cursor()
@@ -1810,7 +1919,8 @@ with tab5:
                 """, (ncod, ncat, ntit, nevid, hashlib.sha256(nevid.encode()).hexdigest(), nres, nqh, nqnh, datetime.now().strftime("%Y-%m-%d")))
                 conn.commit()
                 conn.close()
-                st.success("✅ Caso guardado y Red Neuronal actualizada en tiempo real.")
+                sync_res = guardar_y_sincronizar_cerebro_autonomo(gh_repo_input, gh_token_input, gh_branch_input)
+                st.success(f"✅ Caso guardado y Red Neuronal actualizada en tiempo real. {sync_res['msg']}")
 
 st.markdown("---")
-st.caption(f"⚙️ **Arquitectura, Ingeniería de Sistemas y Red Neuronal Auto-Evolutiva:** {AUTOR_SISTEMA} • {MARCA_SISTEMA}")
+st.caption(f"⚙️ **Arquitectura, Ingeniería de Sistemas y Red Neuronal Auto-Inyectable:** {AUTOR_SISTEMA} • {MARCA_SISTEMA}")
