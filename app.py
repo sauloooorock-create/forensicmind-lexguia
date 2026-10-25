@@ -601,7 +601,7 @@ with tab1:
     rama_activa = clasificacion['rama']
     cat_activa = clasificacion['categoria']
     tipo_activo = clasificacion['tipo']
-    plan_activo = obtener_plan_accion_ciudadano(cat_activa, tipo_activo, "Demandante")
+   plan_activo = obtener_plan_accion_ciudadano(cat_activa, tipo_activo)
     # Búsqueda CBR
     conn = sqlite3.connect(DB_NAME)
     df_hist = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
