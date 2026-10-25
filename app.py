@@ -1,20 +1,38 @@
-
 import streamlit as st
 import sqlite3
 import hashlib
 import re
 import math
+import io
 from collections import Counter
 from datetime import datetime
 import pandas as pd
 import numpy as np
 import cv2
 
+# Intentar importar librerías avanzadas para voz y Word
+try:
+    import speech_recognition as sr
+except ImportError:
+    sr = None
+
+try:
+    from docx import Document
+except ImportError:
+    Document = None
+
+try:
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.feature_extraction.text import TfidfVectorizer
+except ImportError:
+    MLPClassifier = None
+    TfidfVectorizer = None
+
 # ==============================================================================
 # CONFIGURACIÓN DE PÁGINA Y ESTÉTICA LEGAL-FORENSE
 # ==============================================================================
 st.set_page_config(
-    page_title="ForensicMind & LexGuía CBR v3.0 | Justicia Preventiva",
+    page_title="ForensicMind & LexGuía CBR v4.0 | Justicia Preventiva",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -51,21 +69,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-DB_NAME = "boveda_juridica_cbr_v3.db"
+DB_NAME = "boveda_juridica_cbr_v4.db"
 
 # ==============================================================================
-# 1. TAXONOMÍA JURÍDICA INTEGRAL (BASE DE CONOCIMIENTO ESTRUCTURADA)
+# 1. TAXONOMÍA JURÍDICA INTEGRAL Y CATÁLOGOS V4
 # ==============================================================================
 RAMAS_DERECHO = {
     "Derecho Público": [
         "Derecho Constitucional", "Derecho Administrativo", "Derecho Penal",
-        "Derecho Procesal Penal", "Derecho Electoral", "Derecho Internacional Público",
-        "Derecho Tributario"
+        "Derecho Procesal Penal", "Derecho Electoral", "Derecho Internacional Público", "Derecho Tributario"
     ],
     "Derecho Privado": [
         "Derecho Civil", "Derecho Mercantil", "Derecho Laboral",
-        "Derecho de Familia", "Derecho Procesal Civil", "Derecho Comercial",
-        "Derecho de Propiedad Intelectual"
+        "Derecho de Familia", "Derecho Procesal Civil", "Derecho Comercial", "Derecho de Propiedad Intelectual"
     ],
     "Otros / Especializados": [
         "Derecho Informático/Digital", "Derecho Ambiental", "Derecho Agrario",
@@ -76,18 +92,15 @@ RAMAS_DERECHO = {
 TIPOS_CASOS = {
     "Casos Penales": [
         "Homicidio", "Robo/Hurto", "Fraude", "Violencia doméstica",
-        "Delitos de tránsito", "Narcotráfico", "Corrupción",
-        "Abuso de autoridad", "Estafa", "Falsificación"
+        "Delitos de tránsito", "Narcotráfico", "Corrupción", "Abuso de autoridad", "Estafa", "Falsificación"
     ],
     "Casos Civiles": [
         "Divorcio/separación", "Custodia de menores", "Herencias/sucesiones",
-        "Deudas", "Arrendamiento", "Responsabilidad civil", "Accidentes",
-        "Contratos", "Daño y perjuicio", "Propiedad"
+        "Deudas", "Arrendamiento", "Responsabilidad civil", "Accidentes", "Contratos", "Daño y perjuicio", "Propiedad"
     ],
     "Casos Laborales": [
         "Despido injustificado", "Acoso laboral", "Discriminación",
-        "Accidentes de trabajo", "Salarios adeudados", "Beneficios no pagados",
-        "Reclasificación laboral"
+        "Accidentes de trabajo", "Salarios adeudados", "Beneficios no pagados", "Reclasificación laboral"
     ],
     "Casos Mercantiles": [
         "Quiebra/insolvencia", "Sociedades mercantiles", "Contratos comerciales",
@@ -101,38 +114,23 @@ TIPOS_CASOS = {
 
 ACTORES_JUDICIALES = {
     "Jueces y Magistrados": [
-        "Juez civil", "Juez penal", "Juez laboral", "Juez mercantil",
-        "Magistrado", "Juez de paz", "Juez de garantías"
+        "Juez civil", "Juez penal", "Juez laboral", "Juez mercantil", "Magistrado", "Juez de paz", "Juez de garantías"
     ],
     "Abogados": [
-        "Abogado litigante", "Abogado asesor", "Abogado defensor",
-        "Abogado acusador", "Abogado especializado", "Procurador"
+        "Abogado litigante", "Abogado asesor", "Abogado defensor", "Abogado acusador", "Abogado especializado", "Procurador"
     ],
     "Otros Profesionales": [
-        "Fiscal/Ministerio Público", "Perito", "Notario",
-        "Mediador", "Árbitro", "Gestor administrativo"
+        "Fiscal/Ministerio Público", "Perito", "Notario", "Mediador", "Árbitro", "Gestor administrativo"
     ]
 }
 
 ETAPAS_PROCESO = {
     "Proceso Penal (8 Etapas)": [
-        "1. Denuncia/Querella",
-        "2. Investigación/Instrucción",
-        "3. Auto de procesamiento",
-        "4. Preparación de juicio oral",
-        "5. Juicio oral",
-        "6. Sentencia",
-        "7. Recursos/Apelación",
-        "8. Ejecución de sentencia"
+        "1. Denuncia/Querella", "2. Investigación/Instrucción", "3. Auto de procesamiento",
+        "4. Preparación de juicio oral", "5. Juicio oral", "6. Sentencia", "7. Recursos/Apelación", "8. Ejecución de sentencia"
     ],
     "Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)": [
-        "1. Demanda",
-        "2. Contestación",
-        "3. Prueba",
-        "4. Alegatos",
-        "5. Sentencia",
-        "6. Recursos",
-        "7. Ejecución"
+        "1. Demanda", "2. Contestación", "3. Prueba", "4. Alegatos", "5. Sentencia", "6. Recursos", "7. Ejecución"
     ]
 }
 
@@ -159,97 +157,12 @@ CONCEPTOS_CLAVE = {
     "Caducidad": "Extinción automática de una instancia o proceso judicial por inactividad de las partes durante el tiempo legal establecido.",
     "Cosa juzgada": "Efecto definitivo de una sentencia firme contra la cual ya no cabe ningún recurso; el caso no puede volver a juzgarse dos veces.",
     "Legitimidad activa / pasiva": "Tener la titularidad real del derecho para poder reclamar (activa) o ser la persona legalmente obligada a responder (pasiva).",
-    "Jurisdicción y Competencia": "El territorio y la materia exacta del Juez que tiene autoridad legal para resolver tu conflicto (ej. no llevar un despido ante un juez civil).",
+    "Jurisdicción y Competencia": "El territorio y la materia exacta del Juez que tiene autoridad legal para resolver tu conflicto.",
     "Due process (Debido proceso)": "Garantía constitucional de ser oído en igualdad de condiciones, con defensa técnica, ante juez imparcial y sin pruebas obtenidas ilegalmente."
 }
 
 # ==============================================================================
-# 2. GUÍA AUTOMÁTICA DE "QUÉ HACER" SEGÚN CATEGORÍA DE CASO
-# ==============================================================================
-def obtener_plan_accion_ciudadano(categoria_caso: str, tipo_caso: str, rol_usuario: str) -> dict:
-    if categoria_caso == "Casos Penales":
-        return {
-            "proceso": "Proceso Penal (8 Etapas)",
-            "juez": "Juez de garantías / Juez penal",
-            "abogado": "Abogado acusador (Asesor jurídico de víctima)" if "Víctima" in rol_usuario else "Abogado defensor penalista",
-            "profesionales": "Fiscal/Ministerio Público + Perito Forense",
-            "medida_sugerida": "Medidas de protección inmediatas / Retención de bienes",
-            "recurso_clave": "Amparo / Habeas corpus (si hay detención arbitraria) / Apelación",
-            "pasos_inmediatos": [
-                "1. NO alterar ni tocar la escena, teléfono o documento original (preservar Cadena de Custodia y sello SHA-256).",
-                "2. Acudir al Ministerio Público / Fiscalía a interponer Denuncia o Querella narrando hora, fecha y lugar exactos (o exigir lectura de derechos y Abogado Defensor si eres el imputado).",
-                "3. Solicitar de inmediato Medidas de Protección si existe riesgo físico, violencia doméstica o abuso de autoridad.",
-                "4. Exigir la intervención de Perito para fijar pruebas antes de que se borren cámaras o registros."
-            ],
-            "alerta_fatal": "En delitos de querella el plazo de PRESCRIPCIÓN suele ser corto, y cualquier prueba obtenida violando el DEBIDO PROCESO será anulada."
-        }
-    elif categoria_caso == "Casos Laborales":
-        return {
-            "proceso": "Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez laboral (Centro de Conciliación y Tribunal Laboral)",
-            "abogado": "Abogado especializado en Derecho Laboral / Procurador de la Defensa del Trabajo",
-            "profesionales": "Mediador (Conciliador) + Perito contable/informático",
-            "medida_sugerida": "Embargo preventivo (precautorio sobre cuentas/bienes de la patronal)",
-            "recurso_clave": "Amparo directo / Revisión / Nulidad de actuaciones",
-            "pasos_inmediatos": [
-                "1. JAMÁS firmar hojas en blanco ni 'renuncias voluntarias' bajo presión si se trata de un Despido Injustificado.",
-                "2. Resguardar recibos de nómina, transferencias, mensajes de WhatsApp, correos y bitácoras de entrada/salida con sello forense.",
-                "3. Solicitar cita obligatoria ante el Centro de Conciliación Laboral antes de presentar la Demanda.",
-                "4. ¡CUIDADO CON LA PRESCRIPCIÓN! En materia laboral los plazos para demandar despido suelen vencer en 60 días (2 meses)."
-            ],
-            "alerta_fatal": "Dejar pasar el plazo de prescripción o aceptar un finiquito simulado sin desglose de indemnización constitucional."
-        }
-    elif categoria_caso == "Casos Familiares":
-        return {
-            "proceso": "Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez de lo Familiar / Juez civil",
-            "abogado": "Abogado especializado en Derecho de Familia",
-            "profesionales": "Mediador familiar + Perito en psicología/trabajo social",
-            "medida_sugerida": "Pensión alimenticia provisional / Medidas de protección / Guarda y custodia provisional",
-            "recurso_clave": "Apelación / Queja / Amparo indirecto (interés superior del menor)",
-            "pasos_inmediatos": [
-                "1. Reunir actas de nacimiento, acta de matrimonio y comprobantes de todos los gastos de los menores (educación, salud, alimentación).",
-                "2. Solicitar como medida cautelar urgente la fijación de Pensión Alimenticia Provisional (descuento vía nómina) desde el primer auto judicial.",
-                "3. Si existe Violencia de Género o doméstica, pedir orden de restricción y salida inmediata del agresor del domicilio.",
-                "4. Documentar ingresos reales del deudor alimentario (propiedades, vehículos, actividad comercial)."
-            ],
-            "alerta_fatal": "Acordar pensiones de palabra sin convenio judicial aprobado (Cosa Juzgada) o sustraer menores sin orden de Guarda y Custodia."
-        }
-    elif categoria_caso == "Casos Mercantiles":
-        return {
-            "proceso": "Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez mercantil",
-            "abogado": "Abogado litigante mercantil / Corporativo",
-            "profesionales": "Notario Público (Fe de hechos) + Perito grafoscópico/contable + Árbitro",
-            "medida_sugerida": "Embargo preventivo (Juicio Ejecutivo Mercantil) / Retención de bienes",
-            "recurso_clave": "Apelación / Amparo / Nulidad de pagaré o contrato",
-            "pasos_inmediatos": [
-                "1. Verificar si cuentas con un título que traiga aparejada ejecución (pagaré, cheque, factura firmada o contrato comercial).",
-                "2. Solicitar desde el escrito inicial de Demanda el Embargo Preventivo de cuentas bancarias o bienes del deudor.",
-                "3. Si existe incumplimiento digital o competencia desleal, levantar Fe de Hechos con Notario o sello pericial SHA-256 de correos y ERP.",
-                "4. Revisar cláusulas de arbitraje o jurisdicción antes de presentar la demanda."
-            ],
-            "alerta_fatal": "Alterar fechas o montos en un pagaré (provoca absolución por falsificación) o dejar caducar la acción cambiaria directa."
-        }
-    else: # Casos Civiles
-        return {
-            "proceso": "Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez civil / Juez de paz",
-            "abogado": "Abogado litigante civil",
-            "profesionales": "Notario Público + Perito valuador/ingeniero + Mediador",
-            "medida_sugerida": "Orden de no enajenar (Anotación preventiva en Registro Público) / Embargo preventivo",
-            "recurso_clave": "Apelación / Casación / Amparo",
-            "pasos_inmediatos": [
-                "1. Asegurar el contrato escrito (arrendamiento, compraventa, mutuo), escrituras o recibos de pago.",
-                "2. Si el conflicto es por Propiedad o Deudas, pedir al Juez Civil una Orden de No Enajenar para que la contraparte no venda ni oculte el inmueble.",
-                "3. Acreditar la Legitimidad Activa (que tú eres el titular del derecho) y notificar formalmente mediante interpelación judicial o notarial.",
-                "4. Cuantificar con precisión el Daño y Perjuicio con facturas, dictámenes periciales y avalúos."
-            ],
-            "alerta_fatal": "Desalojar a un inquilino por la fuerza sin Sentencia Civil y orden de lanzamiento (te convierte en acusado de despojo)."
-        }
-
-# ==============================================================================
-# 3. CAPA DE PERSISTENCIA SQLITE Y CASOS SEMILLA MULTIDISCIPLINARIOS
+# 2. CAPA DE PERSISTENCIA SQLITE CON ANATOMÍA DEL JUICIO (12+ CASOS SEMILLA)
 # ==============================================================================
 def init_db():
     conn = sqlite3.connect(DB_NAME)
@@ -271,9 +184,12 @@ def init_db():
             evidencia_logs TEXT,
             hash_sha256 TEXT,
             resultado TEXT,
+            accion_abogado TEXT,
+            reaccion_juez TEXT,
             causa_raiz_fallo TEXT,
             estrategia_ganadora TEXT,
             que_hacer_ciudadano TEXT,
+            que_no_hacer_ciudadano TEXT,
             fecha_registro TEXT
         )
     """)
@@ -282,95 +198,141 @@ def init_db():
     if c.fetchone()[0] == 0:
         semillas = [
             (
-                "EXP-PEN-2026-001", "Derecho Público", "Derecho Penal", "Casos Penales", "Fraude",
-                "Estafa Digital, Suplantación Bancaria y Alteración de Bitácoras",
-                "Juez de garantías, Fiscal/Ministerio Público, Abogado acusador, Perito Forense",
-                "2. Investigación/Instrucción", "Retención de bienes / Congelamiento de cuentas",
-                "Sentencia condenatoria", "Amparo (para forzar aseguramiento de cuentas)",
-                "Transferencia SPEI no autorizada, phishing, acceso IP 192.168.1.50, borrado de logs auth.log, fraude electrónico",
-                hashlib.sha256(b"EXP-PEN-2026-001").hexdigest(), "GANADO",
-                "N/A - Evidencia admitida con cadena de custodia intacta.",
-                "Se sellaron los estados de cuenta, cabeceras de correo y bitácoras de acceso con hash SHA-256 en el minuto cero y se promovió control judicial ante Juez de Garantías para congelar la cuenta receptora.",
-                "Presentar querella inmediata ante Fiscalía, aportar dictamen pericial informático de las trazas y exigir oficio de inmovilización de fondos.",
-                "2026-08-10"
+                "EXP-LAB-2026-001", "Derecho Privado", "Derecho Laboral", "Casos Laborales", "Despido injustificado",
+                "Despido Injustificado con Resguardo de Evidencia Digital",
+                "Juez laboral, Abogado especializado, Perito informático",
+                "3. Prueba", "Embargo preventivo", "Sentencia condenatoria (Laudo favorable)", "Amparo directo",
+                "Despido sin aviso formal, bloqueo de usuario y retención de salarios",
+                hashlib.sha256(b"EXP-LAB-2026-001").hexdigest(), "GANADO",
+                "El abogado recopiló capturas con SHA-256, bitácoras de asistencia y testigos presenciales.",
+                "El Juez valoró positivamente las pruebas electrónicas y condenó al pago de indemnización total.",
+                "N/A", "Aportar bitácoras y mensajes inmediatos.",
+                "Demandar antes de los 60 días de plazo legal y aportar pruebas digitales.",
+                "Jamás firmar hojas en blanco ni aceptar acuerdos verbales.", "2026-08-01"
             ),
             (
                 "EXP-LAB-2026-002", "Derecho Privado", "Derecho Laboral", "Casos Laborales", "Despido injustificado",
-                "Despido Injustificado con Coacción de Firma y Salarios Adeudados",
-                "Juez laboral, Abogado especializado, Mediador, Perito en documentoscopía",
-                "3. Prueba", "Embargo preventivo",
-                "Sentencia condenatoria (Laudo a favor del trabajador)", "Amparo directo",
-                "Despido sin aviso de rescisión, bloqueo de acceso biométrico, adeudo de horas extras y aguinaldo, coacción para firmar hoja en blanco",
-                hashlib.sha256(b"EXP-LAB-2026-002").hexdigest(), "GANADO",
-                "N/A - Condena al pago de indemnización constitucional y salarios caídos.",
-                "El trabajador se negó a firmar la renuncia, conservó capturas de WhatsApp donde el jefe le notificaba la baja y el Perito demostró alteración del registro de asistencia SQLite de la empresa.",
-                "No firmar renuncia, acudir antes de 60 días al Centro de Conciliación y respaldar mensajes de trabajo y recibos CFDI.",
-                "2026-08-22"
+                "Despido Injustificado Perdido por Prescripción y Hoja en Blanco",
+                "Juez laboral, Abogado patronal", "2. Contestación", "Ninguna",
+                "Sentencia absolutoria (a favor de la empresa)", "Apelación",
+                "Trabajador despedido que firmó renuncia voluntaria en hoja en blanco y esperó 4 meses",
+                hashlib.sha256(b"EXP-LAB-2026-002").hexdigest(), "PERDIDO",
+                "El abogado defensor no objetó a tiempo la renuncia y dejó pasar el plazo.",
+                "El Juez aplicó la excepción de prescripción y absolvió a la patronal.",
+                "Prescripción consumada (más de 60 días) y firma coaccionada en blanco.",
+                "N/A - Caso perdido por inactividad temporal.",
+                "Acudir de inmediato al Centro de Conciliación.", "Jamás dejar pasar el plazo de 60 días ni firmar documentos sin leer.", "2026-08-05"
             ),
             (
-                "EXP-LAB-2026-003", "Derecho Privado", "Derecho Laboral", "Casos Laborales", "Salarios adeudados",
-                "Reclamo de Despido y Prestaciones Perdido por Prescripción",
-                "Juez laboral, Abogado litigante",
-                "2. Contestación", "Ninguna",
-                "Sentencia absolutoria (a favor de la empresa)", "Apelación / Amparo (Desestimado)",
-                "Trabajador despedido verbalmente que esperó 4 meses creyendo en promesas de pago antes de acudir al tribunal laboral",
-                hashlib.sha256(b"EXP-LAB-2026-003").hexdigest(), "PERDIDO",
-                "PRESCRIPCIÓN CONSUMADA: El ciudadano dejó pasar el término legal de 2 meses (60 días) para demandar el despido injustificado por confiar en acuerdos verbales.",
-                "N/A - Caso sobreseído por excepción de prescripción opuesta por el demandado.",
-                "JAMÁS esperar promesas verbales del patrón; el reloj de prescripción corre desde el día siguiente a la separación.",
-                "2026-09-02"
+                "EXP-FAM-2026-003", "Derecho Privado", "Derecho de Familia", "Casos Familiares", "Pensión alimenticia",
+                "Fijación Exitosa de Pensión Provisional y Custodia",
+                "Juez de lo Familiar, Abogado especialista", "1. Demanda", "Pensión provisional",
+                "Sentencia civil favorable (35% vía nómina)", "Queja", "Ocultamiento de ingresos del deudor y necesidad de alimentos",
+                hashlib.sha256(b"EXP-FAM-2026-003").hexdigest(), "GANADO",
+                "El abogado solicitó informes financieros directos a la Comisión Bancaria y SAT.",
+                "El Juez priorizó el interés superior del menor y decretó retención salarial.",
+                "N/A", "Solicitar informes al SAT y bancos del deudor.",
+                "Exigir pensión provisional desde el primer auto judicial.", "Acordar pensiones de palabra sin aval judicial.", "2026-08-10"
             ),
             (
                 "EXP-FAM-2026-004", "Derecho Privado", "Derecho de Familia", "Casos Familiares", "Pensión alimenticia",
-                "Fijación de Pensión Alimenticia, Guarda y Custodia y Ocultamiento de Ingresos",
-                "Juez de lo Familiar, Abogado especializado, Perito en trabajo social",
-                "1. Demanda", "Retención de bienes / Descuento directo por nómina",
-                "Sentencia civil (Pensión definitiva del 35%)", "Queja (por suspensión de pensión provisional)",
-                "Deudor alimentario renunció simuladamente para no pagar pensión a dos menores, ocultando ingresos en cuentas mercantiles secundarias",
-                hashlib.sha256(b"EXP-FAM-2026-004").hexdigest(), "GANADO",
-                "N/A - Sentencia favorable para los menores.",
-                "Se solicitó al Juez requerir informes a la Comisión Bancaria y al SAT (Derecho Tributario), acreditando el flujo real de dinero del demandado.",
-                "Pedir pensión provisional desde el día 1 de la demanda y solicitar oficios de investigación patrimonial al SAT y bancos.",
-                "2026-09-15"
+                "Pensión Alimenticia Perdida por Insolvencia Simulada No Combatida",
+                "Juez familiar", "3. Prueba", "Ninguna", "Sentencia absolutoria parcial", "Apelación",
+                "Deudor renunció a empleo formal para eludir su obligación",
+                hashlib.sha256(b"EXP-FAM-2026-004").hexdigest(), "PERDIDO",
+                "La parte actora no aportó indicios de capacidad económica real alterna.",
+                "El Juez resolvió con base en ingresos formales nulos declarados.",
+                "Falta de investigación patrimonial y peritaje contable.", "N/A",
+                "Ofrecer peritaje financiero de estilo de vida.", "Confiarse en que el deudor no tiene ingresos formales.", "2026-08-15"
             ),
             (
-                "EXP-PEN-2026-005", "Derecho Público", "Derecho Procesal Penal", "Casos Penales", "Abuso de autoridad",
-                "Detención Arbitraria e Intrusión Ilegal a Teléfono Móvil sin Orden Judicial",
-                "Juez de garantías, Abogado defensor, Fiscal/Ministerio Público, Perito",
-                "3. Auto de procesamiento", "Medidas de protección",
-                "Sentencia absolutoria (Nulidad de prueba ilícita)", "Habeas corpus / Amparo / Nulidad",
-                "Policías revisaron teléfono y base de datos privada del ciudadano sin orden de cateo ni control judicial, rompiendo cadena de custodia y debido proceso",
+                "EXP-PEN-2026-005", "Derecho Público", "Derecho Penal", "Casos Penales", "Fraude",
+                "Estafa Digital y Phishing Bancario Ganado por Trazas SHA-256",
+                "Juez de garantías, Fiscal, Perito forense", "2. Investigación", "Congelamiento de cuentas",
+                "Sentencia condenatoria", "Amparo", "Transferencia no autorizada y alteración de bitácoras de acceso",
                 hashlib.sha256(b"EXP-PEN-2026-005").hexdigest(), "GANADO",
-                "N/A - Se declaró la nulidad absoluta de las pruebas por violación al Debido Proceso (Due Process).",
-                "El Abogado Defensor y el Perito demostraron que los archivos del teléfono fueron abiertos y modificados después de la hora de detención sin hash SHA-256 ni orden de Juez de Garantías.",
-                "Exigir respeto al Debido Proceso: ninguna autoridad puede revisar tu teléfono o domicilio sin orden judicial escrita.",
-                "2026-09-28"
+                "El perito aportó trazas IP y huella hash SHA-256 intactas.",
+                "El Juez ordenó el aseguramiento inmediato de la cuenta receptora del fraude.",
+                "N/A", "Interponer querella con peritaje informático inmediato.",
+                "Denunciar en menos de 24 horas y aportar bitácoras digitales.", "Alterar capturas de pantalla o borrar registros.", "2026-08-20"
             ),
             (
-                "EXP-CIV-2026-006", "Derecho Privado", "Derecho Civil", "Casos Civiles", "Arrendamiento",
-                "Incumplimiento de Contrato de Arrendamiento y Desalojo por Propia Mano",
-                "Juez civil, Abogado litigante, Notario",
-                "4. Alegatos", "Orden de no enajenar / Embargo preventivo",
-                "Sentencia condenatoria (En contra del propietario por cambiar chapas)", "Apelación",
-                "Inquilino debía 4 meses de renta; el dueño rompió cerraduras y sacó los muebles a la calle sin juicio previo ni orden de juez civil",
-                hashlib.sha256(b"EXP-CIV-2026-006").hexdigest(), "PERDIDO",
-                "Justicia por propia mano y violación de domicilio/despojo: El propietario pasó de ser Demandante civil a Acusado penal por no esperar la Sentencia y etapa de Ejecución.",
-                "N/A - Se perdió la ventaja procesal por actuar fuera de la vía judicial.",
-                "Aunque te deban renta o invadan un contrato, NUNCA cambies cerraduras por tu cuenta; promueve juicio de desahucio y embargo de bienes.",
-                "2026-10-05"
+                "EXP-PEN-2026-006", "Derecho Público", "Derecho Penal", "Casos Penales", "Fraude",
+                "Fraude Bancario Perdido por Alteración de Pruebas Digitales",
+                "Fiscalía", "3. Prueba", "Ninguna", "Sentencia absolutoria", "Apelación",
+                "Víctima modificó archivos de registro antes de entregarlos al perito",
+                hashlib.sha256(b"EXP-PEN-2026-006").hexdigest(), "PERDIDO",
+                "La defensa demostró ruptura de la cadena de custodia digital.",
+                "El Juez desechó las capturas por carecer de integridad criptográfica.",
+                "Ruptura de cadena de custodia y alteración de metadatos.", "N/A",
+                "Preservar dispositivos originales sin modificar.", "Modificar o editar archivos de evidencia digital.", "2026-08-25"
             ),
             (
-                "EXP-MER-2026-007", "Derecho Privado", "Derecho Mercantil", "Casos Mercantiles", "Incumplimiento de contratos",
-                "Cobro de Pagarés y Facturas Comerciales con Embargo Precautorio",
-                "Juez mercantil, Abogado litigante, Perito contable",
-                "1. Demanda", "Embargo preventivo",
-                "Sentencia condenatoria (Remate de bienes embargados)", "Apelación",
-                "Proveedor entregó mercancía industrial, cliente incumplió contrato comercial y pretendió vaciar bodegas para declararse en insolvencia",
-                hashlib.sha256(b"EXP-MER-2026-007").hexdigest(), "GANADO",
-                "N/A - Recuperación del 100% de la suerte principal más intereses moratorios.",
-                "Se promovió Juicio Ejecutivo Mercantil ejecutando el embargo preventivo en el mismo acto de notificación antes de que el deudor ocultara activos.",
-                "Documentar entregas con pagarés o facturas firmadas de recibido y solicitar embargo precautorio desde el primer auto.",
-                "2026-10-18"
+                "EXP-PEN-2026-007", "Derecho Público", "Derecho Procesal Penal", "Casos Penales", "Abuso de autoridad",
+                "Detención Ilegal y Nulidad de Cateo sin Orden Judicial",
+                "Juez de garantías, Defensor público", "3. Auto de procesamiento", "Medidas de protección",
+                "Sentencia absolutoria (Nulidad absoluta)", "Habeas corpus / Amparo",
+                "Policías ingresaron al domicilio sin orden de cateo ni flagrancia",
+                hashlib.sha256(b"EXP-PEN-2026-007").hexdigest(), "GANADO",
+                "El abogado defensor acreditó violación flagrante al debido proceso y artículo 16 constitucional.",
+                "El Juez decretó la nulidad de todo lo actuado y la libertad inmediata.",
+                "N/A", "Invocar control convencional y nulidad de prueba ilícita.",
+                "Exigir orden de cateo firmada por juez competente.", "Oponer resistencia física violenta ante la autoridad.", "2026-09-01"
+            ),
+            (
+                "EXP-PEN-2026-008", "Derecho Público", "Derecho Procesal Penal", "Casos Penales", "Abuso de autoridad",
+                "Detención Validada por Consentimiento Tácito en Audiencia",
+                "Juez penal", "5. Juicio oral", "Prisión preventiva", "Sentencia condenatoria", "Apelación",
+                "Imputado firmó actas ministeriales sin presencia de defensor técnico",
+                hashlib.sha256(b"EXP-PEN-2026-008").hexdigest(), "PERDIDO",
+                "Falta de objeción oportuna por la defensa inicial.",
+                "El Juez consideró convalidadas las actuaciones ministeriales.",
+                "Convalidación de vicios formales por falta de defensa técnica temprana.", "N/A",
+                "Designar defensor particular o público desde el primer momento.", "Declarar ante el ministerio público sin asistencia legal.", "2026-09-05"
+            ),
+            (
+                "EXP-CIV-2026-009", "Derecho Privado", "Derecho Civil", "Casos Civiles", "Arrendamiento",
+                "Desocupación Legal y Embargo de Garantías por Rentas Vencidas",
+                "Juez civil", "1. Demanda", "Embargo precautorio", "Sentencia condenatoria", "Apelación",
+                "Inquilino con 6 meses de adeudo y negativa de entrega de inmueble",
+                hashlib.sha256(b"EXP-CIV-2026-009").hexdigest(), "GANADO",
+                "El abogado promovió juicio de desahucio con solicitud simultánea de embargo de bienes.",
+                "El Juez autorizó el lanzamiento y ejecución coactiva con fuerza pública.",
+                "N/A", "Promover juicio especial de arrendamiento y embargo precautorio.",
+                "Seguir estrictamente la vía judicial para recuperar la posesión.", "Desalojar por propia mano cambiando cerraduras.", "2026-09-10"
+            ),
+            (
+                "EXP-CIV-2026-010", "Derecho Privado", "Derecho Civil", "Casos Civiles", "Arrendamiento",
+                "Desalojo por Propia Mano Convertido en Delito de Despojo",
+                "Juez penal y civil", "2. Contestación", "Ninguna", "Sentencia condenatoria (Contra el propietario)", "Amparo",
+                "Propietario sacó muebles a la calle sin orden judicial",
+                hashlib.sha256(b"EXP-CIV-2026-010").hexdigest(), "PERDIDO",
+                "El arrendador actuó por propia mano ignorando los tribunales civiles.",
+                "El Juez sancionó el autotutela convirtiendo al dueño en imputado penal.",
+                "Justicia por propia mano (Autotutela prohibida por ley).", "N/A",
+                "Acudir al juzgado civil competente.", "Tomar la justicia por propia mano.", "2026-09-15"
+            ),
+            (
+                "EXP-MER-2026-011", "Derecho Privado", "Derecho Mercantil", "Casos Mercantiles", "Incumplimiento de contratos",
+                "Cobro Ejecutivo de Pagaré con Embargo Precautorio Exitoso",
+                "Juez mercantil", "1. Demanda", "Embargo preventivo", "Sentencia condenatoria (Remate)", "Apelación",
+                "Incumplimiento de título de crédito por parte de empresa de comercio",
+                hashlib.sha256(b"EXP-MER-2026-011").hexdigest(), "GANADO",
+                "El abogado ejecutó el título con base en el artículo 1391 del Código de Comercio.",
+                "El Juez ordenó embargo inmediato en la diligencia de exequendo.",
+                "N/A", "Ejecutar pagaré mercantil con aparejada ejecución.",
+                "Verificar la correcta redacción y firmas del título de crédito.", "Aceptar pagarés con alteraciones o espacios en blanco.", "2026-09-20"
+            ),
+            (
+                "EXP-MER-2026-012", "Derecho Privado", "Derecho Mercantil", "Casos Mercantiles", "Incumplimiento de contratos",
+                "Cobro Mercantil Perdido por Alteración de la Fecha en el Pagaré",
+                "Juez mercantil", "3. Prueba", "Ninguna", "Sentencia absolutoria", "Apelación",
+                "Pagaré con enmienda física visible en el espacio de fecha de vencimiento",
+                hashlib.sha256(b"EXP-MER-2026-012").hexdigest(), "PERDIDO",
+                "El perito grafoscópico de la contraparte demostró la alteración material del documento.",
+                "El Juez absolvió al demandado por pérdida de fuerza ejecutiva del título.",
+                "Alteración material del documento base de la acción.", "N/A",
+                "Revisar autenticidad y pulcritud de documentos mercantiles.", "Alterar o enmendar manualmente títulos de crédito.", "2026-09-25"
             )
         ]
         c.executemany("""
@@ -378,8 +340,9 @@ def init_db():
                 codigo_caso, macro_rama, rama_derecho, categoria_caso, tipo_caso,
                 titulo, actores_intervinientes, etapa_clave, medida_cautelar,
                 resolucion_obtenida, recurso_utilizado, evidencia_logs, hash_sha256,
-                resultado, causa_raiz_fallo, estrategia_ganadora, que_hacer_ciudadano, fecha_registro
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                resultado, accion_abogado, reaccion_juez, causa_raiz_fallo,
+                estrategia_ganadora, que_hacer_ciudadano, que_no_hacer_ciudadano, fecha_registro
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, semillas)
         conn.commit()
     conn.close()
@@ -387,8 +350,61 @@ def init_db():
 init_db()
 
 # ==============================================================================
-# 4. MOTOR MATEMÁTICO CBR Y ESCÁNER HEURÍSTICO JURÍDICO-FORENSE
+# 3. RED NEURONAL MLP Y MOTOR CBR
 # ==============================================================================
+def entrenar_red_neuronal_autoclasificacion():
+    conn = sqlite3.connect(DB_NAME)
+    df = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
+    conn.close()
+    
+    if df.empty or MLPClassifier is None or TfidfVectorizer is None:
+        return None, None
+        
+    X_text = df['titulo'] + " " + df['evidencia_logs'] + " " + df['tipo_caso']
+    y_rama = df['rama_derecho']
+    
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=500)
+    X_vec = vectorizer.fit_transform(X_text)
+    
+    mlp = MLPClassifier(hidden_layer_sizes=(64, 32), activation='relu', max_iter=300, random_state=42)
+    mlp.fit(X_vec, y_rama)
+    return vectorizer, mlp
+
+VECTORIZER_MLP, MODELO_MLP = entrenar_red_neuronal_autoclasificacion()
+
+def autoclasificar_caso_con_red_neuronal(relato: str) -> dict:
+    if MODELO_MLP is not None and VECTORIZER_MLP is not None:
+        X_test = VECTORIZER_MLP.transform([relato])
+        rama_predicha = MODELO_MLP.predict(X_test)[0]
+        probabilidades = MODELO_MLP.predict_proba(X_test)[0]
+        confianza = round(float(max(probabilidades)) * 100, 1)
+    else:
+        rama_predicha = "Derecho Civil"
+        confianza = 75.0
+        
+    # Heurísticas complementarias
+    cat = "Casos Civiles"
+    tipo = "Contratos"
+    if any(k in relato.lower() for k in ['despido', 'patrón', 'salario', 'trabajo', 'renuncia']):
+        cat = "Casos Laborales"
+        tipo = "Despido injustificado"
+    elif any(k in relato.lower() for k in ['pensión', 'hijos', 'custodia', 'divorcio', 'menor']):
+        cat = "Casos Familiares"
+        tipo = "Pensión alimenticia"
+    elif any(k in relato.lower() for k in ['fraude', 'estafa', 'policía', 'amenaza', 'robo', 'detención']):
+        cat = "Casos Penales"
+        tipo = "Fraude"
+    elif any(k in relato.lower() for k in ['pagaré', 'deuda', 'contrato', 'comercial', 'empresa']):
+        cat = "Casos Mercantiles"
+        tipo = "Incumplimiento de contratos"
+
+    return {
+        "rama": rama_predicha,
+        "categoria": cat,
+        "tipo": tipo,
+        "confianza": confianza
+    }
+
 def tokenizar(texto: str) -> Counter:
     palabras = re.findall(r'[a-zA-ZáéíóúñÁÉÍÓÚÑ0-9_./-]+', texto.lower())
     stopwords = {'de', 'la', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un', 'para', 'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'que', 'es', 'sin'}
@@ -399,11 +415,9 @@ def calcular_similitud_coseno(texto1: str, texto2: str) -> float:
     vec2 = tokenizar(texto2)
     interseccion = set(vec1.keys()) & set(vec2.keys())
     numerador = sum([vec1[x] * vec2[x] for x in interseccion])
-    
     suma1 = sum([vec1[x] ** 2 for x in vec1.keys()])
     suma2 = sum([vec2[x] ** 2 for x in vec2.keys()])
     denominador = math.sqrt(suma1) * math.sqrt(suma2)
-    
     if not denominador:
         return 0.0
     return round((float(numerador) / denominador) * 100, 1)
@@ -411,25 +425,21 @@ def calcular_similitud_coseno(texto1: str, texto2: str) -> float:
 def auditar_riesgo_juridico_forense(relato_evidencia: str) -> dict:
     hallazgos = []
     riesgo = 20
-    
     reglas = [
-        (r'despido|renuncia|hoja en blanco|finiquito|salarios|aguinaldo', "🟠 ALERTA LABORAL: Posible coacción patronal o riesgo de prescripción (60 días para demandar).", 25),
-        (r'violencia|amenaza|golpe|agresi|peligro|arma|acoso', "🔴 URGENCIA PENAL/FAMILIAR: Solicitar Medidas de Protección inmediatas ante Fiscalía o Juez.", 35),
-        (r'detenci|polic|abuso de autoridad|cateo|sin orden', "🔴 ALERTA CONSTITUCIONAL: Posible violación al Debido Proceso; evaluar Amparo / Habeas Corpus y Nulidad de prueba.", 35),
-        (r'sed\s+-i|rm\s+-rf|shred|borrado|altera|falsifica|hash|log|ip\s+\d+', "🔴 ALERTA FORENSE DIGITAL: Indicios de manipulación de evidencia o fraude informático; sellar con SHA-256.", 30),
-        (r'deuda|pagar[eé]|contrato|renta|arrendamiento|incumplimiento|factura', "🟡 RIESGO PATRIMONIAL: Solicitar Embargo Preventivo u Orden de No Enajenar antes de que oculten bienes.", 20),
-        (r'pensi[oó]n|alimentos|hijos|custodia|menor|divorcio', "🟠 PRIORIDAD FAMILIAR: Exigir Pensión Alimenticia Provisional y guarda/custodia urgente.", 25)
+        (r'despido|renuncia|hoja en blanco|finiquito|salarios', "🟠 ALERTA LABORAL: Riesgo de prescripción (60 días para demandar).", 25),
+        (r'violencia|amenaza|golpe|agresi|peligro|arma', "🔴 URGENCIA PENAL/FAMILIAR: Solicitar Medidas de Protección inmediatas.", 35),
+        (r'detenci|polic|abuso de autoridad|cateo|sin orden', "🔴 ALERTA CONSTITUCIONAL: Posible violación al Debido Proceso; evaluar Amparo y Nulidad.", 35),
+        (r'fraude|estafa|phishing|transferencia|hash|log|ip', "🔴 ALERTA FORENSE DIGITAL: Evidencia electrónica; sellar con SHA-256.", 30),
+        (r'pagar[eé]|deuda|contrato|renta|arrendamiento|incumplimiento', "🟡 RIESGO PATRIMONIAL: Solicitar Embargo Preventivo u Orden de No Enajenar.", 20),
+        (r'pensi[oó]n|alimentos|hijos|custodia|menor', "🟠 PRIORIDAD FAMILIAR: Exigir Pensión Alimenticia Provisional urgente.", 25)
     ]
-    
     for patron, msg, peso in reglas:
         if re.search(patron, relato_evidencia, re.IGNORECASE):
             hallazgos.append(msg)
             riesgo += peso
-            
     riesgo = min(100, riesgo)
     if not hallazgos:
-        hallazgos.append("🟢 Caso ordinario: Asegurar pruebas documentales y verificar plazos de prescripción.")
-        
+        hallazgos.append("🟢 Caso ordinario: Asegurar documentos y verificar plazos.")
     return {
         "hallazgos": hallazgos,
         "riesgo_score": riesgo,
@@ -437,123 +447,168 @@ def auditar_riesgo_juridico_forense(relato_evidencia: str) -> dict:
     }
 
 # ==============================================================================
-# 5. GENERADOR DE FICHA CIUDADANA Y PERICIAL EN FORMATO ESTRICTO 9:16 (1080x1920)
+# 4. DICTADO POR VOZ Y EXPORTACIÓN A WORD (.DOCX)
+# ==============================================================================
+def transcribir_audio_espanol(audio_bytes) -> str:
+    if sr is None or audio_bytes is None:
+        return ""
+    try:
+        r = sr.Recognizer()
+        audio_file = io.BytesIO(audio_bytes.read())
+        with sr.AudioFile(audio_file) as source:
+            audio_data = r.record(source)
+            texto = r.recognize_google(audio_data, language="es-MX")
+            return texto
+    except Exception:
+        return "⚠️ No se pudo procesar automáticamente el audio. Por favor escribe tu relato en el cuadro de texto."
+
+def generar_dictamen_word_docx(codigo, clasificacion, auditoria, plan, top_prec) -> bytes:
+    if Document is None:
+        return b""
+    doc = Document()
+    doc.add_heading("DICTAMEN JURÍDICO-FORENSE Y PLAN DE ACCIÓN", 0)
+    
+    doc.add_paragraph(f"Expediente / Código: {codigo}")
+    doc.add_paragraph(f"Fecha de Emisión: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    doc.add_paragraph(f"Sello Criptográfico SHA-256: {auditoria['hash_evidencia']}")
+    
+    doc.add_heading("1. Autoclasificación Neuronal (MLP)", level=1)
+    doc.add_paragraph(f"Rama Detectada: {clasificacion['rama']} (Confianza: {clasificacion['confianza']}%)")
+    doc.add_paragraph(f"Categoría: {clasificacion['categoria']} | Tipo: {clasificacion['tipo']}")
+    
+    doc.add_heading("2. Diagnóstico de Riesgo y Alertas Forenses", level=1)
+    doc.add_paragraph(f"Puntuación de Urgencia: {auditoria['riesgo_score']} / 100")
+    for h in auditoria['hallazgos']:
+        doc.add_paragraph(f"• {h}", style='List Bullet')
+        
+    doc.add_heading("3. Protocolo Ciudadano Paso a Paso", level=1)
+    for paso in plan['pasos_inmediatos']:
+        doc.add_paragraph(f"• {paso}", style='List Bullet')
+        
+    doc.add_heading("4. Precedente CBR Más Cercano", level=1)
+    doc.add_paragraph(f"Caso Referencia: {top_prec['codigo_caso']} - {top_prec['titulo']}")
+    doc.add_paragraph(f"Estrategia Ganadora: {top_prec['estrategia_ganadora']}")
+    doc.add_paragraph(f"Causa Raíz de Falla (en caso de derrota): {top_prec['causa_raiz_fallo']}")
+    
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+# ==============================================================================
+# 5. GENERADOR DE FICHA VERTICAL 9:16 (1080x1920)
 # ==============================================================================
 def limpiar_ascii(texto: str) -> str:
     reemplazos = str.maketrans("áéíóúñÁÉÍÓÚÑ", "aeiounAEIOUN")
     return texto.translate(reemplazos).encode('ascii', 'ignore').decode('ascii')
 
 def generar_ficha_vertical_9_16(codigo: str, rama: str, caso: str, etapa: str, plan: dict, prob_exito: float, riesgo: int, hash_ev: str) -> np.ndarray:
-    # Formato vertical estricto 9:16 (1080 de ancho x 1920 de alto)
     alto, ancho = 1920, 1080
     img = np.zeros((alto, ancho, 3), dtype=np.uint8)
     img[:] = (24, 15, 10)
     
-    # Marcos
     cv2.rectangle(img, (25, 25), (1055, 1895), (240, 175, 50), 4)
     cv2.rectangle(img, (40, 40), (1040, 1880), (70, 50, 30), 2)
     
-    # Cabecera
     cv2.rectangle(img, (40, 40), (1040, 220), (45, 28, 16), -1)
-    cv2.putText(img, "FORENSICMIND & LEXGUIA v3.0", (70, 110), cv2.FONT_HERSHEY_DUPLEX, 1.7, (100, 220, 255), 3)
-    cv2.putText(img, "HOJA DE RUTA JURIDICA Y SELLO PERICIAL (9:16)", (70, 175), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (210, 210, 210), 2)
+    cv2.putText(img, "FORENSICMIND & LEXGUIA v4.0", (70, 110), cv2.FONT_HERSHEY_DUPLEX, 1.6, (100, 220, 255), 3)
+    cv2.putText(img, "DICTAMEN JURIDICO Y SELLO PERICIAL (9:16)", (70, 175), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (210, 210, 210), 2)
     
-    # Clasificación del Caso
     cv2.putText(img, limpiar_ascii(f"EXPEDIENTE: {codigo}"), (70, 285), cv2.FONT_HERSHEY_DUPLEX, 1.1, (255, 255, 255), 2)
     cv2.putText(img, limpiar_ascii(f"RAMA: {rama}"), (70, 340), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (140, 240, 180), 2)
-    cv2.putText(img, limpiar_ascii(f"TIPO DE CASO: {caso}"), (70, 390), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (140, 240, 180), 2)
-    cv2.putText(img, limpiar_ascii(f"ETAPA ACTUAL: {etapa[:45]}"), (70, 440), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255, 210, 110), 2)
+    cv2.putText(img, limpiar_ascii(f"TIPO: {caso}"), (70, 390), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (140, 240, 180), 2)
+    cv2.putText(img, limpiar_ascii(f"ETAPA: {etapa[:42]}"), (70, 440), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (255, 210, 110), 2)
     
-    # Cajas de Métricas
     cv2.rectangle(img, (70, 480), (515, 680), (35, 35, 68), -1)
-    cv2.rectangle(img, (70, 480), (515, 680), (90, 90, 255), 3)
-    cv2.putText(img, "URGENCIA / RIESGO", (110, 535), cv2.FONT_HERSHEY_DUPLEX, 0.9, (210, 210, 255), 2)
-    cv2.putText(img, f"{riesgo}/100", (165, 635), cv2.FONT_HERSHEY_DUPLEX, 2.0, (90, 90, 255), 4)
+    cv2.putText(img, "RIESGO LEGAL", (110, 535), cv2.FONT_HERSHEY_DUPLEX, 0.9, (210, 210, 255), 2)
+    cv2.putText(img, f"{riesgo}/100", (145, 635), cv2.FONT_HERSHEY_DUPLEX, 2.0, (90, 90, 255), 4)
     
     cv2.rectangle(img, (565, 480), (1010, 680), (30, 60, 35), -1)
-    cv2.rectangle(img, (565, 480), (1010, 680), (110, 240, 130), 3)
     cv2.putText(img, "VIABILIDAD CBR", (625, 535), cv2.FONT_HERSHEY_DUPLEX, 0.9, (200, 255, 200), 2)
     cv2.putText(img, f"{prob_exito}%", (660, 635), cv2.FONT_HERSHEY_DUPLEX, 2.0, (110, 240, 130), 4)
     
-    # Actores y Escudos
-    cv2.putText(img, "ACTORES Y MEDIDAS DE PROTECCION:", (70, 755), cv2.FONT_HERSHEY_DUPLEX, 1.0, (100, 220, 255), 2)
-    cv2.putText(img, limpiar_ascii(f"Juez: {plan['juez'][:48]}"), (70, 805), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (230, 230, 230), 2)
-    cv2.putText(img, limpiar_ascii(f"Defensa: {plan['abogado'][:46]}"), (70, 850), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (230, 230, 230), 2)
-    cv2.putText(img, limpiar_ascii(f"Medida: {plan['medida_sugerida'][:46]}"), (70, 895), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 220, 120), 2)
-    cv2.putText(img, limpiar_ascii(f"Recurso: {plan['recurso_clave'][:46]}"), (70, 940), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 220, 120), 2)
+    cv2.putText(img, "ACTORES Y MEDIDAS CLAVE:", (70, 755), cv2.FONT_HERSHEY_DUPLEX, 1.0, (100, 220, 255), 2)
+    cv2.putText(img, limpiar_ascii(f"Juez: {plan['juez'][:45]}"), (70, 805), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (230, 230, 230), 2)
+    cv2.putText(img, limpiar_ascii(f"Defensa: {plan['abogado'][:45]}"), (70, 850), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (230, 230, 230), 2)
+    cv2.putText(img, limpiar_ascii(f"Medida: {plan['medida_sugerida'][:45]}"), (70, 895), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 220, 120), 2)
     
-    # Plan de Acción Ciudadano
-    cv2.putText(img, "QUE HACER PASO A PASO (GUIA CIUDADANA):", (70, 1025), cv2.FONT_HERSHEY_DUPLEX, 1.0, (140, 255, 160), 2)
-    y_cursor = 1085
-    for paso in plan["pasos_inmediatos"]:
+    cv2.putText(img, "GUIA CIUDADANA PASO A PASO:", (70, 995), cv2.FONT_HERSHEY_DUPLEX, 1.0, (140, 255, 160), 2)
+    y_cursor = 1055
+    for paso in plan["pasos_inmediatos"][:3]:
         limpio = limpiar_ascii(paso)
-        fragmentos = [limpio[i:i+54] for i in range(0, len(limpio), 54)]
-        for frag in fragmentos[:2]:
-            cv2.putText(img, frag, (70, y_cursor), cv2.FONT_HERSHEY_SIMPLEX, 0.76, (220, 220, 220), 2)
-            y_cursor += 42
-        y_cursor += 18
+        cv2.putText(img, limpio[:55], (70, y_cursor), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (220, 220, 220), 2)
+        y_cursor += 50
         
-    # Sello SHA-256
-    cv2.putText(img, "SELLO CRIPTOGRAFICO SHA-256 DE EVIDENCIA:", (70, 1600), cv2.FONT_HERSHEY_DUPLEX, 0.85, (100, 220, 255), 2)
+    cv2.putText(img, "SELLO SHA-256:", (70, 1600), cv2.FONT_HERSHEY_DUPLEX, 0.85, (100, 220, 255), 2)
     cv2.putText(img, hash_ev[:36], (70, 1645), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (160, 255, 160), 2)
-    cv2.putText(img, hash_ev[36:], (70, 1685), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (160, 255, 160), 2)
     
-    # Pie de Ficha 9:16
     cv2.rectangle(img, (70, 1735), (1010, 1850), (42, 30, 20), -1)
-    cv2.putText(img, "FORMATO VERTICAL ESTRICTO 9:16 (1080x1920 PX)", (145, 1785), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 255, 218), 2)
-    cv2.putText(img, "JUSTICIA PREVENTIVA - ASESORIA JURIDICA Y FORENSE", (135, 1828), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (190, 190, 190), 1)
-    
+    cv2.putText(img, "VERTICAL 9:16 (1080x1920 PX)", (200, 1785), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 255, 218), 2)
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 # ==============================================================================
-# 6. INTERFAZ PRINCIPAL DE LA SUITE REESTRUCTURADA
+# 6. INTERFAZ PRINCIPAL DE LA SUITE v4.0
 # ==============================================================================
-st.title("⚖️ ForensicMind & LexGuía CBR v3.0 — Justicia Preventiva y Asesoría Ciudadana")
-st.caption("Orientación Jurídica Paso a Paso • Razonamiento Basado en Casos (Ganados vs. Perdidos) • Peritaje Forense SHA-256")
+st.title("⚖️ ForensicMind & LexGuía CBR v4.0 — Red Neuronal y Anatomía del Juicio")
+st.caption("Autoclasificación MLP • Comparativa Ganados vs. Perdidos • Dictado por Voz • Sello SHA-256")
 
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🛡️ 1. Asesor Ciudadano ('Qué Hacer') & Diagnóstico CBR",
+    "🛡️ 1. Autoclasificación en 1 Clic & Comparador Ganados vs. Perdidos",
     "🗺️ 2. Etapas del Juicio, Actores y Diccionario Legal",
-    "📚 3. Bóveda de Jurisprudencia (Ganados vs. Perdidos)",
-    "➕ 4. Registrar Nuevo Caso / Post-Mortem"
+    "📚 3. Bóveda y Radiografía Completa de Casos",
+    "➕ 4. Registrar Nuevo Caso"
 ])
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 1: ASESOR CIUDADANO Y MOTOR CBR
+# PESTAÑA 1: AUTOCLASIFICACIÓN Y ANÁLISIS
 # ------------------------------------------------------------------------------
 with tab1:
-    st.subheader("🧭 Diagnóstico del Problema y Plan de Acción Inmediato")
-    c_sel1, c_sel2, c_sel3, c_sel4 = st.columns(4)
+    st.subheader("🧠 Cuéntame libremente qué ocurrió (Autoclasificación con Red Neuronal)")
     
-    with c_sel1:
-        macro_sel = st.selectbox("1. Ámbito del Derecho", list(RAMAS_DERECHO.keys()))
-        rama_sel = st.selectbox("2. Rama Específica", RAMAS_DERECHO[macro_sel])
-    with c_sel2:
-        cat_caso_sel = st.selectbox("3. Familia de Caso", list(TIPOS_CASOS.keys()))
-        tipo_caso_sel = st.selectbox("4. Problema Específico", TIPOS_CASOS[cat_caso_sel])
-    with c_sel3:
-        rol_sel = st.selectbox(
-            "5. ¿Cuál es tu posición hoy?",
-            ["Demandante / Acusador (Víctima o afectado)", "Demandado / Acusado (Me están reclamando o imputando)"]
-        )
-        plan_activo = obtener_plan_accion_ciudadano(cat_caso_sel, tipo_caso_sel, rol_sel)
-        etapa_sel = st.selectbox("6. Etapa Judicial Actual", ETAPAS_PROCESO[plan_activo["proceso"]])
-    with c_sel4:
-        codigo_exp = st.text_input("Código de Consulta", value="ASESORIA-2026-01")
-        medida_sel = st.selectbox("7. Medida Cautelar Requerida", MEDIDAS_CAUTELARES)
+    col_voz1, col_voz2 = st.columns([2, 1])
+    with col_voz2:
+        audio_file = st.audio_input("🎙️ Dictar mi caso por voz (Español)")
+        texto_voz = ""
+        if audio_file is not None:
+            with st.spinner("Transcribiendo audio..."):
+                texto_voz = transcribir_audio_espanol(audio_file)
+                if texto_voz:
+                    st.success("¡Transcripción completada!")
+
+    def_relato = "Me despidieron injustificadamente hoy, me exigen firmar una hoja en blanco y bloquearon mi acceso."
+    if texto_voz and "⚠️" not in texto_voz:
+        def_relato = texto_voz
 
     relato_usuario = st.text_area(
-        "📝 Describe qué ocurrió y pega aquí cualquier evidencia (mensajes, cláusulas de contrato, bitácoras o hechos):",
-        height=140,
-        value="Me despidieron injustificadamente hoy, me exigen firmar una hoja en blanco para darme mi finiquito, me deben salarios y bloquearon mi usuario en la base de datos de asistencia."
+        "Escribe aquí con tus propias palabras qué te pasó, qué te reclaman o edita tu dictado por voz:",
+        value=def_relato,
+        height=120
     )
 
-    # Cruce Matemático CBR contra SQLite
+    clasificacion = autoclasificar_caso_con_red_neuronal(relato_usuario)
+    
+    with st.expander("⚙️ Ajustes Manuales (Opcional)", expanded=False):
+        c_sel1, c_sel2, c_sel3 = st.columns(3)
+        macro_sel = c_sel1.selectbox("Ámbito del Derecho", list(RAMAS_DERECHO.keys()))
+        rama_sel = c_sel2.selectbox("Rama Específica", RAMAS_DERECHO[macro_sel], index=0)
+        cat_caso_sel = c_sel3.selectbox("Familia de Caso", list(TIPOS_CASOS.keys()), index=2)
+        tipo_caso_sel = st.selectbox("Problema Específico", TIPOS_CASOS[cat_caso_sel], index=0)
+        rol_sel = st.radio("Tu Posición:", ["Demandante / Acusador", "Demandado / Acusado"])
+        etapa_sel = st.selectbox("Etapa Judicial:", ETAPAS_PROCESO["Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)"])
+        codigo_exp = st.text_input("Código de Expediente", value="ASESORIA-2026-04")
+    
+    # Usar valores automáticos o manuales
+    rama_activa = clasificacion['rama']
+    cat_activa = clasificacion['categoria']
+    tipo_activo = clasificacion['tipo']
+    plan_activo = obtener_plan_accion_ciudadano(cat_activa, tipo_activo, "Demandante")
+
+    # Búsqueda CBR
     conn = sqlite3.connect(DB_NAME)
     df_hist = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
     conn.close()
 
-    consulta_full = f"{rama_sel} {cat_caso_sel} {tipo_caso_sel} {relato_usuario}"
+    consulta_full = f"{rama_activa} {cat_activa} {tipo_activo} {relato_usuario}"
     similitudes = []
     for _, row in df_hist.iterrows():
         doc_hist = f"{row['rama_derecho']} {row['categoria_caso']} {row['tipo_caso']} {row['titulo']} {row['evidencia_logs']} {row['que_hacer_ciudadano']}"
@@ -561,200 +616,222 @@ with tab1:
         similitudes.append({**row.to_dict(), "similitud": score_sim})
 
     df_sim = pd.DataFrame(similitudes).sort_values(by="similitud", ascending=False)
-    relevantes = df_sim[df_sim["similitud"] > 8.0]
+    relevantes = df_sim[df_sim["similitud"] > 5.0]
     if not relevantes.empty:
         ganados_peso = relevantes[relevantes["resultado"] == "GANADO"]["similitud"].sum()
         total_peso = relevantes["similitud"].sum()
-        prob_exito = round((ganados_peso / total_peso) * 100, 1) if total_peso > 0 else 55.0
+        prob_exito = round((ganados_peso / total_peso) * 100, 1) if total_peso > 0 else 60.0
     else:
-        prob_exito = 55.0
+        prob_exito = 60.0
 
     auditoria = auditar_riesgo_juridico_forense(relato_usuario)
     top_precedente = df_sim.iloc[0]
 
-    # Métricas Superiores
+    # Métricas de salida
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Urgencia / Riesgo Legal", f"{auditoria['riesgo_score']}/100", "Atención Inmediata" if auditoria['riesgo_score'] >= 65 else "Ordinario")
-    m2.metric("Viabilidad de Éxito (CBR)", f"{prob_exito}%", f"Cruce con {len(relevantes)} casos")
-    m3.metric("Precedente Más Cercano", f"{top_precedente['similitud']}%", top_precedente["codigo_caso"])
-    m4.metric("Juez Competente", plan_activo["juez"].split("/")[0], rama_sel)
+    m1.metric("Confianza Neuronal MLP", f"{clasificacion['confianza']}%", clasificacion['rama'])
+    m2.metric("Urgencia / Riesgo Legal", f"{auditoria['riesgo_score']}/100", "Atención Inmediata" if auditoria['riesgo_score'] >= 65 else "Ordinario")
+    m3.metric("Viabilidad CBR", f"{prob_exito}%", f"Cruce con {len(relevantes)} casos")
+    m4.metric("Precedente Cercano", f"{top_precedente['similitud']}%", top_precedente["codigo_caso"])
 
-    # Bloque Central: Qué Hacer Paso a Paso + Actores y Recursos
-    col_guia, col_actores = st.columns([1.25, 1])
-
-    with col_guia:
-        st.markdown("### 🚨 ¿Qué debes hacer ahora mismo? (Protocolo Ciudadano Paso a Paso)")
-        for paso in plan_activo["pasos_inmediatos"]:
-            st.markdown(f"- **{paso}**")
-        
-        st.markdown(f"""
-        <div class="alert-box">
-            <b>⚠️ PELIGRO LEGAL MORTAL A EVITAR (Prescripción / Caducidad / Debido Proceso):</b><br>
-            {plan_activo['alerta_fatal']}
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("#### 🔍 Alertas Detectadas por el Escáner Forense en tu Relato:")
-        for h in auditoria["hallazgos"]:
-            st.write(h)
-        st.caption(f"🔒 **Sello Criptográfico SHA-256 de tu Evidencia:** `{auditoria['hash_evidencia']}`")
-
-    with col_actores:
-        st.markdown("### 🏛️ Mapa de Actores, Medidas y Recursos para tu Caso")
-        st.markdown(f"""
-        <div class="card-box">
-            <span class="step-badge">ETAPA ACTUAL: {etapa_sel}</span><br><br>
-            <b>👨‍⚖️ Juez o Autoridad que resuelve:</b> {plan_activo['juez']}<br>
-            <b>💼 Abogado que necesitas:</b> {plan_activo['abogado']}<br>
-            <b>🔬 Otros Profesionales Clave:</b> {plan_activo['profesionales']}<br>
-            <b>🛡️ Medida Cautelar para protegerte hoy:</b> {plan_activo['medida_sugerida']}<br>
-            <b>📜 Recursos Legales disponibles:</b> {plan_activo['recurso_clave']}
-        </div>
-        """, unsafe_allow_html=True)
+    # Botón de Descarga de Dictamen Word (.docx)
+    word_bytes = generar_dictamen_word_docx(codigo_exp, clasificacion, auditoria, plan_activo, top_precedente)
+    st.download_button(
+        label="📄 Descargar Dictamen Jurídico-Forense Completo en Word (.docx)",
+        data=word_bytes,
+        file_name=f"Dictamen_{codigo_exp}.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
     st.markdown("---")
-    st.subheader("🧠 Comparativa de Jurisprudencia CBR: Cómo se Ganan y por qué se Pierden Casos como el Tuyo")
+    st.subheader("⚖️ Comparativa Directa: Casos Ganados vs. Perdidos (Qué Hacer vs. Qué No Hacer)")
     col_w, col_l = st.columns(2)
 
     with col_w:
-        st.markdown("#### 🏆 Casos Similares GANADOS (Tácticas que funcionaron)")
-        for _, g in df_sim[df_sim["resultado"] == "GANADO"].head(2).iterrows():
+        st.markdown("#### 🟢 Cómo se GANA este caso (Precedente Exitoso)")
+        for _, g in df_sim[df_sim["resultado"] == "GANADO"].head(1).iterrows():
             st.markdown(f"""
             <div class="card-box">
-                <span class="win-badge">GANADO • {g['similitud']}% SIMILITUD</span> <b>{g['codigo_caso']} ({g['tipo_caso']})</b><br>
+                <span class="win-badge">GANADO • {g['similitud']}% SIMILITUD</span> <b>{g['codigo_caso']}</b><br>
                 <b>{g['titulo']}</b><br><br>
-                <b>🎯 Estrategia Ganadora:</b> {g['estrategia_ganadora']}<br>
-                <b>🏛️ Resolución / Recurso:</b> {g['resolucion_obtenida']} | {g['recurso_utilizado']}<br>
-                <b>💡 Consejo Ciudadano:</b> {g['que_hacer_ciudadano']}
+                <b>💼 Qué hizo el Abogado:</b> {g['accion_abogado']}<br>
+                <b>👨‍⚖️ Reacción del Juez:</b> {g['reaccion_juez']}<br>
+                <b>✅ QUÉ DEBES HACER HOY:</b> {g['que_hacer_ciudadano']}
             </div>
             """, unsafe_allow_html=True)
 
     with col_l:
-        st.markdown("#### ❌ Casos Similares PERDIDOS (Errores que debes evitar)")
-        for _, p in df_sim[df_sim["resultado"] == "PERDIDO"].head(2).iterrows():
+        st.markdown("#### 🔴 Por qué se PIERDE este caso (Errores fatales)")
+        for _, p in df_sim[df_sim["resultado"] == "PERDIDO"].head(1).iterrows():
             st.markdown(f"""
             <div class="alert-box">
-                <span class="loss-badge">PERDIDO • {p['similitud']}% SIMILITUD</span> <b>{p['codigo_caso']} ({p['tipo_caso']})</b><br>
+                <span class="loss-badge">PERDIDO • {p['similitud']}% SIMILITUD</span> <b>{p['codigo_caso']}</b><br>
                 <b>{p['titulo']}</b><br><br>
-                <b>💥 Causa Raíz de la Derrota:</b> {p['causa_raiz_fallo']}<br>
-                <b>🏛️ Resolución Emitida:</b> {p['resolucion_obtenida']}<br>
-                <b>🛡️ Cómo Blindarte Hoy:</b> {p['que_hacer_ciudadano']}
+                <b>💥 Causa Raíz del Fallo:</b> {p['causa_raiz_fallo']}<br>
+                <b>🚫 QUÉ NO DEBES HACER JAMÁS:</b> {p['que_no_hacer_ciudadano']}
             </div>
             """, unsafe_allow_html=True)
 
-    with st.expander("📱 Generar Ficha Ciudadana y Pericial en Formato Vertical Estricto 9:16 (1080x1920 px)", expanded=False):
+    with st.expander("📱 Generar Ficha Pericial en Formato Vertical 9:16 (1080x1920 px)", expanded=False):
         img_9_16 = generar_ficha_vertical_9_16(
-            codigo_exp, rama_sel, tipo_caso_sel, etapa_sel,
+            codigo_exp, rama_activa, tipo_activo, "1. Demanda / Inicio",
             plan_activo, prob_exito, auditoria["riesgo_score"], auditoria["hash_evidencia"]
         )
         c_i1, c_i2, c_i3 = st.columns([1, 1.2, 1])
         with c_i2:
-            st.image(img_9_16, caption="Ficha Legal-Forense 9:16 (1080x1920 px)", use_container_width=True)
+            st.image(img_9_16, caption="Ficha Pericial 9:16 (1080x1920 px)", use_container_width=True)
+            st.download_button(
+                label="📥 Descargar Imagen 9:16 (PNG)",
+                data=cv2.imencode('.png', cv2.cvtColor(img_9_16, cv2.COLOR_RGB2BGR))[1].tobytes(),
+                file_name=f"Ficha_{codigo_exp}.png",
+                mime="image/png"
+            )
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR DE ETAPAS Y DICCIONARIO CIUDADANO
+# PESTAÑA 2: ETAPAS Y DICCIONARIO
 # ------------------------------------------------------------------------------
 with tab2:
-    st.subheader("🗺️ Mapa de Etapas Judiciales y Traductor de Conceptos Legales Clave")
+    st.subheader("🗺️ Mapa de Etapas Judiciales y Diccionario Legal")
     col_et1, col_et2 = st.columns(2)
-    
     with col_et1:
-        st.markdown("#### 🚔 Las 8 Etapas del Proceso Penal")
+        st.markdown("#### 🚔 Proceso Penal (8 Etapas)")
         for e in ETAPAS_PROCESO["Proceso Penal (8 Etapas)"]:
-            st.markdown(f"**{e}**")
-        st.markdown("#### 📑 Las 7 Etapas del Proceso Civil / Laboral / Familiar / Mercantil")
+            st.markdown(f"• {e}")
+        st.markdown("#### 📑 Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)")
         for e in ETAPAS_PROCESO["Proceso Civil / Laboral / Familiar / Mercantil (7 Etapas)"]:
-            st.markdown(f"**{e}**")
-
+            st.markdown(f"• {e}")
     with col_et2:
-        st.markdown("#### 📖 Diccionario Ciudadano de Conceptos Legales Clave")
-        concepto_elegido = st.selectbox("Selecciona un concepto para entender cómo afecta tu caso:", list(CONCEPTOS_CLAVE.keys()))
-        st.info(f"**{concepto_elegido}:** {CONCEPTOS_CLAVE[concepto_elegido]}")
-        
-        st.markdown("#### ⚖️ Tipos de Resoluciones y Recursos Legales")
-        st.write("**Resoluciones y Sentencias:** " + ", ".join(RESOLUCIONES_SENTENCIAS))
-        st.write("**Recursos para Impugnar:** " + ", ".join(RECURSOS_LEGALES))
-        st.write("**Medidas Cautelares:** " + ", ".join(MEDIDAS_CAUTELARES))
+        st.markdown("#### 📖 Diccionario Ciudadano")
+        concepto = st.selectbox("Concepto legal:", list(CONCEPTOS_CLAVE.keys()))
+        st.info(f"**{concepto}:** {CONCEPTOS_CLAVE[concepto]}")
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 3: BÓVEDA DE JURISPRUDENCIA CBR
+# PESTAÑA 3: BÓVEDA E INSPECTOR DETALLADO DE CASOS
 # ------------------------------------------------------------------------------
 with tab3:
-    st.subheader("📚 Bóveda Histórica Multidisciplinaria (Casos Ganados vs. Perdidos)")
-    f_col1, f_col2 = st.columns(2)
-    filtro_veredicto = f_col1.selectbox("Filtrar por Resultado:", ["TODOS", "GANADO", "PERDIDO"])
-    filtro_cat = f_col2.selectbox("Filtrar por Familia de Caso:", ["TODAS"] + list(TIPOS_CASOS.keys()))
+    st.subheader("📚 Bóveda y Radiografía Completa de Casos (Anatomía del Juicio)")
+    f_col1, f_col2, f_col3 = st.columns(3)
+    filtro_ver = f_col1.selectbox("Resultado:", ["TODOS", "GANADO", "PERDIDO"])
+    filtro_cat = f_col2.selectbox("Familia:", ["TODAS"] + list(TIPOS_CASOS.keys()))
     
     df_view = df_hist.copy()
-    if filtro_veredicto != "TODOS":
-        df_view = df_view[df_view["resultado"] == filtro_veredicto]
+    if filtro_ver != "TODOS":
+        df_view = df_view[df_view["resultado"] == filtro_ver]
     if filtro_cat != "TODAS":
         df_view = df_view[df_view["categoria_caso"] == filtro_cat]
         
-    st.dataframe(
-        df_view[[
-            "codigo_caso", "rama_derecho", "tipo_caso", "titulo",
-            "resultado", "resolucion_obtenida", "recurso_utilizado",
-            "causa_raiz_fallo", "estrategia_ganadora", "que_hacer_ciudadano"
-        ]],
-        use_container_width=True,
-        hide_index=True
-    )
+    caso_seleccionado = st.selectbox("🔍 Selecciona un Expediente para Inspección Profunda:", df_view["codigo_caso"].tolist())
+    
+    if caso_seleccionado:
+        c_det = df_hist[df_hist["codigo_caso"] == caso_seleccionado].iloc[0]
+        
+        st.markdown(f"### 📁 Expediente: {c_det['codigo_caso']} — {c_det['titulo']}")
+        
+        col_d1, col_d2 = st.columns(2)
+        with col_d1:
+            st.markdown(f"""
+            <div class="card-box">
+                <h4>📋 1. Hechos y Evidencia Forense</h4>
+                <p><b>Rama:</b> {c_det['rama_derecho']} ({c_det['categoria_caso']})</p>
+                <p><b>Hechos / Logs:</b> {c_det['evidencia_logs']}</p>
+                <p><b>Hash SHA-256:</b> <code>{c_det['hash_sha256']}</code></p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="card-box">
+                <h4>💼 2. ¿Qué hizo exactamente el Abogado?</h4>
+                <p>{c_det['accion_abogado'] if c_det['accion_abogado'] else c_det['estrategia_ganadora']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col_d2:
+            st.markdown(f"""
+            <div class="card-box">
+                <h4>👨‍⚖️ 3. ¿Cómo reaccionó el Juez y qué valoró?</h4>
+                <p><b>Resolución:</b> {c_det['resolucion_obtenida']}</p>
+                <p><b>Criterio Judicial:</b> {c_det['reaccion_juez'] if c_det['reaccion_juez'] else 'Valoración conforme a derecho y pruebas aportadas.'}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            is_win = c_det['resultado'] == 'GANADO'
+            st.markdown(f"""
+            <div class="{'card-box' if is_win else 'alert-box'}">
+                <h4 style="color:{'#34d399' if is_win else '#f87171'};">⚖️ 4. Veredicto y Guía Ciudadana</h4>
+                <p><b>Resultado:</b> {c_det['resultado']}</p>
+                <p><b>Estrategia / Falla:</b> {c_det['estrategia_ganadora'] if is_win else c_det['causa_raiz_fallo']}</p>
+                <p><b>Qué Hacer:</b> {c_det['que_hacer_ciudadano']}</p>
+                <p><b>Qué NO Hacer:</b> {c_det['que_no_hacer_ciudadano']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 4: ALIMENTAR NUEVO PRECEDENTE
+# PESTAÑA 4: REGISTRAR NUEVO PRECEDENTE
 # ------------------------------------------------------------------------------
 with tab4:
-    st.subheader("➕ Registrar Nuevo Precedente Jurídico-Forense en la Base de Conocimiento")
-    with st.form("form_nuevo_precedente"):
+    st.subheader("➕ Registrar Nuevo Precedente con Anatomía del Juicio en SQLite")
+    with st.form("form_nuevo_v4"):
         f1, f2, f3 = st.columns(3)
-        n_cod = f1.text_input("Código (ej. EXP-CIV-2026-008)")
+        n_cod = f1.text_input("Código (ej. EXP-LAB-2026-013)")
         n_macro = f2.selectbox("Ámbito", list(RAMAS_DERECHO.keys()))
         n_rama = f3.selectbox("Rama del Derecho", sum(RAMAS_DERECHO.values(), []))
         
         f4, f5, f6 = st.columns(3)
-        n_cat = f4.selectbox("Categoría de Caso", list(TIPOS_CASOS.keys()))
+        n_cat = f4.selectbox("Familia de Caso", list(TIPOS_CASOS.keys()))
         n_tipo = f5.selectbox("Tipo de Caso", sum(TIPOS_CASOS.values(), []))
         n_res_final = f6.selectbox("Resultado Final", ["GANADO", "PERDIDO"])
         
-        n_tit = st.text_input("Título Descriptivo del Caso")
+        n_tit = st.text_input("Título Descriptivo")
         
         f7, f8, f9 = st.columns(3)
         n_etapa = f7.selectbox("Etapa Determinante", sum(ETAPAS_PROCESO.values(), []))
-        n_medida = f8.selectbox("Medida Cautelar Aplicada", ["Ninguna"] + MEDIDAS_CAUTELARES)
-        n_recurso = f9.selectbox("Recurso Legal Utilizado", ["Ninguno"] + RECURSOS_LEGALES)
+        n_medida = f8.selectbox("Medida Cautelar", ["Ninguna"] + MEDIDAS_CAUTELARES)
+        n_recurso = f9.selectbox("Recurso Legal", ["Ninguno"] + RECURSOS_LEGALES)
         
         f10, f11 = st.columns(2)
-        n_resolucion = f10.selectbox("Tipo de Resolución Emitida", RESOLUCIONES_SENTENCIAS)
-        n_actores = f11.text_input("Actores que intervinieron (ej. Juez laboral, Perito, Abogado defensor)")
+        n_resolucion = f10.selectbox("Resolución Emitida", RESOLUCIONES_SENTENCIAS)
+        n_actores = f11.text_input("Actores intervinientes")
         
-        n_evidencia = st.text_area("Evidencia, Hechos y Trazas Forenses del Caso")
-        n_causa_fallo = st.text_input("Si se PERDIÓ: ¿Cuál fue el error o causa raíz? (Prescripción, Caducidad, Prueba ilícita, etc.)")
-        n_estrategia = st.text_area("Estrategia Jurídica y Pericial que dio la victoria (o que faltó aplicar)")
-        n_consejo = st.text_area("Guía Ciudadana: ¿Qué debe hacer una persona ante un caso idéntico?")
+        n_evidencia = st.text_area("📋 Hechos y Evidencia Forense")
         
-        btn_save = st.form_submit_button("💾 Guardar Precedente en Bóveda SQLite")
+        col_ab_j1, col_ab_j2 = st.columns(2)
+        with col_ab_j1:
+            n_accion_abogado = st.text_area("💼 ¿Qué hizo exactamente el Abogado?")
+        with col_ab_j2:
+            n_reaccion_juez = st.text_area("👨‍⚖️ ¿Cómo reaccionó el Juez?")
+            
+        n_causa_fallo = st.text_input("Si se PERDIÓ: Causa raíz o error procesal (o N/A)")
+        n_estrategia = st.text_area("Estrategia ganadora aplicada")
+        
+        col_qh1, col_qh2 = st.columns(2)
+        with col_qh1:
+            n_que_hacer = st.text_area("✅ Qué DEBE hacer el ciudadano")
+        with col_qh2:
+            n_que_no_hacer = st.text_area("🚫 Qué NO debe hacer jamás")
+            
+        btn_save = st.form_submit_button("💾 Guardar Precedente Completo")
         if btn_save and n_cod and n_tit:
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             try:
-                h_sha = hashlib.sha256(n_evidencia.encode('utf-8')).hexdigest()
+                h_sha = hashlib.sha256(n_evidencia.encode("utf-8")).hexdigest()
                 c.execute("""
                     INSERT INTO casos_juridicos_cbr (
                         codigo_caso, macro_rama, rama_derecho, categoria_caso, tipo_caso,
                         titulo, actores_intervinientes, etapa_clave, medida_cautelar,
                         resolucion_obtenida, recurso_utilizado, evidencia_logs, hash_sha256,
-                        resultado, causa_raiz_fallo, estrategia_ganadora, que_hacer_ciudadano, fecha_registro
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        resultado, accion_abogado, reaccion_juez, causa_raiz_fallo,
+                        estrategia_ganadora, que_hacer_ciudadano, que_no_hacer_ciudadano, fecha_registro
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     n_cod, n_macro, n_rama, n_cat, n_tipo, n_tit, n_actores,
-                    n_etapa, n_medida, n_resolucion, n_recurso, n_evidencia,
-                    h_sha, n_res_final, n_causa_fallo, n_estrategia, n_consejo,
-                    datetime.now().strftime("%Y-%m-%d")
+                    n_etapa, n_medida, n_resolucion, n_recurso, n_evidencia, h_sha,
+                    n_res_final, n_accion_abogado, n_reaccion_juez, n_causa_fallo,
+                    n_estrategia, n_que_hacer, n_que_no_hacer, datetime.now().strftime("%Y-%m-%d")
                 ))
                 conn.commit()
-                st.success(f"✅ Precedente {n_cod} guardado. El motor CBR ya lo utiliza para asesorar nuevos casos.")
+                st.success(f"✅ Precedente {n_cod} guardado exitosamente en `{DB_NAME}`.")
             except sqlite3.IntegrityError:
-                st.error("⚠️ Ese código de expediente ya existe.")
+                st.error("⚠️ Ese código de expediente ya existe en la base de datos.")
             finally:
                 conn.close()
