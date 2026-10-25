@@ -758,4 +758,3 @@ with tab4:
                 st.error("⚠️ Ese código de expediente ya existe.")
             finally:
                 conn.close()
-
