@@ -1721,19 +1721,59 @@ with tab2:
 # ==============================================================================
 # PESTAÑA 3 (PUBLICA): CASOS GANADOS VS PERDIDOS
 # ==============================================================================
-with tab4:
-    st.subheader("🔬 Ejemplos Reales: Cómo se Ganan y por qué se Pierden los Casos")
+# ==============================================================================
+# PESTAÑA: CASOS GANADOS VS. PERDIDOS (COMPARATIVA VISUAL)
+# ==============================================================================
+with tab4: # (O la variable de tu pestaña de Casos)
+    st.subheader("🔬 Comparativa Real: Estrategia Ganadora vs. Error Fatal")
+    st.write("Analiza lado a lado qué acciones hicieron ganar un caso similar y qué errores provocaron que otro se perdiera:")
+
+    f_cat_comp = st.selectbox("Elige el tema que deseas comparar:", list(TIPOS_CASOS.keys()), key="filtro_comparativa_visual")
+
     conn = sqlite3.connect(DB_NAME)
-    df_hist_all = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr", conn)
+    df_comp = pd.read_sql_query("SELECT * FROM casos_juridicos_cbr WHERE categoria_caso = ?", conn, params=(f_cat_comp,))
     conn.close()
 
-    filtro_cat = st.selectbox("Filtrar ejemplos por tema:", ["TODOS"] + list(TIPOS_CASOS.keys()))
-    df_mostrar = df_hist_all if filtro_cat == "TODOS" else df_hist_all[df_hist_all["categoria_caso"] == filtro_cat]
-    st.dataframe(
-        df_mostrar[["codigo_caso", "categoria_caso", "titulo", "resultado", "que_hacer_ciudadano", "que_no_hacer_ciudadano"]],
-        use_container_width=True,
-        hide_index=True
-    )
+    if df_comp.empty:
+        st.info("Aún no hay suficientes registros comparativos para esta categoría.")
+    else:
+        ganados_list = df_comp[df_comp["resultado"] == "GANADO"].to_dict(orient="records")
+        perdidos_list = df_comp[df_comp["resultado"] == "PERDIDO"].to_dict(orient="records")
+
+        col_cg, col_cp = st.columns(2)
+
+        with col_cg:
+            st.markdown("#### 🟢 Estrategia del Caso GANADO")
+            if ganados_list:
+                g = ganados_list[0]
+                st.markdown(f"""
+                <div class='money-box'>
+                    <span class='win-badge'>CASO EXITOSO</span><br><br>
+                    <b>📌 {g['titulo']}</b><br><br>
+                    <b>Hechos del Conflicto:</b><br>{g['evidencia_logs']}<br><br>
+                    <b>💼 Qué hizo el Abogado / Estrategia:</b><br>{g['accion_abogado']}<br><br>
+                    <b>👨‍⚖️ Reacción de la Autoridad:</b><br>{g['reaccion_juez']}<br><br>
+                    <b>✅ Qué debes hacer tú:</b><br>{g['que_hacer_ciudadano']}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.info("No hay un caso ganado registrado en esta categoría aún.")
+
+        with col_cp:
+            st.markdown("#### 🔴 Error del Caso PERDIDO")
+            if perdidos_list:
+                p = perdidos_list[0]
+                st.markdown(f"""
+                <div class='alert-box'>
+                    <span class='loss-badge'>CASO FRACASADO</span><br><br>
+                    <b>📌 {p['titulo']}</b><br><br>
+                    <b>Hechos del Conflicto:</b><br>{p['evidencia_logs']}<br><br>
+                    <b>💥 Causa Raíz de la Derrota:</b><br>{p['causa_raiz_fallo']}<br><br>
+                    <b>🚫 Qué NO debes hacer jamás:</b><br>{p['que_no_hacer_ciudadano']}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.info("No hay un caso perdido registrado en esta categoría aún.")
 
 # ==============================================================================
 # PESTAÑAS EXCLUSIVAS DE ADMINISTRADOR (SOLO VISIBLES CON CONTRASEÑA)
