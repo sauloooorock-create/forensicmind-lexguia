@@ -35,10 +35,10 @@ except ImportError:
     TfidfVectorizer = None
 
 # ==============================================================================
-# SELLO DE AUTORÍA Y CONFIGURACIÓN GLOBAL v8.0
+# SELLO DE AUTORÍA Y CONFIGURACIÓN GLOBAL v8.0 (NIVEL 1000%)
 # ==============================================================================
 AUTOR_SISTEMA = "Ing. Industrial y de Sistemas Saúl Ángel Ortiz Rogel"
-MARCA_SISTEMA = "ForensicMind & LexGuía CBR v8.0 — Asesor Ciudadano Paso a Paso & GitHub Sync"
+MARCA_SISTEMA = "ForensicMind & LexGuía CBR v8.0 — Asesoría Ciudadana Paso a Paso & Auto-Sync"
 
 st.set_page_config(
     page_title=f"{MARCA_SISTEMA} | {AUTOR_SISTEMA}",
@@ -50,7 +50,6 @@ st.set_page_config(
 DB_NAME = "boveda_juridica_cbr_v8.db"
 BACKUP_JSON_FILE = "cerebro_autonomo_backup.json"
 
-# Lectura segura desde Streamlit Secrets
 DEFAULT_GH_TOKEN = ""
 DEFAULT_GH_REPO = "sauloooorock-create/forensicmind-lexguia"
 DEFAULT_GH_BRANCH = "main"
@@ -70,55 +69,55 @@ if "es_admin" not in st.session_state:
     st.session_state["es_admin"] = False
 
 # ==============================================================================
-# BARRA LATERAL: LOGIN DE ADMINISTRADOR Y AJUSTES OCULTOS AL PÚBLICO
+# BARRA LATERAL: LOGIN DE ADMINISTRADOR Y AJUSTES VISUALES
 # ==============================================================================
 with st.sidebar:
-    st.markdown("### 🎨 Apariencia de Lectura")
+    st.markdown("### 🎨 Apariencia de la Pantalla")
     modo_visual = st.radio(
-        "Estilo visual de la pantalla:",
-        ["☀️ Ejecutivo Claro (Máxima Lectura en Celular)", "🌙 Oscuro Forense Blindado"],
+        "Elige cómo prefieres leer:",
+        ["☀️ Modo Claro (Fácil lectura en celular)", "🌙 Modo Oscuro Forense"],
         index=0
+    )
+    buscar_web_switch = st.checkbox(
+        "🌐 Consultar noticias y criterios en Internet en vivo",
+        value=True
     )
 
     st.markdown("---")
     st.markdown("### 🔐 Acceso Exclusivo Administrador")
     if not st.session_state["es_admin"]:
-        pass_input = st.text_input(
-            "Clave de Administrador:",
+        clave_input = st.text_input(
+            "Contraseña de Administrador:",
             type="password",
-            placeholder="Exclusivo Ing. Saúl Ortiz"
+            placeholder="Solo para el Ing. Saúl..."
         )
-        if st.button("🔓 Desbloquear Panel Maestro", use_container_width=True):
-            if pass_input == DEFAULT_ADMIN_PASS:
+        if st.button("🔓 Desbloquear Panel Admin", use_container_width=True):
+            if clave_input == DEFAULT_ADMIN_PASS:
                 st.session_state["es_admin"] = True
-                st.success("✅ Bienvenido, Ing. Saúl. Panel total desbloqueado.")
+                st.success("✅ Bienvenido, Ing. Saúl.")
                 st.rerun()
             else:
                 st.error("❌ Contraseña incorrecta.")
-        # Valores por defecto seguros cuando un ciudadano usa la app
-        auto_entrenar_switch = True
-        buscar_web_switch = True
         gh_repo_input = DEFAULT_GH_REPO
         gh_token_input = DEFAULT_GH_TOKEN
         gh_branch_input = DEFAULT_GH_BRANCH
+        admin_email_input = DEFAULT_ADMIN_EMAIL
+        auto_entrenar_switch = True
     else:
         st.success("✅ Modo Administrador Activo")
-        if st.button("🔒 Cerrar Sesión de Administrador", use_container_width=True):
+        auto_entrenar_switch = st.checkbox("🧠 Auto-Aprendizaje e Inyección Activa", value=True)
+        gh_repo_input = st.text_input("Repositorio GitHub:", value=DEFAULT_GH_REPO)
+        gh_token_input = st.text_input("GitHub Token (ghp_...):", value=DEFAULT_GH_TOKEN, type="password")
+        gh_branch_input = st.text_input("Rama (Branch):", value=DEFAULT_GH_BRANCH)
+        admin_email_input = st.text_input(
+            "Tu correo para recibir dudas:",
+            value=DEFAULT_ADMIN_EMAIL,
+            placeholder="tucorreo@gmail.com"
+        )
+        if st.button("🔒 Cerrar Sesión Admin", use_container_width=True):
             st.session_state["es_admin"] = False
             st.rerun()
 
-        st.markdown("---")
-        st.markdown("### ⚙️ Controles Maestros de la IA")
-        auto_entrenar_switch = st.checkbox("🧠 Auto-Aprendizaje e Inyección Activa", value=True)
-        buscar_web_switch = st.checkbox("🌐 Búsqueda en Vivo en Internet (Google & Wikipedia)", value=True)
-        st.markdown("### ☁️ Credenciales GitHub Auto-Sync")
-        gh_repo_input = st.text_input("Repositorio (usuario/repo):", value=DEFAULT_GH_REPO)
-        gh_token_input = st.text_input("GitHub Token (ghp_...):", value=DEFAULT_GH_TOKEN, type="password")
-        gh_branch_input = st.text_input("Rama (Branch):", value=DEFAULT_GH_BRANCH)
-
-# ==============================================================================
-# ESTILOS VISUALES ADAPTATIVOS (CLARO Y OSCURO)
-# ==============================================================================
 if "Claro" in modo_visual:
     st.markdown("""
     <style>
@@ -137,9 +136,8 @@ if "Claro" in modo_visual:
             -webkit-text-fill-color: #0f172a !important;
             border: 2px solid #2563eb !important;
             border-radius: 10px !important;
-            font-size: 1.05rem !important;
+            font-size: 1.04rem !important;
             font-weight: 600 !important;
-            line-height: 1.5 !important;
             padding: 12px !important;
         }
         div[data-baseweb="select"] > div {
@@ -156,7 +154,6 @@ if "Claro" in modo_visual:
             border-radius: 14px;
             padding: 16px 20px;
             margin-bottom: 18px;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
         }
         .author-banner * { color: #ffffff !important; }
         div[data-testid="metric-container"] {
@@ -165,7 +162,6 @@ if "Claro" in modo_visual:
             border-left: 5px solid #2563eb !important;
             padding: 14px !important;
             border-radius: 12px !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
         }
         div[data-testid="metric-container"] label { color: #475569 !important; -webkit-text-fill-color: #475569 !important; }
         div[data-testid="stMetricValue"] { color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-weight: 800 !important; }
@@ -173,21 +169,21 @@ if "Claro" in modo_visual:
         .loss-badge { background-color: #dc2626; color: #ffffff !important; padding: 5px 12px; border-radius: 6px; font-weight: 700; display: inline-block; }
         .step-badge { background-color: #1d4ed8; color: #ffffff !important; padding: 5px 12px; border-radius: 6px; font-weight: 700; display: inline-block; }
         .gold-badge { background-color: #f59e0b; color: #0f172a !important; padding: 5px 12px; border-radius: 6px; font-weight: 800; display: inline-block; }
-        .card-box { background-color: #ffffff; border: 1px solid #cbd5e1; border-left: 6px solid #2563eb; border-radius: 12px; padding: 18px; margin: 10px 0; color: #0f172a !important; line-height: 1.65; }
-        .money-box { background-color: #ecfdf5; border: 1px solid #6ee7b7; border-left: 6px solid #059669; border-radius: 12px; padding: 18px; margin: 10px 0; color: #064e3b !important; line-height: 1.65; }
-        .lawyer-box { background-color: #eef2ff; border: 1px solid #a5b4fc; border-left: 6px solid #4f46e5; border-radius: 12px; padding: 18px; margin: 10px 0; color: #1e1b4b !important; line-height: 1.65; }
-        .alert-box { background-color: #fef2f2; border: 1px solid #fca5a5; border-left: 6px solid #dc2626; border-radius: 12px; padding: 18px; margin: 10px 0; color: #7f1d1d !important; line-height: 1.65; }
-        .script-box { background-color: #fffbeb; border: 1px solid #fde68a; border-left: 6px solid #d97706; border-radius: 12px; padding: 18px; margin: 10px 0; color: #78350f !important; line-height: 1.65; }
+        .card-box { background-color: #ffffff; border: 1px solid #cbd5e1; border-left: 6px solid #2563eb; border-radius: 12px; padding: 18px; margin: 12px 0; color: #0f172a !important; line-height: 1.65; }
+        .money-box { background-color: #ecfdf5; border: 1px solid #6ee7b7; border-left: 6px solid #059669; border-radius: 12px; padding: 18px; margin: 12px 0; color: #064e3b !important; line-height: 1.65; }
+        .lawyer-box { background-color: #eef2ff; border: 1px solid #a5b4fc; border-left: 6px solid #4f46e5; border-radius: 12px; padding: 18px; margin: 12px 0; color: #1e1b4b !important; line-height: 1.65; }
+        .alert-box { background-color: #fef2f2; border: 1px solid #fca5a5; border-left: 6px solid #dc2626; border-radius: 12px; padding: 18px; margin: 12px 0; color: #7f1d1d !important; line-height: 1.65; }
+        .script-box { background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 6px solid #d97706; border-radius: 12px; padding: 18px; margin: 12px 0; color: #78350f !important; line-height: 1.65; }
         .web-box { background-color: #f0f9ff; border: 1px solid #7dd3fc; border-left: 6px solid #0284c7; border-radius: 12px; padding: 16px; margin: 10px 0; color: #0c4a6e !important; }
         div.stButton > button:first-child {
             background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%) !important;
             color: #ffffff !important;
             -webkit-text-fill-color: #ffffff !important;
             font-weight: 800 !important;
-            font-size: 1.05rem !important;
+            font-size: 1.04rem !important;
             border-radius: 10px !important;
             border: none !important;
-            padding: 14px 22px !important;
+            padding: 13px 20px !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -199,7 +195,7 @@ else:
         h1, h2, h3, h4, h5, h6, p, li, label, [data-testid="stWidgetLabel"] p { color: #f8fafc !important; -webkit-text-fill-color: #f8fafc !important; font-weight: 600 !important; }
         textarea, input[type="text"], input[type="number"], input[type="password"] {
             background-color: #ffffff !important; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;
-            border: 2px solid #38bdf8 !important; border-radius: 10px !important; font-size: 1.05rem !important; font-weight: 700 !important; padding: 12px !important;
+            border: 2px solid #38bdf8 !important; border-radius: 10px !important; font-size: 1.04rem !important; font-weight: 700 !important; padding: 12px !important;
         }
         div[data-baseweb="select"] > div { background-color: #1e293b !important; color: #f8fafc !important; -webkit-text-fill-color: #f8fafc !important; border: 1px solid #38bdf8 !important; }
         .author-banner { background: linear-gradient(90deg, #0f172a 0%, #1e293b 100%); border: 1px solid #38bdf8; border-left: 6px solid #f59e0b; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; }
@@ -208,156 +204,132 @@ else:
         .loss-badge { background-color: #7f1d1d; color: #f87171 !important; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
         .step-badge { background-color: #1e3a8a; color: #93c5fd !important; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
         .gold-badge { background-color: #f59e0b; color: #0f172a !important; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-        .card-box { background-color: #131c2e; border: 1px solid #2dd4bf; border-radius: 10px; padding: 18px; margin: 10px 0; line-height: 1.65; }
-        .money-box { background-color: #0f2922; border: 1px solid #10b981; border-left: 5px solid #34d399; border-radius: 10px; padding: 18px; margin: 10px 0; line-height: 1.65; }
-        .lawyer-box { background-color: #1e1b4b; border: 1px solid #818cf8; border-left: 5px solid #a78bfa; border-radius: 10px; padding: 18px; margin: 10px 0; line-height: 1.65; }
-        .alert-box { background-color: #1f1215; border: 1px solid #f87171; border-left: 5px solid #ef4444; border-radius: 10px; padding: 18px; margin: 10px 0; line-height: 1.65; }
-        .script-box { background-color: #271c09; border: 1px solid #f59e0b; border-left: 5px solid #fbbf24; border-radius: 10px; padding: 18px; margin: 10px 0; line-height: 1.65; }
+        .card-box { background-color: #131c2e; border: 1px solid #2dd4bf; border-radius: 10px; padding: 18px; margin: 12px 0; line-height: 1.65; }
+        .money-box { background-color: #0f2922; border: 1px solid #10b981; border-left: 5px solid #34d399; border-radius: 10px; padding: 18px; margin: 12px 0; line-height: 1.65; }
+        .lawyer-box { background-color: #1e1b4b; border: 1px solid #818cf8; border-left: 5px solid #a78bfa; border-radius: 10px; padding: 18px; margin: 12px 0; line-height: 1.65; }
+        .alert-box { background-color: #1f1215; border: 1px solid #f87171; border-left: 5px solid #ef4444; border-radius: 10px; padding: 18px; margin: 12px 0; line-height: 1.65; }
+        .script-box { background-color: #271c09; border: 1px solid #f59e0b; border-left: 5px solid #fbbf24; border-radius: 10px; padding: 18px; margin: 12px 0; line-height: 1.65; }
         .web-box { background-color: #0c192c; border: 1px solid #38bdf8; border-left: 5px solid #0284c7; border-radius: 10px; padding: 16px; margin: 10px 0; }
         div.stButton > button:first-child { background-color: #2563eb !important; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: bold !important; border-radius: 10px !important; padding: 12px 20px !important; }
     </style>
     """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 1. TAXONOMÍA COMPLETA (6 GRANDES FAMILIAS INCLUYENDO TRÁNSITO Y POLICÍAS)
+# 1. CATÁLOGO DE PROBLEMAS CIUDADANOS (INCLUYE TRÁNSITO Y POLICÍAS)
 # ==============================================================================
 TIPOS_CASOS = {
     "Casos Laborales": [
-        "Despido injustificado", "Coacción para firmar renuncia / hoja en blanco",
-        "Falta de pago de vacaciones / días de descanso", "Salarios o quincenas retenidas",
-        "Acoso laboral (Mobbing)", "Accidente de trabajo sin IMSS"
+        "Despido injustificado",
+        "Coacción para firmar renuncia u hoja en blanco",
+        "Salarios, vacaciones o días de descanso no pagados",
+        "Acoso laboral o maltrato del jefe",
+        "Accidente de trabajo sin seguro (IMSS)"
     ],
-    "Tránsito, Multas y Abuso Policial": [
-        "Policía pide mordida o amenaza con corralón", "Retención ilegal de placas, licencia o tarjeta",
-        "Detención en retén o revisión arbitraria de vehículo", "Choque vial y abuso de grúas o ajustadores",
-        "Multa fantasma o infracción improcedente"
+    "Casos de Tránsito y Policía": [
+        "Abuso en retén o revisión de rutina sin motivo",
+        "Intento de mordida o amenaza de llevar al corralón",
+        "Retención ilegal de placas, licencia o tarjeta de circulación",
+        "Policía quiere revisar mi celular o mochila sin orden",
+        "Choque vial y abuso de grúa o ajustador"
     ],
     "Casos Familiares": [
-        "Pensión alimenticia y ocultamiento de ingresos", "Divorcio e inventario de bienes",
-        "Guarda y custodia de hijos", "Régimen de visitas impedido", "Reconocimiento de paternidad"
+        "Pensión alimenticia (Papá o mamá que no da gasto)",
+        "Divorcio y separación de bienes",
+        "Guarda, custodia y visitas de los hijos"
     ],
-    "Casos Penales": [
-        "Fraude bancario SPEI / Phishing digital", "Detención arbitraria y revisión ilegal de celular",
-        "Robo o extorsión", "Violencia familiar", "Abuso de autoridad ministerial"
+    "Casos Penales y Fraudes": [
+        "Fraude bancario, vaciado de cuenta o transferencia SPEI",
+        "Acoso de cobranza o préstamos por aplicación",
+        "Detención arbitraria por patrulla",
+        "Robo o estafa comercial"
     ],
     "Casos Civiles": [
-        "Arrendamiento (Inquilino que no paga renta)", "Acoso de despachos de cobranza o apps de préstamos",
-        "Incumplimiento de contrato civil", "Disputa de propiedad o terrenos", "Herencias y sucesiones"
+        "Inquilino que no paga la renta ni se quiere salir",
+        "Abuso del casero (quiere sacarme sin orden de juez)",
+        "Incumplimiento de contrato o daños"
     ],
     "Casos Mercantiles": [
-        "Cobro de pagaré vencido", "Mercancía entregada y no pagada",
-        "Cheque sin fondos o factura comercial", "Fraude entre socios comerciales"
-    ]
-}
-
-ETAPAS_PROCESO = {
-    "Proceso Laboral / Civil / Familiar / Mercantil (7 Etapas)": [
-        "1. Solicitud de Conciliación / Demanda Inicial",
-        "2. Audiencia de Conciliación / Contestación",
-        "3. Ofrecimiento y Admisión de Pruebas",
-        "4. Desahogo de Pruebas y Alegatos",
-        "5. Laudo / Sentencia Definitiva",
-        "6. Recursos / Amparo Directo",
-        "7. Ejecución Forzosa y Embargo"
-    ],
-    "Proceso Administrativo / Tránsito y Vialidad (5 Etapas)": [
-        "1. Intervención en Vía Pública y Verificación de Facultades",
-        "2. Levantamiento de Boleta de Infracción / Acta Circunstanciada",
-        "3. Queja ante Asuntos Internos / Contraloría Municipal o Estatal",
-        "4. Juicio de Nulidad ante Tribunal de Justicia Administrativa",
-        "5. Devolución de Garantías o Cancelación de Multa"
-    ],
-    "Proceso Penal (8 Etapas)": [
-        "1. Denuncia o Querella ante Fiscalía/MP",
-        "2. Investigación Inicial y Complementaria",
-        "3. Audiencia Inicial y Control de Detención",
-        "4. Etapa Intermedia (Admisión de Pruebas)",
-        "5. Audiencia de Juicio Oral",
-        "6. Emisión de Sentencia",
-        "7. Recursos de Apelación / Amparo",
-        "8. Ejecución de Sanciones y Reparación del Daño"
+        "Cobro de pagaré firmado o dinero prestado",
+        "Mercancía entregada que no quieren pagar"
     ]
 }
 
 TABULADOR_HONORARIOS_RAMA = {
     "Casos Laborales": {
-        "asesoria_min": 500, "asesoria_sug": 800, "asesoria_max": 1800, "anticipo_sug": 0,
-        "esquema_cobro": "Porcentaje al ganar (Cuota Litis del 20% al 30% solo cuando cobres tu dinero; $0 de anticipo inicial)",
-        "pct_sugerido": 25.0, "gastos_periciales_sug": 1000, "horas_promedio_despacho": 35,
-        "via_gratuita": "PROFEDET / Procuraduría de la Defensa del Trabajo y Centro de Conciliación — $0 MXN (100% Gratuito)"
+        "asesoria_min": 0, "asesoria_sug": 800, "asesoria_max": 1500, "anticipo_sug": 0,
+        "esquema_cobro": "Porcentaje al ganar (el abogado cobra del 20% al 30% solo cuando tú cobras tu dinero; $0 de anticipo inicial)",
+        "pct_sugerido": 25.0, "gastos_periciales_sug": 500, "horas_promedio_despacho": 35,
+        "via_gratuita": "PROFEDET y Centro de Conciliación Laboral — $0 pesos (100% Gratis para el trabajador)"
     },
-    "Tránsito, Multas y Abuso Policial": {
-        "asesoria_min": 400, "asesoria_sug": 700, "asesoria_max": 1500, "anticipo_sug": 1500,
-        "esquema_cobro": "Honorario fijo por Juicio de Nulidad de Multa o Amparo contra Corralón/Retención",
-        "pct_sugerido": 15.0, "gastos_periciales_sug": 500, "horas_promedio_despacho": 15,
-        "via_gratuita": "Unidad de Asuntos Internos Policial / Defensoría en Justicia Administrativa / Derechos Humanos — $0 MXN"
+    "Casos de Tránsito y Policía": {
+        "asesoria_min": 0, "asesoria_sug": 800, "asesoria_max": 2000, "anticipo_sug": 2500,
+        "esquema_cobro": "Trámite de impugnación de multa ante Tribunal Administrativo o queja en Asuntos Internos",
+        "pct_sugerido": 0.0, "gastos_periciales_sug": 500, "horas_promedio_despacho": 15,
+        "via_gratuita": "Asuntos Internos de Seguridad Pública / Defensoría de Justicia Administrativa — $0 pesos (100% Gratis)"
     },
     "Casos Familiares": {
-        "asesoria_min": 700, "asesoria_sug": 1200, "asesoria_max": 2500, "anticipo_sug": 5000,
-        "esquema_cobro": "Honorario dividido en pagos mensuales o por etapa procesal",
-        "pct_sugerido": 0.0, "gastos_periciales_sug": 2500, "horas_promedio_despacho": 45,
-        "via_gratuita": "DIF Municipal/Estatal y Defensoría Pública Familiar — $0 MXN (100% Gratuito)"
+        "asesoria_min": 500, "asesoria_sug": 1000, "asesoria_max": 2000, "anticipo_sug": 5000,
+        "esquema_cobro": "Pago fijo dividido en etapas conforme avanza el juez familiar",
+        "pct_sugerido": 0.0, "gastos_periciales_sug": 2000, "horas_promedio_despacho": 45,
+        "via_gratuita": "Procuraduría del DIF y Defensoría Pública Familiar de tu Estado — $0 pesos"
     },
-    "Casos Penales": {
-        "asesoria_min": 1000, "asesoria_sug": 2000, "asesoria_max": 4500, "anticipo_sug": 15000,
-        "esquema_cobro": "Cobro por etapa (Ministerio Público / Audiencia Inicial / Juicio Oral)",
-        "pct_sugerido": 15.0, "gastos_periciales_sug": 8000, "horas_promedio_despacho": 75,
-        "via_gratuita": "Instituto de la Defensoría Pública y Comisión de Atención a Víctimas — $0 MXN"
+    "Casos Penales y Fraudes": {
+        "asesoria_min": 800, "asesoria_sug": 1500, "asesoria_max": 3500, "anticipo_sug": 10000,
+        "esquema_cobro": "Cobro por etapa (Denuncia en Ministerio Público / Audiencia Inicial / Juicio)",
+        "pct_sugerido": 15.0, "gastos_periciales_sug": 4000, "horas_promedio_despacho": 60,
+        "via_gratuita": "CONDUSEF (para bancos), Policía Cibernética y Defensoría Pública Penal — $0 pesos"
     },
     "Casos Civiles": {
-        "asesoria_min": 800, "asesoria_sug": 1400, "asesoria_max": 2800, "anticipo_sug": 6000,
-        "esquema_cobro": "Anticipo inicial + 15% sobre el monto recuperado o inmueble liberado",
-        "pct_sugerido": 15.0, "gastos_periciales_sug": 3500, "horas_promedio_despacho": 50,
-        "via_gratuita": "Defensoría Pública Civil o CONDUSEF (contra cobranza bancaria abusiva) — $0 MXN"
+        "asesoria_min": 700, "asesoria_sug": 1200, "asesoria_max": 2500, "anticipo_sug": 6000,
+        "esquema_cobro": "Anticipo inicial + porcentaje de las rentas o propiedad recuperada",
+        "pct_sugerido": 15.0, "gastos_periciales_sug": 3000, "horas_promedio_despacho": 45,
+        "via_gratuita": "Defensoría Pública Civil del Poder Judicial de tu Estado — $0 pesos"
     },
     "Casos Mercantiles": {
-        "asesoria_min": 900, "asesoria_sug": 1600, "asesoria_max": 3200, "anticipo_sug": 5000,
-        "esquema_cobro": "Anticipo para diligencia de embargo + 20% sobre lo cobrado efectivamente",
-        "pct_sugerido": 20.0, "gastos_periciales_sug": 4000, "horas_promedio_despacho": 40,
-        "via_gratuita": "PROFECO o CONDUSEF — $0 MXN"
+        "asesoria_min": 800, "asesoria_sug": 1500, "asesoria_max": 3000, "anticipo_sug": 5000,
+        "esquema_cobro": "Anticipo para embargo + 15% a 25% de lo que se le cobre al deudor",
+        "pct_sugerido": 20.0, "gastos_periciales_sug": 3000, "horas_promedio_despacho": 35,
+        "via_gratuita": "PROFECO o Defensoría de Oficio — $0 pesos"
     }
 }
 
 ESCENARIOS_FRECUENTES = {
-    "✍️ Escribir o dictar mi propio caso con mis palabras": "Mi sueldo semanal es de 2300. Me despidieron y no me quieren dar liquidación, solo me quieren dar $5000 y no me daban vacaciones ni días libres ni bonos, ¿qué procede ahí?",
-    "🚓 Tránsito / Policía: Me detuvo una patrulla, me amenazan con corralón y piden mordida": "Un policía me detuvo diciendo que cometí una infracción, me quitó mi licencia y tarjeta de circulación, me amenaza con llevarse mi vehículo al corralón con grúa si no le doy $2,500 en efectivo ahorita mismo.",
-    "💼 Laboral: Me quieren obligar a firmar mi renuncia o una hoja en blanco": "Me corrieron de la chamba hoy sin darme aviso por escrito, el de recursos humanos me encerró en la oficina y dice que si no le firmo mi hoja de renuncia voluntaria no me deja salir ni me paga mi semana.",
-    "📱 Cobranza Abusiva: Me amenazan por deudas o préstamos de aplicación": "Pedí un préstamo y ahora un despacho de cobranza me manda mensajes con insultos, amenazas de embargo falso mañana mismo y están mandando fotos mías a mis contactos de WhatsApp.",
-    "👨‍👩‍👧 Familiar: El papá/mamá de mis hijos no da gasto y esconde su sueldo": "El papá de mis hijos lleva 4 meses sin dar pensión alimenticia, se salió de su trabajo con seguro para decirle al juez que no gana nada, pero tiene un negocio y recibe transferencias.",
-    "💻 Penal / Banco: Me vaciaron mi cuenta bancaria con un enlace o llamada falsa": "Me llegó un mensaje según de mi banco por un cargo no reconocido, entré al link y me vaciaron $38,000 pesos por transferencia SPEI que yo jamás autoricé.",
-    "🏠 Civil: Mi inquilino no me paga la renta y no se quiere salir de la casa": "Le renté mi casa a una persona que lleva 5 meses sin pagarme renta, ya se venció el contrato y me dice que le haga como quiera porque no se va a salir.",
-    "📑 Mercantil: Me firmaron un pagaré por dinero prestado y se esconden": "Le presté $45,000 pesos a un conocido que me firmó un pagaré, ya pasó la fecha de pago y ahora me bloqueó de WhatsApp y no me quiere pagar."
+    "✍️ Escribir o dictar mi propio problema con mis palabras": "Mi sueldo semanal es de 2300. Me despidieron y no me quieren dar liquidación, solo me quieren dar $5000 y no me daban vacaciones ni días libres ni bonos, ¿qué procede ahí?",
+    "🚓 Tránsito y Policía: Patrulla me paró sin motivo, pide mordida y amenaza con corralón": "Iba manejando mi moto o carro tranquilo, una patrulla de tránsito me paró diciendo que es revisión de rutina, me quieren quitar la placa o llevarse mi vehículo al corralón con grúa si no les doy para el refresco.",
+    "💼 Laboral: Me corrieron hoy y me quieren obligar a firmar mi renuncia u hoja en blanco": "Me corrieron del trabajo hoy sin darme aviso escrito, el encargado de recursos humanos me tiene en la oficina y dice que si no le firmo mi hoja de renuncia voluntaria no me va a pagar ni mi semana trabajada.",
+    "👨‍👩‍👧 Familiar: El papá o mamá de mis hijos no da gasto y esconde su dinero": "El papá de mis hijos lleva meses sin dar dinero para la comida ni escuela de los niños, dice que no tiene trabajo para no dar pensión pero sí cobra dinero por fuera.",
+    "📱 Fraude Bancario / Cobranza: Me vaciaron la cuenta o me amenazan de una app de préstamos": "Me robaron dinero de mi cuenta del banco con movimientos que yo no hice y además me están mandando mensajes de amenazas a mí y a mis contactos.",
+    "🏠 Renta / Inquilinos: Mi inquilino no paga la renta o el dueño me quiere sacar a la fuerza": "Le renté a una persona que lleva 4 meses sin pagar renta, ya venció el contrato y no se quiere salir de la casa.",
+    "📑 Deudas y Pagarés: Presté dinero con un pagaré firmado y se esconden para no pagar": "Una persona me firmó un pagaré hace meses por dinero que le presté, ya pasó la fecha de pago y no me quiere pagar."
 }
 
 # ==============================================================================
-# 2. TRADUCTOR SEMÁNTICO DE LENGUAJE COLOQUIAL A CONCEPTOS LEGALES
+# 2. TRADUCTOR DE PALABRAS COLOQUIALES -> COMPRENSIÓN DE LA RED NEURONAL
 # ==============================================================================
 DICCIONARIO_COLOQUIAL_A_JURIDICO = [
-    (r'\b(chamba|jale|empleo|trabajo|oficina|empresa|fabrica|tienda|bodega|turno|raya)\b', ' trabajo laboral patron '),
+    (r'\b(chamba|jale|empleo|trabajo|oficina|empresa|fabrica|tienda|bodega|turno)\b', ' trabajo laboral patron '),
     (r'\b(corrieron|echaron|despidieron|cortaron|dieron de baja|ya no me dejaron entrar)\b', ' despido injustificado laboral '),
-    (r'\b(patron|jefe|gerente|rh|recursos humanos|supervisor|dueño)\b', ' patron laboral empleador '),
-    (r'\b(liquidacion|finiquito|quincena|semanal|sueldo|nomina|aguinaldo|vacaciones|dias libres|descanso|horas extras|bonos)\b', ' liquidacion salario prestaciones laboral '),
+    (r'\b(patron|jefe|gerente|rh|recursos humanos|supervisor|encargado)\b', ' patron laboral empleador '),
+    (r'\b(liquidacion|finiquito|quincena|semanal|raya|sueldo|nomina|aguinaldo|vacaciones|dias libres|descanso|horas extras|bonos)\b', ' liquidacion salario prestaciones laboral '),
     (r'\b(hoja en blanco|firmar mi renuncia|renuncia voluntaria|quieren dar solo|solo me dan)\b', ' coaccion laboral despido injustificado '),
-    (r'\b(transito|multa|infraccion|corralon|grua|mordida|placa|placas|licencia|tarjeta de circulacion|reten|alcoholimetro|verificacion|motocicleta|moto|carro|auto)\b', ' transito vialidad policia corralon multa administrativo '),
-    (r'\b(para el refresco|ponernos de acuerdo|bajarle a la multa|quitaron la placa)\b', ' extorsion policial transito mordida corralon '),
+    (r'\b(transito|policia|patrulla|mordida|infraccion|multa|corralon|grua|placas|licencia|tarjeta de circulacion|reten|moto|carro|auto|vehiculo|oficial)\b', ' transito policia vialidad corralon multa abuso '),
     (r'\b(gasto de los niños|manutencion|pension|alimentos|papa de mis hijos|mama de mis hijos|divorcio|custodia)\b', ' pension alimenticia familiar custodia hijos '),
-    (r'\b(vaciaron mi cuenta|robaron mi tarjeta|phishing|hackearon|estafaron|clonaron|spei)\b', ' fraude bancario penal ciberdelito '),
-    (r'\b(patrulla|policias|mp|ministerio publico|detuvieron|arrestaron|separos|revisaron mi celular)\b', ' detencion arbitraria abuso de autoridad penal '),
-    (r'\b(inquilino|renta|arrendamiento|depa|departamento|casa rentada|desalojar|cambiar la chapa|cobranza|despacho|prestamo|embargo falso)\b', ' arrendamiento civil inquilino desocupacion cobranza '),
-    (r'\b(pagare|cheque sin fondos|mercancia fiada|letra de cambio|deudor comercial)\b', ' pagare ejecutivo mercantil cobranza ')
+    (r'\b(vaciaron mi cuenta|robaron mi tarjeta|phishing|hackearon|estafaron|clonaron|spei|cobranza|prestamo)\b', ' fraude bancario penal ciberdelito '),
+    (r'\b(inquilino|renta|arrendamiento|depa|departamento|casa rentada|desalojar|cambiar la chapa)\b', ' arrendamiento civil inquilino desocupacion '),
+    (r'\b(pagare|cheque sin fondos|mercancia fiada|deudor comercial)\b', ' pagare ejecutivo mercantil cobranza ')
 ]
 
 def expandir_lenguaje_coloquial(texto: str) -> str:
     texto_limpio = str(texto).lower()
     expansiones = []
-    for patron, equivalente_juridico in DICCIONARIO_COLOQUIAL_A_JURIDICO:
+    for patron, eq in DICCIONARIO_COLOQUIAL_A_JURIDICO:
         matches = re.findall(patron, texto_limpio)
         if matches:
-            expansiones.append(equivalente_juridico * len(matches))
+            expansiones.append(eq * len(matches))
     return str(texto) + " " + " ".join(expansiones)
 
 # ==============================================================================
-# 3. MOTOR DE AUTOINYECCIÓN PERPETUA Y SINCRONIZACIÓN GITHUB API (INCLUYE BUZÓN)
+# 3. AUTOINYECCIÓN PERPETUA Y SINCRONIZACIÓN CON GITHUB API
 # ==============================================================================
 def inyectar_diccionario_cerebro_en_sqlite(data: dict, conn: sqlite3.Connection) -> dict:
     c = conn.cursor()
@@ -383,7 +355,7 @@ def inyectar_diccionario_cerebro_en_sqlite(data: dict, conn: sqlite3.Connection)
             m.get("rama_derecho", "Derecho Laboral"),
             m.get("categoria_caso", "Casos Laborales"),
             m.get("tipo_caso", "Despido injustificado"),
-            m.get("fuente_aprendizaje", "Auto-Inyección de Respaldo"),
+            m.get("fuente_aprendizaje", "Auto-Inyección"),
             float(m.get("confianza", 95.0)),
             h_c,
             m.get("fecha_aprendizaje", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -410,11 +382,11 @@ def inyectar_diccionario_cerebro_en_sqlite(data: dict, conn: sqlite3.Connection)
             cs.get("categoria_caso", "Casos Laborales"),
             cs.get("tipo_caso", "Despido injustificado"),
             cs.get("titulo", "Caso Restaurado"),
-            cs.get("actores_intervinientes", "Juez, Abogado"),
-            cs.get("etapa_clave", "1. Demanda"),
-            cs.get("medida_cautelar", "Embargo preventivo"),
-            cs.get("resolucion_obtenida", "Sentencia"),
-            cs.get("recurso_utilizado", "Amparo"),
+            cs.get("actores_intervinientes", "Autoridad, Abogado"),
+            cs.get("etapa_clave", "1. Inicio"),
+            cs.get("medida_cautelar", "Protección"),
+            cs.get("resolucion_obtenida", "Resolución"),
+            cs.get("recurso_utilizado", "Defensa"),
             cs.get("evidencia_logs", ""),
             cs.get("hash_sha256", hashlib.sha256(str(cod).encode()).hexdigest()),
             cs.get("resultado", "GANADO"),
@@ -430,24 +402,20 @@ def inyectar_diccionario_cerebro_en_sqlite(data: dict, conn: sqlite3.Connection)
             nuevos_casos += 1
 
     for bz in data.get("buzon_casos_usuarios", []):
-        rel_bz = str(bz.get("relato_usuario", "")).strip()
-        if not rel_bz:
+        h_bz = bz.get("hash_mensaje")
+        if not h_bz:
             continue
-        h_bz = bz.get("hash_caso") or hashlib.sha256(rel_bz.lower().encode("utf-8")).hexdigest()
         c.execute("""
             INSERT OR IGNORE INTO buzon_casos_usuarios (
-                nombre_contacto, medio_contacto, categoria_sugerida,
-                relato_usuario, duda_especifica, estado_revision,
-                respuesta_admin, hash_caso, fecha_envio
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                nombre_usuario, contacto_usuario, categoria_sugerida,
+                descripcion_duda, estado_revision, hash_mensaje, fecha_envio
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
-            bz.get("nombre_contacto", "Anónimo"),
-            bz.get("medio_contacto", "Sin especificar"),
+            bz.get("nombre_usuario", "Ciudadano"),
+            bz.get("contacto_usuario", ""),
             bz.get("categoria_sugerida", "Casos Laborales"),
-            rel_bz,
-            bz.get("duda_especifica", ""),
+            bz.get("descripcion_duda", ""),
             bz.get("estado_revision", "PENDIENTE"),
-            bz.get("respuesta_admin", ""),
             h_bz,
             bz.get("fecha_envio", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         ))
@@ -505,7 +473,7 @@ def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", bran
         pass
 
     if not repo or not token:
-        return {"local_ok": True, "github_ok": False, "msg": "Respaldo local autoinyectable actualizado."}
+        return {"local_ok": True, "github_ok": False, "msg": "Respaldo local actualizado."}
 
     url_api = f"https://api.github.com/repos/{repo.strip()}/contents/{BACKUP_JSON_FILE}"
     headers = {
@@ -525,7 +493,7 @@ def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", bran
         sha_actual = None
 
     body_put = {
-        "message": f"Auto-Inyección IA v8.0 ({len(df_mem)} memorias | {len(df_casos)} casos | {len(df_buzon)} buzón)",
+        "message": f"Auto-Sync ForensicMind v8.0 ({len(df_mem)} memorias | {len(df_buzon)} buzon)",
         "content": base64.b64encode(raw_bytes).decode("utf-8"),
         "branch": branch.strip()
     }
@@ -548,12 +516,11 @@ def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", bran
     return {"local_ok": True, "github_ok": False, "msg": "Respaldo local actualizado."}
 
 # ==============================================================================
-# 4. INICIALIZACIÓN DE SQLITE CON CASOS SEMILLA (INCLUYE TRÁNSITO Y LABORAL)
+# 4. INICIALIZACIÓN DE SQLITE Y CASOS SEMILLA (INCLUYE TRÁNSITO Y LABORAL)
 # ==============================================================================
 def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str = "main"):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
     c.execute("""
         CREATE TABLE IF NOT EXISTS casos_juridicos_cbr (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -600,14 +567,12 @@ def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str
     c.execute("""
         CREATE TABLE IF NOT EXISTS buzon_casos_usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_contacto TEXT,
-            medio_contacto TEXT,
+            nombre_usuario TEXT,
+            contacto_usuario TEXT,
             categoria_sugerida TEXT,
-            relato_usuario TEXT,
-            duda_especifica TEXT,
+            descripcion_duda TEXT,
             estado_revision TEXT,
-            respuesta_admin TEXT,
-            hash_caso TEXT UNIQUE,
+            hash_mensaje TEXT UNIQUE,
             fecha_envio TEXT
         )
     """)
@@ -615,115 +580,73 @@ def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str
     semillas = [
         (
             "EXP-LAB-2026-001", "Derecho Privado", "Derecho Laboral", "Casos Laborales", "Despido injustificado",
-            "Despido Injustificado Ganado (Sueldo Semanal sin Vacaciones ni Descansos y Oferta Trampa de $5,000)",
-            "Conciliador Laboral, Juez Laboral, Abogado / Procurador PROFEDET",
-            "1. Solicitud de Conciliación / Demanda Inicial", "Embargo precautorio de cuentas", "Convenio ratificado al 100% de Ley", "Demanda laboral",
-            "Mi sueldo semanal es de 2300, me despidieron sin aviso y solo me quieren dar $5000 sin liquidación, no me daban vacaciones ni días libres ni bonos.",
+            "Trabajador con Sueldo Semanal Despedido sin Vacaciones Rechaza $5,000 y Cobra Liquidación Completa",
+            "Procurador PROFEDET / Conciliador Laboral",
+            "Cita de Conciliación", "Citación obligatoria al patrón", "Pago completo en convenio oficial", "Solicitud de Conciliación",
+            "Mi sueldo semanal es de 2300, me despidieron y solo me quieren dar $5000 sin vacaciones ni días libres ni bonos.",
             hashlib.sha256(b"EXP-LAB-2026-001").hexdigest(), "GANADO",
-            "El abogado rechazó los $5,000 iniciales, citó al patrón en el Centro de Conciliación y exigió 90 días de Salario Diario Integrado, vacaciones atrasadas, aguinaldo y séptimos días trabajados.",
-            "La autoridad laboral obligó al patrón a pagar más de $49,000 MXN al no existir aviso escrito de rescisión.",
-            "N/A", "No firmar renuncia voluntaria, rechazar pagos engañosos y acudir a Conciliación en la primera semana.",
-            "Rechazar los $5,000 si te piden firmar renuncia, respaldar mensajes de WhatsApp de horarios y citar al patrón en el Centro de Conciliación.",
-            "JAMÁS firmar una hoja en blanco o carta de renuncia voluntaria para que te suelten un pago chiquito.",
+            "El trabajador no firmó la renuncia, rechazó los $5,000 engañosos y acudió al Centro de Conciliación exigiendo sus 90 días de sueldo más vacaciones y descansos trabajados.",
+            "La autoridad laboral obligó a la empresa a pagar la liquidación real completa para evitar juicio y embargo.",
+            "N/A", "No firmar renuncia y acudir en la primera semana al Centro de Conciliación.",
+            "Guardar mensajes de WhatsApp del jefe, no firmar renuncia y acudir gratis a PROFEDET o Conciliación.",
+            "JAMÁS firmar una hoja en blanco o carta de renuncia a cambio de $5,000.",
             "2026-08-01"
         ),
         (
             "EXP-LAB-2026-002", "Derecho Privado", "Derecho Laboral", "Casos Laborales", "Despido injustificado",
-            "Despido Perdido por Aceptar $5,000 Firmando Carta de Renuncia y Dejar Pasar 60 Días",
-            "Juez Laboral, Abogado de empresa",
-            "2. Audiencia de Conciliación / Contestación", "Ninguna", "Sentencia absolutoria para la empresa", "Amparo directo",
-            "El trabajador aceptó $5,000 por urgencia económica firmando una hoja de renuncia voluntaria y reclamó hasta después de dos meses.",
+            "Trabajador Pierde su Liquidación por Firmar Hoja de Renuncia a Cambio de $5,000 Rápidos",
+            "Juez Laboral",
+            "Audiencia Inicial", "Ninguna", "Absolución del patrón", "Demanda tardía",
+            "Trabajador aceptó $5,000 en efectivo y firmó una hoja que decía renuncia voluntaria creyendo que luego podía reclamar más.",
             hashlib.sha256(b"EXP-LAB-2026-002").hexdigest(), "PERDIDO",
-            "Se presentó la demanda fuera del plazo de 60 días y sin pruebas de coacción en la firma.",
-            "El Juez declaró prescrita la acción y dio por válida la renuncia firmada.",
-            "Firmar renuncia voluntaria bajo promesa verbal y dejar vencer los 60 días naturales.",
-            "N/A", "Acudir a PROFEDET o Conciliación inmediatamente sin firmar papelería de baja.",
-            "NUNCA creer en la promesa de 'firma tu renuncia hoy para liberarte este cheque y luego vemos lo demás'.",
+            "El patrón exhibió en el juzgado la hoja firmada por el trabajador donde decía que él solito renunció y que no se le debía nada.",
+            "El Juez dio por válida la renuncia firmada y el trabajador perdió más de $40,000 pesos.",
+            "Firmar papeles de renuncia por presión o dejar pasar más de 60 días.",
+            "N/A", "Leer todo antes de firmar y salir de la oficina sin firmar si el monto es injusto.",
+            "NUNCA firmar renuncia voluntaria cuando en realidad te están corriendo.",
             "2026-08-05"
         ),
         (
-            "EXP-TRA-2026-003", "Derecho Público", "Derecho Administrativo", "Tránsito, Multas y Abuso Policial", "Policía pide mordida o amenaza con corralón",
-            "Amenaza de Corralón y Retención de Licencia Anulada por Grabación y Queja en Asuntos Internos",
-            "Agente de Tránsito, Unidad de Asuntos Internos, Magistrado Administrativo",
-            "1. Intervención en Vía Pública y Verificación de Facultades", "Suspensión de cobro y devolución de licencia", "Nulidad lisa y llana de infracción", "Juicio Contencioso Administrativo",
-            "Un policía me detuvo sin motivo claro, me quitó mi licencia y me amenazó con llevarse mi carro o moto al corralón con grúa si no le daba $2,500 de mordida.",
-            hashlib.sha256(b"EXP-TRA-2026-003").hexdigest(), "GANADO",
-            "El ciudadano grabó el número de patrulla y gafete, exigió boleta oficial en lugar de dar efectivo e impugnó la falta de fundamentación ante el Tribunal Administrativo.",
-            "Asuntos Internos inició investigación al oficial y el Tribunal anuló la multa ordenando devolver los documentos sin costo.",
-            "N/A", "Grabar legalmente la intervención, pedir el artículo exacto del Reglamento de Tránsito y jamás entregar dinero en efectivo.",
-            "Grabar con el celular, anotar número de patrulla, exigir que te digan qué artículo te permite corralón y reportar a Asuntos Internos.",
-            "JAMÁS dar mordida ni ponerte a empujar o insultar al policía (para que no te acusen de resistencia de particulares).",
-            "2026-08-12"
+            "EXP-VIAL-2026-003", "Derecho Público", "Derecho Administrativo", "Casos de Tránsito y Policía", "Intento de mordida o amenaza de llevar al corralón",
+            "Conductor Frena Extorsión de Patrulla y Evita Corralón Ilegal Grabando el Procedimiento",
+            "Agente de Tránsito, Asuntos Internos",
+            "Detención en vía pública", "Grabación ciudadana y solicitud de boleta oficial", "Cancelación de acto arbitrario", "Queja en Asuntos Internos",
+            "Una patrulla me paró por supuesta revisión de rutina en mi moto o carro, me amenazaron con llevarse el vehículo al corralón con grúa si no les daba dinero de mordida.",
+            hashlib.sha256(b"EXP-VIAL-2026-003").hexdigest(), "GANADO",
+            "El conductor mantuvo la calma, encendió la cámara de su celular, pidió el nombre y número de patrulla del oficial y exigió que le señalaran el artículo exacto del Reglamento de Tránsito.",
+            "Al ver que el ciudadano conocía que una revisión de rutina no amerita corralón y estaba grabando legalmente, los policías devolvieron los documentos y se retiraron.",
+            "N/A", "Conocer las únicas causas reales de corralón, grabar con respeto y nunca dar mordida.",
+            "Grabar desde tu asiento sin obstruir, pedir número de patrulla y exigir boleta oficial si hubo infracción real.",
+            "JAMÁS insultar ni empujar al policía, ni entregar dinero en efectivo en la calle.",
+            "2026-09-02"
         ),
         (
-            "EXP-TRA-2026-004", "Derecho Público", "Derecho Administrativo", "Tránsito, Multas y Abuso Policial", "Policía pide mordida o amenaza con corralón",
-            "Caso Vial Complicado por Agredir Verbalmente al Oficial y Entregar Dinero sin Recibo",
-            "Juez Cívico, Agente Policial",
-            "2. Levantamiento de Boleta de Infracción / Acta Circunstanciada", "Remisión a Juzgado Cívico", "Arresto administrativo y arrastre de grúa", "Queja",
-            "El conductor discutió a gritos y empujones con la patrulla, no grabó evidencia y entregó dinero en efectivo sin recibo.",
-            hashlib.sha256(b"EXP-TRA-2026-004").hexdigest(), "PERDIDO",
-            "No existían pruebas de la extorsión original y los oficiales reportaron faltas a la autoridad.",
-            "El Juez Cívico impuso sanción administrativa.",
-            "Perder la calma, caer en provocaciones físicas y no documentar en video el abuso.",
-            "N/A", "Mantener voz tranquila, manos visibles en el volante y grabar todo desde el primer segundo.",
-            "NUNCA insultar ni tocar físicamente a un oficial ni soltar dinero en efectivo sin boleta oficial.",
-            "2026-08-14"
+            "EXP-VIAL-2026-004", "Derecho Público", "Derecho Administrativo", "Casos de Tránsito y Policía", "Intento de mordida o amenaza de llevar al corralón",
+            "Conductor Termina Detenido en el Juez Cívico por Insultar y Forcejear con el Policía de Tránsito",
+            "Juez Cívico / Policía Municipal",
+            "Detención en calle", "Ninguna", "Arresto administrativo y corralón", "Ninguno",
+            "Conductor se bajó furioso del auto, gritó groserías y trató de arrebatarle su licencia de las manos al policía.",
+            hashlib.sha256(b"EXP-VIAL-2026-004").hexdigest(), "PERDIDO",
+            "Aunque la parada inicial de la patrulla era injusta, el conductor perdió la calma y agredió verbal y físicamente al oficial.",
+            "Los policías pidieron refuerzos, lo subieron a la patrulla por faltas a la autoridad y se llevaron el vehículo al corralón.",
+            "Perder los estribos, gritar insultos o tocar físicamente al policía.",
+            "N/A", "Mantener las manos visibles en el volante y reclamar todo por la vía legal con video.",
+            "NUNCA forcejear, insultar ni bajarte agresivo frente a una patrulla.",
+            "2026-09-06"
         ),
         (
-            "EXP-FAM-2026-005", "Derecho Privado", "Derecho de Familia", "Casos Familiares", "Pensión alimenticia y ocultamiento de ingresos",
-            "Pensión Alimenticia Ganada Rastreando Cuentas Bancarias del Deudor que Renunció a su Empleo",
-            "Juez de lo Familiar, Abogado Familiar, Trabajador Social",
-            "1. Solicitud de Conciliación / Demanda Inicial", "Pensión provisional urgente y oficio a bancos (CNBV)", "Sentencia de pensión definitiva y aseguramiento", "Incidente de alimentos",
-            "El papá de mis hijos dejó de dar gasto, se salió de trabajar para decir que no tiene ingresos pero cobra en efectivo y transferencias.",
+            "EXP-FAM-2026-005", "Derecho Privado", "Derecho de Familia", "Casos Familiares", "Pensión alimenticia (Papá o mamá que no da gasto)",
+            "Madre Logra Pensión Alimenticia Provisional Aunque el Padre Ocultaba su Sueldo",
+            "Juez Familiar, Procuraduría DIF",
+            "Demanda inicial de alimentos", "Descuento directo y rastreo SAT/Bancos", "Pensión asegurada para los hijos", "Oficios a bancos y SAT",
+            "El papá de mis hijos lleva meses sin dar gasto, se salió de su trabajo para decir que no tiene dinero pero cobra por fuera.",
             hashlib.sha256(b"EXP-FAM-2026-005").hexdigest(), "GANADO",
-            "El abogado solicitó pensión provisional desde el día 1 y pidió al Juez girar oficios al SAT y a la Comisión Nacional Bancaria para ver todos sus depósitos.",
-            "El Juez fijó pensión con base en sus depósitos bancarios reales y ordenó inscripción en el Registro de Deudores Alimentarios Morosos.",
-            "N/A", "Pedir pensión provisional inmediata e investigar estados de cuenta bancarios y nivel de vida.",
-            "Juntar actas de nacimiento, tickets de gastos de comida/escuela y acudir al Juez Familiar o DIF.",
-            "No conformarse con promesas de palabra ni ocultar a los menores sin orden judicial.",
-            "2026-08-18"
-        ),
-        (
-            "EXP-PEN-2026-006", "Derecho Público", "Derecho Penal", "Casos Penales", "Fraude bancario SPEI / Phishing digital",
-            "Recuperación de Dinero por Fraude Bancario SPEI y Phishing con Sello Forense y CONDUSEF",
-            "CONDUSEF, Fiscal MP, Juez Civil/Mercantil",
-            "1. Denuncia o Querella ante Fiscalía/MP", "Bloqueo de folio SPEI y dictamen CONDUSEF", "Restitución de fondos bancarios más intereses", "Juicio Oral Mercantil contra el Banco",
-            "Me vaciaron mi cuenta del banco tras picarle a un enlace falso de mensaje SMS y se hicieron transferencias SPEI no reconocidas.",
-            hashlib.sha256(b"EXP-PEN-2026-006").hexdigest(), "GANADO",
-            "Se reportó el cargo en las primeras 24 horas, se descargó el comprobante CEP de Banxico para identificar al titular destino y se demandó al banco conforme a jurisprudencia de la SCJN.",
-            "El banco fue condenado a reembolsar el dinero porque no acreditó que el cliente autorizó la operación con sus factores de seguridad.",
-            "N/A", "Reportar de inmediato al banco pidiendo folio, descargar el CEP en Banxico y acudir a CONDUSEF.",
-            "Llamar a tu banco para bloquear la cuenta y pedir número de folio, sacar capturas sin recortar y acudir a CONDUSEF/Fiscalía.",
-            "No borrar el mensaje SMS falso ni dejar pasar semanas sin levantar el folio de cargo no reconocido.",
-            "2026-08-22"
-        ),
-        (
-            "EXP-CIV-2026-007", "Derecho Privado", "Derecho Civil", "Casos Civiles", "Arrendamiento (Inquilino que no paga renta)",
-            "Recuperación Legal de Casa Rentada y Cobro de Rentas mediante Juicio de Arrendamiento",
-            "Juez Civil, Actuario, Abogado Civil",
-            "1. Solicitud de Conciliación / Demanda Inicial", "Embargo de bienes del fiador/inquilino", "Sentencia de desocupación y entrega del inmueble", "Juicio de Arrendamiento",
-            "Mi inquilino lleva 5 meses sin pagarme la renta, ya se acabó el contrato y dice que no se va a salir.",
-            hashlib.sha256(b"EXP-CIV-2026-007").hexdigest(), "GANADO",
-            "Se promovió controversia de arrendamiento civil solicitando orden de lanzamiento legal y embargo de cuentas/bienes.",
-            "El Juez ordenó la desocupación con apoyo de actuario y fuerza pública legal.",
-            "N/A", "Usar la vía judicial civil sin caer en el delito de despojo por cuenta propia.",
-            "Buscar el contrato de renta, mensajes de cobro y promover juicio civil de desocupación.",
-            "JAMÁS cambiar la chapa tú mismo ni cortar el agua o la luz por la fuerza (porque el inquilino te denuncia por despojo).",
-            "2026-08-26"
-        ),
-        (
-            "EXP-MER-2026-008", "Derecho Privado", "Derecho Mercantil", "Casos Mercantiles", "Cobro de pagaré vencido",
-            "Cobro Exitoso de Pagaré con Embargo desde la Primera Visita al Deudor",
-            "Juez Mercantil, Actuario Ejecutor, Abogado",
-            "1. Solicitud de Conciliación / Demanda Inicial", "Auto de exequendo (Embargo inmediato)", "Sentencia de remate y pago total", "Juicio Ejecutivo Mercantil",
-            "Me firmaron un pagaré por dinero prestado, ya venció la fecha y el deudor se esconde para no pagar.",
-            hashlib.sha256(b"EXP-MER-2026-008").hexdigest(), "GANADO",
-            "Se presentó demanda ejecutiva mercantil con el pagaré original y el Actuario embargó bienes en la primera diligencia.",
-            "El Juez condenó al pago del capital más intereses moratorios.",
-            "N/A", "Conservar el pagaré original sin tachaduras y embargar en el primer acto.",
-            "Guardar el pagaré original en lugar seguro y demandar antes de cumplir 3 años de vencido.",
-            "NUNCA remarcar con otra pluma la fecha o el monto del pagaré después de firmado.",
-            "2026-08-29"
+            "Se acudió al Juez Familiar pidiendo pensión provisional urgente y que se revisaran las cuentas bancarias y nivel de vida del deudor.",
+            "El Juez fijó pensión obligatoria desde la primera semana a favor de los niños.",
+            "N/A", "Pedir pensión provisional con las actas de nacimiento de los niños.",
+            "Juntar actas de nacimiento y recibos de gastos de los hijos y acudir al DIF o Juez Familiar.",
+            "No quedarte esperando promesas de palabra que nunca cumple.",
+            "2026-09-12"
         )
     ]
 
@@ -741,8 +664,7 @@ def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str
     if os.path.exists(BACKUP_JSON_FILE):
         try:
             with open(BACKUP_JSON_FILE, "r", encoding="utf-8") as f_local:
-                data_local = json.load(f_local)
-                inyectar_diccionario_cerebro_en_sqlite(data_local, conn)
+                inyectar_diccionario_cerebro_en_sqlite(json.load(f_local), conn)
         except Exception:
             pass
 
@@ -757,30 +679,43 @@ def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str
 init_db_and_autoinject(gh_repo_input, gh_token_input, gh_branch_input)
 
 # ==============================================================================
-# 5. EXTRACTOR COLOQUIAL DE SUELDO Y CALCULADORA LFT COMPLETA (CON DÍAS LIBRES)
+# 5. EXTRACTOR DE DATOS DEL RELATO Y CALCULADORA LABORAL COMPLETA (CON DESCANSOS)
 # ==============================================================================
 def normalizar_texto_coloquial(texto: str) -> dict:
     texto_low = texto.lower().replace(",", "")
     salario_mensual = None
     periodicidad = "Mensual ($9,857.14 / mes)"
+    sueldo_base_periodo = 2300.0
 
-    m_sem = re.search(r'(?:semanal(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:a la semana|semanal(?:es)?|por semana))', texto_low)
+    m_sem = re.search(
+        r'(?:semanal(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:a la semana|semanal(?:es)?|por semana))',
+        texto_low
+    )
     if m_sem:
         val = float(m_sem.group(1) or m_sem.group(2))
+        sueldo_base_periodo = val
         salario_mensual = round((val / 7.0) * 30.0, 2)
         periodicidad = f"Semanal (${val:,.2f} a la semana)"
 
     if salario_mensual is None:
-        m_quin = re.search(r'(?:quincenal(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:a la quincena|quincenal(?:es)?|por quincena))', texto_low)
+        m_quin = re.search(
+            r'(?:quincenal(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:a la quincena|quincenal(?:es)?|por quincena))',
+            texto_low
+        )
         if m_quin:
             val = float(m_quin.group(1) or m_quin.group(2))
+            sueldo_base_periodo = val
             salario_mensual = round(val * 2.0, 2)
             periodicidad = f"Quincenal (${val:,.2f} a la quincena)"
 
     if salario_mensual is None:
-        m_men = re.search(r'(?:mensual(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:al mes|mensual(?:es)?|por mes))', texto_low)
+        m_men = re.search(
+            r'(?:mensual(?:es)?(?:\s+es)?(?:\s+de)?\s*\$?\s*(\d+(?:\.\d+)?))|(?:(\d+(?:\.\d+)?)\s*(?:pesos\s*)?(?:al mes|mensual(?:es)?|por mes))',
+            texto_low
+        )
         if m_men:
             val = float(m_men.group(1) or m_men.group(2))
+            sueldo_base_periodo = val
             salario_mensual = round(val, 2)
             periodicidad = f"Mensual (${val:,.2f} al mes)"
 
@@ -788,27 +723,31 @@ def normalizar_texto_coloquial(texto: str) -> dict:
         m_gen = re.search(r'(?:gano|ganaba|sueldo|pago|pagan)\s*(?:es\s*de)?\s*\$?\s*(\d+(?:\.\d+)?)', texto_low)
         if m_gen:
             val = float(m_gen.group(1))
+            sueldo_base_periodo = val
             if val < 5000:
                 salario_mensual = round((val / 7.0) * 30.0, 2)
-                periodicidad = f"Semanal detectado (${val:,.2f} a la semana)"
+                periodicidad = f"Semanal (${val:,.2f} a la semana)"
             else:
                 salario_mensual = round(val, 2)
-                periodicidad = f"Mensual detectado (${val:,.2f} al mes)"
+                periodicidad = f"Mensual (${val:,.2f} al mes)"
 
     oferta_patronal = 0.0
-    m_oferta = re.search(r'(?:quieren dar|ofrecen|daban|dan|ofreciendo|soltar|piden|mordida de)\s*\$?\s*(\d+(?:\.\d+)?)', texto_low)
+    m_oferta = re.search(r'(?:quieren dar|ofrecen|daban|dan|ofreciendo|soltar)\s*\$?\s*(\d+(?:\.\d+)?)', texto_low)
     if m_oferta:
         oferta_patronal = float(m_oferta.group(1))
 
     sin_vacaciones = any(k in texto_low for k in ["no me daban vacaciones", "sin vacaciones", "nunca tuve vacaciones"])
     sin_dias_libres = any(k in texto_low for k in ["días libres", "dias libres", "sin descanso", "no descansaba", "sin dia de descanso"])
+    sin_bonos = any(k in texto_low for k in ["bonos", "comisiones", "horas extras"])
 
     return {
         "salario_mensual": salario_mensual if salario_mensual else 9857.14,
+        "sueldo_periodo": sueldo_base_periodo,
         "periodicidad": periodicidad,
         "oferta_patronal": oferta_patronal,
         "sin_vacaciones": sin_vacaciones,
-        "sin_dias_libres": sin_dias_libres
+        "sin_dias_libres": sin_dias_libres,
+        "sin_bonos": sin_bonos
     }
 
 def obtener_dias_vacaciones_lft(anios_cumplidos: int) -> int:
@@ -831,9 +770,6 @@ def calcular_liquidacion_y_derechos_lft(
     dias_sueldo_pendientes: int = 0,
     dias_vacaciones_no_gozadas: int = 0,
     dias_descanso_trabajados: int = 0,
-    bonos_o_comisiones_adeudadas: float = 0.0,
-    incluir_20_dias_por_anio: bool = False,
-    meses_duracion_juicio: int = 0,
     salario_minimo_vigente: float = 278.80
 ) -> dict:
     sd = round(salario_mensual / 30.0, 2)
@@ -861,47 +797,41 @@ def calcular_liquidacion_y_derechos_lft(
     salario_base_prima_ant = min(sd, salario_minimo_vigente * 2.0)
     es_despido = ("Despido" in motivo_separacion or "Rescisión" in motivo_separacion)
     monto_prima_antiguedad = round(12.0 * antiguedad_total_anios * salario_base_prima_ant, 2) if (es_despido or anios_antiguedad >= 15) else 0.0
-
     subtotal_finiquito = round(
         monto_sueldo_pendiente + monto_aguinaldo_prop + monto_vacaciones_prop +
-        monto_vacaciones_atrasadas + monto_prima_vac_prop + monto_descansos_trabajados + bonos_o_comisiones_adeudadas, 2
+        monto_vacaciones_atrasadas + monto_prima_vac_prop + monto_descansos_trabajados, 2
     )
 
     monto_indem_90_dias = round(90.0 * sdi, 2) if es_despido else 0.0
-    monto_20_dias_anio = round(20.0 * antiguedad_total_anios * sdi, 2) if (es_despido and incluir_20_dias_por_anio) else 0.0
-    meses_topados_12 = min(12, max(0, meses_duracion_juicio))
-    monto_salarios_caidos = round(meses_topados_12 * 30.0 * sdi, 2) if es_despido else 0.0
-
-    subtotal_indemnizacion = round(monto_prima_antiguedad + monto_indem_90_dias + monto_20_dias_anio + monto_salarios_caidos, 2)
+    subtotal_indemnizacion = round(monto_prima_antiguedad + monto_indem_90_dias, 2)
     gran_total_bruto = round(subtotal_finiquito + subtotal_indemnizacion, 2)
 
     conceptos_tabla = [
-        {"Concepto en Español Simple": "1. Días trabajados que no te han pagado", "Qué dice la Ley": "Art. 82 y 88 LFT", "Tipo de Pago": "Tu Finiquito Seguro", "Monto (MXN)": monto_sueldo_pendiente},
-        {"Concepto en Español Simple": "2. Tu parte de Aguinaldo del año", "Qué dice la Ley": "Art. 87 LFT (Mínimo 15 días/año)", "Tipo de Pago": "Tu Finiquito Seguro", "Monto (MXN)": monto_aguinaldo_prop},
-        {"Concepto en Español Simple": "3. Vacaciones que no te dieron + Proporcionales", "Qué dice la Ley": "Art. 76 y 79 LFT (Vacaciones Dignas)", "Tipo de Pago": "Tu Finiquito Seguro", "Monto (MXN)": round(monto_vacaciones_prop + monto_vacaciones_atrasadas, 2)},
-        {"Concepto en Español Simple": "4. Prima Vacacional (25% extra sobre vacaciones)", "Qué dice la Ley": "Art. 80 LFT", "Tipo de Pago": "Tu Finiquito Seguro", "Monto (MXN)": monto_prima_vac_prop},
-        {"Concepto en Español Simple": "5. Días de descanso trabajados (se pagan al doble extra)", "Qué dice la Ley": "Art. 69 y 73 LFT (Séptimo día)", "Tipo de Pago": "Prestación Omitida", "Monto (MXN)": monto_descansos_trabajados},
-        {"Concepto en Español Simple": "6. Bonos o comisiones pendientes", "Qué dice la Ley": "Art. 84 LFT (Parte del salario)", "Tipo de Pago": "Prestación Omitida", "Monto (MXN)": bonos_o_comisiones_adeudadas},
-        {"Concepto en Español Simple": "7. Prima de Antigüedad (12 días por cada año trabajado)", "Qué dice la Ley": "Art. 162 LFT", "Tipo de Pago": "Indemnización por Despido", "Monto (MXN)": monto_prima_antiguedad},
-        {"Concepto en Español Simple": "8. Indemnización Constitucional (3 meses / 90 días de sueldo integrado)", "Qué dice la Ley": "Art. 123 Constitucional y Art. 48 LFT", "Tipo de Pago": "Indemnización por Despido", "Monto (MXN)": monto_indem_90_dias},
-        {"Concepto en Español Simple": "9. 20 Días por Año (si aplica negativa de reinstalación)", "Qué dice la Ley": "Art. 50 LFT", "Tipo de Pago": "Condena Especial", "Monto (MXN)": monto_20_dias_anio},
-        {"Concepto en Español Simple": "10. Salarios Caídos durante el juicio", "Qué dice la Ley": "Art. 48 LFT", "Tipo de Pago": "Condena en Juicio", "Monto (MXN)": monto_salarios_caidos}
+        {"Qué te deben pagar": "1. Días trabajados que aún no te pagan", "Explicación sencilla": "Los días de esta semana o quincena que ya trabajaste", "Monto (MXN)": monto_sueldo_pendiente},
+        {"Qué te deben pagar": "2. Aguinaldo proporcional", "Explicación sencilla": "La parte de tu aguinaldo acumulada en el año (mínimo 15 días por año)", "Monto (MXN)": monto_aguinaldo_prop},
+        {"Qué te deben pagar": "3. Vacaciones acumuladas y atrasadas", "Explicación sencilla": "Los días de vacaciones que la empresa no te dio pagados en dinero", "Monto (MXN)": round(monto_vacaciones_prop + monto_vacaciones_atrasadas, 2)},
+        {"Qué te deben pagar": "4. Prima vacacional (25% extra)", "Explicación sencilla": "Un 25% adicional sobre el valor de tus vacaciones por ley", "Monto (MXN)": monto_prima_vac_prop},
+        {"Qué te deben pagar": "5. Días libres / descansos trabajados", "Explicación sencilla": "Si trabajaste en tu día de descanso semanal, la ley obliga a pagarlo al doble extra", "Monto (MXN)": monto_descansos_trabajados},
+        {"Qué te deben pagar": "6. Prima de antigüedad (12 días por año)", "Explicación sencilla": "Recompensa obligatoria de 12 días de sueldo por cada año trabajado", "Monto (MXN)": monto_prima_antiguedad},
+        {"Qué te deben pagar": "7. Indemnización de 3 meses (90 días)", "Explicación sencilla": "El castigo principal a la empresa por correrte sin causa justificada", "Monto (MXN)": monto_indem_90_dias}
     ]
 
     return {
-        "sd": sd, "sdi": sdi, "subtotal_finiquito": subtotal_finiquito,
-        "subtotal_indemnizacion": subtotal_indemnizacion, "gran_total_bruto": gran_total_bruto,
-        "monto_indem_90_dias": monto_indem_90_dias, "monto_prima_antiguedad": monto_prima_antiguedad,
+        "sd": sd,
+        "sdi": sdi,
+        "subtotal_finiquito": subtotal_finiquito,
+        "subtotal_indemnizacion": subtotal_indemnizacion,
         "monto_descansos_trabajados": monto_descansos_trabajados,
+        "gran_total_bruto": gran_total_bruto,
         "tabla_conceptos": pd.DataFrame(conceptos_tabla)
     }
 
 def calcular_cotizacion_honorarios_dual(
     monto_en_disputa: float,
-    costo_asesoria: float = 800.0,
+    costo_asesoria: float = 0.0,
     anticipo_fijo: float = 0.0,
     pct_litis: float = 25.0,
-    gastos_periciales: float = 1000.0,
+    gastos_periciales: float = 500.0,
     horas_invertidas: float = 35.0,
     costo_hora_despacho: float = 350.0
 ) -> dict:
@@ -920,434 +850,221 @@ def calcular_cotizacion_honorarios_dual(
     }
 
 # ==============================================================================
-# 6. GENERADOR DE ASESORÍA HUMANA EXHAUSTIVA PASO A PASO (SIN TECNICISMOS)
+# 6. GENERADOR DE ASESORÍA EXHAUSTIVA PASO A PASO (LENGUAJE HUMANO Y CLARO)
 # ==============================================================================
-def generar_asesoria_humana_exhaustiva(
-    categoria_caso: str,
-    tipo_caso: str,
-    relato_usuario: str,
+def construir_asesoria_exhaustiva_ciudadana(
+    categoria: str,
+    tipo: str,
+    relato: str,
     datos_sueldo: dict,
     res_liq: dict,
     res_hon: dict
 ) -> dict:
-    sueldo_mes = datos_sueldo["salario_mensual"]
-    periodicidad = datos_sueldo["periodicidad"]
-    oferta = datos_sueldo["oferta_patronal"]
-    total_ley = res_liq["gran_total_bruto"]
-    neto_bolsillo = res_hon["monto_neto_libre_ciudadano"]
-
-    if categoria_caso == "Casos Laborales":
+    if categoria == "Casos Laborales":
+        oferta = datos_sueldo["oferta_patronal"]
+        total_ley = res_liq["gran_total_bruto"]
         faltante = max(0.0, round(total_ley - oferta, 2))
-        txt_oferta = (
-            f"Además, detecté que la empresa te quiere dar únicamente **${oferta:,.2f} MXN** para deshacerse de ti, lo cual significa que **te están intentando quitar ${faltante:,.2f} MXN** que por ley son tuyos."
-            if oferta > 0 else
-            "Además, te despidieron sin pagarte la indemnización completa que marca la ley."
-        )
-        txt_vac = (
-            "También tomé en cuenta que **no te daban vacaciones ni días libres de descanso**, por lo que esos días no se pierden: el patrón tiene obligación de pagártelos en dinero (y los días de descanso trabajados valen al doble extra)."
-            if (datos_sueldo["sin_vacaciones"] or datos_sueldo["sin_dias_libres"]) else
-            "También incluí el pago proporcional de tus vacaciones, prima vacacional y aguinaldo."
-        )
+        detalles_detectados = [
+            f"Te pagaban un sueldo **{datos_sueldo['periodicidad']}** (lo que equivale a **${datos_sueldo['salario_mensual']:,.2f} pesos al mes** o **${res_liq['sd']:,.2f} pesos por día**)."
+        ]
+        if oferta > 0:
+            detalles_detectados.append(
+                f"La empresa te quiere dar únicamente **${oferta:,.2f} pesos** para deshacerte de ti, cuando por ley te corresponden aproximadamente **${total_ley:,.2f} pesos** (te están queriendo quitar **${faltante:,.2f} pesos** de tu trabajo)."
+            )
+        if datos_sueldo["sin_vacaciones"]:
+            detalles_detectados.append(
+                "Mencionaste que **no te daban vacaciones**: la ley prohíbe que trabajes sin vacaciones, por lo tanto la empresa está obligada a pagarte todos esos días en efectivo más un 25% extra."
+            )
+        if datos_sueldo["sin_dias_libres"]:
+            detalles_detectados.append(
+                "Mencionaste que **no te daban días libres de descanso**: por ley, por cada 6 días de trabajo debes descansar 1 día pagado. Si te hicieron trabajar en tus días de descanso, ese día se tiene que pagar **al doble adicional**."
+            )
 
         return {
-            "proceso": "Proceso Laboral / Civil / Familiar / Mercantil (7 Etapas)",
-            "juez": "Centro de Conciliación Laboral (Etapa 1 amigable) / Juez del Tribunal Laboral (si no pagan)",
-            "abogado": "Procurador gratuito de la PROFEDET ($0 pesos) o Abogado Laboralista privado (que cobra solo porcentaje al ganar)",
-            "profesionales": "Conciliador Oficial del Gobierno + Actuario notificador",
-            "medida_sugerida": "Citar formalmente al patrón al Centro de Conciliación y, si no paga, embargar cuentas de la empresa",
-            "recurso_clave": "Solicitud de Conciliación Prejudicial (Trámite gratuito e inmediato)",
-            "radiografia_empatica": (
-                f"Leí con mucha atención todo lo que escribiste. Tu caso es un **Despido Injustificado**: trabajabas ganando un sueldo **{periodicidad}** "
-                f"(que equivale a **${sueldo_mes:,.2f} MXN al mes** o **${res_liq['sd']:,.2f} MXN por día**). {txt_oferta} {txt_vac}"
+            "titulo_guia": "Guía Completa Paso a Paso para Defender tu Trabajo y tu Liquidación",
+            "radiografia_caso": detalles_detectados,
+            "explicacion_sencilla": (
+                "Cuando te corren del trabajo sin que hayas cometido una falta grave comprobada, la ley mexicana dice que es un **Despido Injustificado**. "
+                "Muchos patrones usan la maña de ofrecerte poquito dinero en efectivo (como $5,000 pesos) pidiéndote que a cambio firmes una hoja que dice 'Renuncia Voluntaria'. "
+                "¡Esa es una trampa! Si tú firmas que renunciaste, legalmente estás diciendo: 'Yo me quise ir solito y la empresa no me debe nada'. "
+                "En cambio, si NO firmas nada, la empresa está obligada a pagarte dos bolsas de dinero: **1) Tu Finiquito** (aguinaldo, vacaciones y días trabajados) y **2) Tu Liquidación de 3 meses de sueldo completo** por haberte dejado sin empleo."
             ),
-            "explicacion_sencilla_dinero": (
-                f"**¿Por qué te tocan ${total_ley:,.2f} MXN y no los ${oferta:,.0f} que te quieren dar?**\n\n"
-                f"En México, la Ley Federal del Trabajo dice que ningún jefe te puede correr nomás de palabra diciendo *'ya no vengas mañana'*. Cuando hacen eso, la ley los castiga obligándolos a pagarte dos bolsas de dinero:\n"
-                f"1. **Tu Finiquito Seguro (${res_liq['subtotal_finiquito']:,.2f} MXN):** Es el dinero que ya te ganaste trabajando (tu aguinaldo proporcional, tus vacaciones que nunca te dieron más un 25% extra, y los días de descanso trabajados).\n"
-                f"2. **Tu Indemnización por Despido (${res_liq['subtotal_indemnizacion']:,.2f} MXN):** Son **3 meses completos de sueldo integrado (90 días = ${res_liq['monto_indem_90_dias']:,.2f} MXN)** más tu **Prima de Antigüedad (${res_liq['monto_prima_antiguedad']:,.2f} MXN)** para que tengas con qué mantenerte mientras encuentras otro trabajo.\n\n"
-                f"Si vas con un defensor gratuito del gobierno (**PROFEDET**), los **${total_ley:,.2f} MXN son íntegros para ti**. Si contratas un abogado particular que te cobre al ganar, te quedarán libres en tu bolsillo alrededor de **${neto_bolsillo:,.2f} MXN**."
-            ),
-            "fases_cronologicas": [
+            "fases_paso_a_paso": [
                 {
-                    "titulo_fase": "FASE 1: ¿Qué hacer HOY MISMO frente al jefe o Recursos Humanos? (Primeras 2 horas)",
-                    "explicacion": (
-                        "• **No firmes ningún papel de 'Renuncia Voluntaria' ni hojas en blanco:** Muchos patrones te dicen: *'Fírmame tu renuncia para que contabilidad me libere hoy mismo tus $5,000 pesos'*. ¡Es una trampa! Si firmas esa hoja, legalmente estás diciendo que tú te saliste por tu gusto y pierdes automáticamente los otros $44,000+ pesos.\n"
-                        "• **Si te quieren encerrar o presionar en una oficina:** Nadie puede retenerte a la fuerza (eso es un delito llamado privación ilegal de la libertad). Saca tu celular, empieza a grabar audio o llama al 911 desde ahí mismo y verás cómo te abren la puerta de inmediato.\n"
-                        "• **¿Qué pasa si no tenías contrato escrito ni seguro (IMSS)?:** ¡No te preocupes! La ley dice que la culpa de no hacer contrato es 100% del patrón, no tuya. Tienes exactamente los mismos derechos."
-                    )
+                    "fase": "FASE 1: ¿Qué hacer HOY MISMO (Primeras 24 horas)?",
+                    "pasos": [
+                        "No firmes absolutamente ningún papel que diga 'Renuncia Voluntaria', 'Finiquito total' ni mucho menos una hoja en blanco. Nadie te puede obligar ni encerrar en la oficina.",
+                        "Si te ofrecen los $5,000 pesos a cambio de tu firma, diles con calma que primero vas a revisar tu cuenta en el Centro de Conciliación y retírate tranquilo.",
+                        "Haz respaldo hoy mismo en tu celular de todas las pruebas de que trabajabas ahí: toma capturas de pantalla de los grupos de WhatsApp del trabajo, mensajes donde tu jefe te daba órdenes o te ponía horarios, fotos de tu uniforme, credencial o transferencias de pago."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 2: ¿Qué pruebas caseras juntar al llegar a tu casa? (Primeras 24 horas)",
-                    "explicacion": (
-                        "Antes de que tu jefe te borre de los grupos de WhatsApp, haz capturas de pantalla de todo esto:\n"
-                        "1. **Mensajes de WhatsApp:** Donde tu jefe o encargado te daba órdenes, te pedía llegar a cierta hora, te mandaba el rol de turnos o te avisaba que ya no te presentaras.\n"
-                        "2. **Comprobantes de pago:** Estados de cuenta si te depositaban en tarjeta, o fotos de los sobres amarillos/recibos si te pagaban en efectivo.\n"
-                        "3. **Fotos y ubicación:** Fotos tuyas con el uniforme, gafete o dentro del negocio, y el nombre completo y dirección exacta del lugar donde trabajabas."
-                    )
+                    "fase": "FASE 2: ¿Qué hacer ESTA MISMA SEMANA (Días 2 al 5)?",
+                    "pasos": [
+                        "Acude personalmente al **Centro de Conciliación Laboral** de tu ciudad o a la **PROFEDET** (Procuraduría de la Defensa del Trabajo). El trámite es 100% gratuito y no necesitas llevar abogado pagado.",
+                        "Lleva en un fólder: tu INE original y copia, el nombre de la empresa o del dueño/jefe, y la dirección aproximada del lugar donde trabajabas (si tienes fotos de la fachada en Google Maps, mejor).",
+                        "En la ventanilla di: 'Vengo a levantar una solicitud de conciliación porque me despidieron y me quieren dar menos de mi liquidación de ley'. Ahí te darán un citatorio oficial para obligar al patrón a presentarse."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 3: ¿A dónde ir ESTA MISMA SEMANA sin gastar un peso? (Días 2 al 5)",
-                    "explicacion": (
-                        "• **Acude al Centro de Conciliación Laboral de tu Estado o a la PROFEDET:** Lleva tu INE, el nombre de tu patrón o del negocio y la dirección del trabajo.\n"
-                        "• **¿Qué hacen ahí?:** Un funcionario público gratuito levanta tu **Solicitud de Conciliación** en 20 minutos y te entrega un citatorio oficial (o lo lleva un notificador) para obligar a tu patrón a presentarse en una sala de conciliación en menos de 15 días."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 4: ¿Cómo actuar el día de la Cita de Conciliación? (Día de cobrar)",
-                    "explicacion": (
-                        "• En esa cita no hay jueces regañones; es una mesa donde un Conciliador oficial le explica al patrón que si no llega a un arreglo contigo ahí mismo, le vas a meter demanda ante el Juez y le saldrá mucho más caro.\n"
-                        "• **La regla de oro en la negociación:** En conciliación rápida (para cobrar en 2 semanas sin esperar meses de juicio), la mayoría de las empresas ofrecen pagar entre el **70% y el 100%** de tu liquidación. Nunca aceptes migajas como $5,000 pesos; exige un convenio justo certificado por el Conciliador."
-                    )
+                    "fase": "FASE 3: ¿Qué hacer el DÍA DE LA CITA frente al patrón?",
+                    "pasos": [
+                        "En la sala de conciliación habrá un funcionario público neutral (el Conciliador). El abogado de la empresa intentará asustarte diciendo que el juicio dura años para que aceptes poquito dinero.",
+                        "Mantente firme: en conciliación es común negociar un pago inmediato en efectivo o transferencia (por ejemplo, entre el 75% y el 100% de tu liquidación total), pero jamás aceptes migajas como $5,000 pesos.",
+                        "Si el patrón no se presenta a la cita, le ponen una multa y a ti te entregan tu constancia para que un abogado público gratuito o privado le embargue bienes o cuentas a la empresa."
+                    ]
                 }
             ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Qué decirle exactamente al jefe o Recursos Humanos cuando te ofrecen $5,000 y te piden firmar:",
-                    "frase_exacta": "\"Entiendo que ya no quieran mis servicios, pero esos $5,000 pesos no cubren mis 90 días de liquidación por ley ni mis vacaciones y descansos trabajados. No voy a firmar ninguna hoja de renuncia voluntaria. Si me van a dar de baja, entréguenme el aviso por escrito o nos vemos esta semana en el Centro de Conciliación Laboral para hacer la cuenta conforme a la ley.\""
-                },
-                {
-                    "situacion": "🗣️ Qué decir al llegar a la ventanilla de la PROFEDET o Centro de Conciliación:",
-                    "frase_exacta": "\"Buenos días. Vengo a solicitar apoyo gratuito y abrir mi cita de conciliación porque me acaban de despedir injustificadamente de mi trabajo. Ganaba por semana, no me daban vacaciones ni días de descanso y me quieren dar solo una mínima parte a cambio de firmar mi renuncia.\""
-                }
+            "guiones_palabra_por_palabra": [
+                "🗣️ **Qué decirle a tu jefe o a Recursos Humanos si te presionan para firmar:**\n\"Le agradezco, pero no voy a firmar ninguna hoja de renuncia porque ustedes me están despidiendo. Voy a acudir al Centro de Conciliación para que ahí hagamos la cuenta justa conforme a la ley y allá les firmo cuando esté mi pago completo.\"",
+                "🗣️ **Qué decir al llegar a la ventanilla del Centro de Conciliación o PROFEDET:**\n\"Buenos días, me acaban de despedir de mi trabajo, ganaba por semana, no me daban vacaciones ni días libres y solo me quieren dar $5,000 pesos si firmo renuncia. Quiero citar al patrón para reclamar mi liquidación completa.\""
             ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (La hoja de renuncia disfrazada):** Te dicen *'Firma aquí de recibido por los $5,000'*, pero el papel arriba o a la mitad dice *'Renuncia Voluntaria y recibo finiquito sin que me deban nada'*. Si firmas eso, regalaste tu caso.",
-                "🚫 **TRAMPA 2 (Dejar pasar el tiempo creyendo promesas):** El patrón te dice *'Aguántame 2 meses y te liquido bien'*. ¡Cuidado! La ley te da **60 días naturales (2 meses en el calendario)** desde el día que te corrieron para ir a Conciliación. Si pasa el día 61, tu derecho caduca y pierdes todo.",
-                "🚫 **TRAMPA 3 (Salirte gritando o llevarte cosas del trabajo):** Aunque tengas mucho coraje, no rompas nada ni te lleves herramientas o dinero de la caja para 'cobrarte a lo chino', porque entonces el patrón te voltea la tortilla y te denuncia penalmente por robo."
+            "errores_fatales": [
+                "🚫 **ERROR 1 — Creer la mentira de 'Firma hoy para darte los $5,000 y la otra semana te damos lo demás':** En el segundo en que pones tu firma en una hoja de renuncia, pierdes legalmente el resto de tu dinero.",
+                "🚫 **ERROR 2 — Dejar pasar más de 60 días (2 meses):** La ley te da exactamente 60 días en el calendario desde que te corrieron para ir a Conciliación. Si vas en el día 61, tu derecho caduca y el patrón ya no te debe nada.",
+                "🚫 **ERROR 3 — Pelear, gritar o llevarte cosas de la empresa para 'cobrarte a lo chino':** No tomes mercancía ni herramientas porque el patrón lo usará para voltearte las cosas y acusarte de robo."
             ],
-            "glosario_sencillo": {
-                "Salario Diario Integrado (SDI)": "Es tu sueldo de un día normal sumándole unos pesitos extra que corresponden a tu aguinaldo y prima vacacional. Con este sueldo más alto se calculan tus 90 días.",
-                "Finiquito vs. Liquidación": "El Finiquito es lo poquito que te dan cuando tú renuncias (solo días trabajados y vacaciones). La Liquidación es el pago grande (con 3 meses extra de sueldo) cuando ellos te corren.",
-                "Prescripción de 60 días": "Es tu fecha de caducidad. Tienes 60 días seguidos desde el despido para iniciar tu reclamo oficial."
-            },
-            "pasos_inmediatos": [
-                f"1. NO FIRMAR renuncia ni hojas en blanco, ni aceptar los ${oferta:,.0f} como pago final.",
-                "2. Guardar hoy mismo capturas de WhatsApp de horarios, órdenes del jefe y recibos/transferencias.",
-                "3. Acudir esta semana al Centro de Conciliación Laboral o PROFEDET (trámite 100% gratuito).",
-                f"4. Exigir tu liquidación legal de ${total_ley:,.2f} MXN (90 días SDI + vacaciones + descansos + aguinaldo)."
-            ],
-            "alerta_fatal": "¡EL RELOJ CORRE! Tienes exactamente 60 días naturales desde el día en que te despidieron para acudir al Centro de Conciliación. Si dejas pasar los 60 días, pierdes el derecho a cobrar."
+            "oficina_ayuda": "Centro de Conciliación Laboral de tu Estado / PROFEDET (Tel. gratuito nacional: 800 911 7877)"
         }
 
-    elif categoria_caso == "Tránsito, Multas y Abuso Policial":
+    elif categoria == "Casos de Tránsito y Policía":
         return {
-            "proceso": "Proceso Administrativo / Tránsito y Vialidad (5 Etapas)",
-            "juez": "Juez Cívico / Magistrado del Tribunal de Justicia Administrativa / Asuntos Internos",
-            "abogado": "Defensor Público Administrativo ($0 pesos) o Abogado Especialista en Nulidad de Multas",
-            "profesionales": "Inspector de Asuntos Internos Policial + Perito en Vialidad",
-            "medida_sugerida": "Grabación en video de la patrulla, negativa a dar mordida y suspensión del acto administrativo",
-            "recurso_clave": "Denuncia en Asuntos Internos Policial y Juicio de Nulidad de Infracción",
-            "radiografia_empatica": (
-                "Analicé tu situación vial. Estás enfrentando un **posible abuso de autoridad policial o de tránsito**: te detuvieron en la vía pública, "
-                "te están reteniendo documentos (licencia, tarjeta de circulación o placa) o te están **amenazando con llevarse tu carro o moto al corralón con grúa** para presionarte a soltar dinero ('mordida')."
+            "titulo_guia": "Guía Ciudadana Paso a Paso contra Abusos de Tránsito, Retenes y Patrullas",
+            "radiografia_caso": [
+                "Reportaste una situación con policías o agentes de tránsito en la calle (parada sin motivo claro, intento de mordida, amenaza de grúa/corralón o revisión indebida).",
+                "En México, ninguna autoridad puede inventar infracciones ni cobrarte dinero en efectivo en la banqueta."
+            ],
+            "explicacion_sencilla": (
+                "Los malos elementos de tránsito o policía suelen usar el miedo para sacarte dinero ('mordida'). Su amenaza favorita es decirte: "
+                "*'Nos vamos a llevar tu carro o tu moto al corralón con la grúa y te va a salir en $5,000 pesos sacarlo, mejor cómo nos arreglamos'*. "
+                "Debes saber la regla de oro: **El corralón NO aplica por cualquier falta menor**. Solo se pueden llevar tu vehículo al corralón en casos graves muy específicos: "
+                "1) Si vienes manejando en estado de ebriedad, 2) Si tu vehículo no trae placas o el permiso está vencido y alterado, 3) Si chocaste y hay heridos o daños a la vía pública, o 4) Si el vehículo tiene reporte de robo. "
+                "Por pasarte un alto, dar vuelta prohibida o una revisión común, **solo procede levantar la boleta de infracción, nunca quitarte tu vehículo con grúa para extorsionarte**."
             ),
-            "explicacion_sencilla_dinero": (
-                "**¿Cuándo SÍ y cuándo NO se pueden llevar tu carro o moto al corralón?**\n\n"
-                "Muchos policías usan la palabra *'Corralón'* como espantapájaros porque saben que el arrastre de grúa cuesta miles de pesos y así te asustan para que les des $1,000 o $2,500 en efectivo. **¡Que no te engañen!** En la mayoría de los Reglamentos de Tránsito de México:\n"
-                "• **NO se pueden llevar tu vehículo al corralón** por una falta simple (como pasarte un alto, dar vuelta prohibida, traer un faro fundido o hablar por celular) si traes tus papeles vigentes.\n"
-                "• **SÓLO procede corralón** en casos graves contados con los dedos: 1) Conducir en estado de ebriedad (alcoholímetro oficial), 2) Circular sin placas o con placas que no coinciden con el engomado/tarjeta, 3) Participar en un choque con heridos o daños a bienes públicos, o 4) Estacionarte bloqueando rampas de discapacitados o entradas de emergencia.\n"
-                "• **¿Cualquiera puede multarte?:** ¡No! Un policía preventivo municipal o estatal en patrulla normal **no puede levantar multas de tránsito**; solo pueden hacerlo los agentes de Tránsito/Vialidad facultados (que suelen portar uniforme distintivo y terminal electrónica)."
-            ),
-            "fases_cronologicas": [
+            "fases_paso_a_paso": [
                 {
-                    "titulo_fase": "FASE 1: En los primeros 30 segundos cuando te marca el alto la patrulla",
-                    "explicacion": (
-                        "1. Oríllate en un lugar seguro e iluminado, apaga el motor, baja tu ventanilla solo a la mitad y pon tus manos visibles sobre el volante o manubrio.\n"
-                        "2. **Pon tu celular a grabar video o audio de inmediato:** En México **es 100% legal grabar a cualquier policía en la calle** porque es un servidor público en funciones (protegido por el Artículo 6° y 7° de la Constitución). No le pongas el teléfono pegado a la cara para no provocarlo; graba desde tu asiento apuntando a tu ventanilla.\n"
-                        "3. **No entregues tus documentos en su mano todavía:** Primero pídele que se identifique y te diga por qué te detuvo. Si le das tu licencia y tarjeta de circulación en los primeros 5 segundos, el mal policía las usa como 'rehén' y se las lleva a su patrulla para obligarte a bajar a negociar."
-                    )
+                    "fase": "FASE 1: En el momento exacto en que te detiene la patrulla",
+                    "pasos": [
+                        "Oríllate en un lugar seguro e iluminado, apaga el motor, baja tu ventanilla solo a la mitad, enciende la luz interior si es de noche y pon tus manos visibles sobre el volante o manubrio.",
+                        "Saca tu celular y empieza a grabar video o audio. **En México es 100% legal grabar a cualquier policía en la vía pública** porque es un servidor público en funciones, siempre y cuando no lo empujes ni obstruyas físicamente.",
+                        "No entregues tu licencia ni tarjeta de circulación en su mano hasta que el oficial se identifique con nombre completo, te diga el motivo exacto de la detención y te confirme que es agente de Tránsito facultado para infraccionar (una patrulla municipal preventiva normal no suele tener facultad de levantar multas de tránsito)."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 2: Cómo desarmar la amenaza del corralón o la mordida (Minutos 2 al 10)",
-                    "explicacion": (
-                        "• Pídele con voz súper tranquila que te enseñe en su reglamento **qué artículo exacto cometiste y en qué artículo dice que esa falta amerita corralón**.\n"
-                        "• Si te insinúa *'¿cómo nos arreglamos para no llamar a la grúa?'*, dile con firmeza que **no traes efectivo y que prefieres que te levante tu boleta de infracción oficial** para pagarla en la Tesorería con descuento (en casi todos los municipios te hacen 50% a 70% de descuento si pagas en los primeros días, o puedes anularla gratis en el Tribunal).\n"
-                        "• Cuando el policía corrupto ve que estás grabando, que conoces la regla del corralón y que le estás pidiendo que escriba su nombre y firma en una boleta oficial, en el 90% de los casos te devuelve tus cosas y te dice *'ya váyase pues, que sea la última vez'*."
-                    )
+                    "fase": "FASE 2: Si te piden 'mordida' o te amenazan con el corralón",
+                    "pasos": [
+                        "Anota o graba el **número económico de la patrulla** (viene pintado en las puertas o salpicaderas) y la hora exacta.",
+                        "Si te amenazan con llamar a la grúa por una falta menor, diles con voz tranquila que estás grabando y que conoces el Reglamento de Tránsito: pide que te levanten la boleta oficial para pagarla en la Tesorería.",
+                        "Si quieren revisar tu mochila, cajuela o desbloquear tu celular: recuerda que **ningún policía puede revisar tus pertenencias privadas ni tu teléfono sin una orden de un Juez**, salvo que te hayan sorprendido cometiendo un delito en ese instante."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 3: ¿Qué hacer si ya te quitaron la placa/licencia o te levantaron la multa?",
-                    "explicacion": (
-                        "1. Anota o toma foto del **número económico de la patrulla** (viene pintado en las puertas y cajuela), la **hora exacta**, la **calle/esquina** y el **nombre del oficial**.\n"
-                        "2. Si te levantaron una boleta de infracción injusta, **tienes 15 días hábiles para impugnarla gratis** ante el Tribunal de Justicia Administrativa de tu estado/municipio. Como el 80% de las boletas están mal llenadas por los policías, el Tribunal las declara nulas y te devuelven tu placa, licencia o dinero sin pagar un peso."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 4: Cómo denunciar al policía abusivo en Asuntos Internos",
-                    "explicacion": (
-                        "• Llama o acude a la **Unidad de Asuntos Internos / Contraloría de la Policía** o al **911 / 089** reportando el número de patrulla y la hora. Los policías le tienen pánico a una queja formal en Asuntos Internos porque les suspenden el sueldo y les abren expediente de destitución."
-                    )
+                    "fase": "FASE 3: Después del incidente (Cómo anular la multa o denunciar al policía)",
+                    "pasos": [
+                        "Si el policía actuó con abuso o te pidió dinero, llama inmediatamente a **Asuntos Internos / Contraloría de Seguridad Pública** o al **911 / 089** dando el número de patrulla y la calle exacta.",
+                        "Si te levantaron una multa injusta, no tienes que pagarla a ciegas: tienes 15 días hábiles para acudir al **Tribunal de Justicia Administrativa** de tu estado, donde un defensor público gratuito impugna la multa y en la mayoría de los casos la anula al 100%."
+                    ]
                 }
             ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Qué decirle al policía en cuanto se acerca a tu ventanilla:",
-                    "frase_exacta": "\"Buenas tardes, oficial. Antes de mostrarle mis documentos, ¿me puede indicar su nombre completo, número de patrulla y cuál es el artículo exacto del Reglamento de Tránsito por el que me detuvo? Estoy grabando por seguridad de ambos.\""
-                },
-                {
-                    "situacion": "🗣️ Qué responderle si te amenaza con llamar a la grúa / corralón o te pide mordida:",
-                    "frase_exacta": "\"Oficial, traigo mis documentos vigentes y no vengo en estado de ebriedad, por lo que el reglamento no autoriza remisión al corralón. No le voy a entregar dinero en efectivo; por favor levánteme la boleta de infracción oficial con su nombre y firma para revisarla en el Tribunal Administrativo o con Asuntos Internos.\""
-                }
+            "guiones_palabra_por_palabra": [
+                "🗣️ **Qué decir cuando el policía se acerca a tu ventanilla:**\n\"Buenas tardes oficial. Estoy grabando por seguridad de ambos. ¿Me puede indicar su nombre completo, su número de patrulla y qué artículo exacto del Reglamento de Tránsito infringí para que me detuviera?\"",
+                "🗣️ **Qué decir si te amenaza con llevarse tu carro/moto al corralón para pedirte mordida:**\n\"Oficial, usted y yo sabemos que el Reglamento de Tránsito no marca remisión al corralón por este motivo, ya que traigo mis placas y documentos en regla. No le voy a dar dinero en efectivo; si cometí una infracción, elabóreme mi boleta oficial con su terminal para pagarla en Tesorería.\"",
+                "🗣️ **Qué decir si quieren revisar tu celular o tu mochila sin motivo:**\n\"Oficial, con todo respeto no autorizo ninguna revisión a mi teléfono ni a mis pertenencias personales porque el Artículo 16 de la Constitución exige orden judicial.\""
             ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (Bajarte del carro a discutir o empujar al policía):** Jamás te bajes furioso ni toques físicamente al oficial. Si lo empujas o lo insultas, pasas de una simple falta de tránsito a que te esposen y te lleven al Ministerio Público por 'delitos contra servidores públicos'. Mantente sentado y tranquilo.",
-                "🚫 **TRAMPA 2 (Darle tus papeles antes de que te diga el motivo):** Muéstralos primero a través del cristal para que vea que están vigentes, y solo entrégalos si es un agente de tránsito facultado que va a llenar la boleta oficial.",
-                "🚫 **TRAMPA 3 (Permitir que revisen tu cajuela o mochila sin motivo):** Una revisión de rutina ('bájese para revisarle el carro y sus bolsas') sin orden judicial ni flagrancia de delito es inconstitucional (Art. 16 Constitucional). Di claramente en tu grabación: *'No doy mi consentimiento para que revisen mi vehículo'*."
+            "errores_fatales": [
+                "🚫 **ERROR 1 — Insultar, gritar o empujar al policía:** Aunque tú tengas toda la razón, si le gritas groserías o le manoteas, les das el pretexto perfecto para arrestarte por 'faltas a la autoridad' y ahí sí se llevan tu vehículo.",
+                "🚫 **ERROR 2 — Darles dinero ('para el refresco'):** Además de fomentar que te vuelvan a parar, algunos malos elementos te graban dándoles billetes para luego extorsionarte más caro acusándote de cohecho.",
+                "🚫 **ERROR 3 — Entregar tus llaves del carro o moto:** Jamás entregues las llaves de tu vehículo en la mano de un oficial."
             ],
-            "glosario_sencillo": {
-                "Boleta de Infracción Fundada y Motivada": "Significa que el policía está obligado a escribir exactamente qué artículo de la ley rompiste y cómo pasó. Si no lo escribe bien, la multa es nula.",
-                "Garantía (Placa o Licencia)": "En algunos municipios retienen una placa o licencia para asegurar que pagues la multa, pero SOLO un agente de tránsito autorizado entregándote tu boleta oficial firmada puede hacerlo, nunca una patrulla común sin recibo.",
-                "Juicio de Nulidad Administrativa": "Es un trámite sencillo y gratuito donde un juez administrativo cancela tu multa y obliga a Tránsito a devolverte tu placa o tu dinero."
-            },
-            "pasos_inmediatos": [
-                "1. Grabar en video desde tu asiento el número de patrulla, rostro/gafete del oficial y la conversación.",
-                "2. NO entregar dinero en efectivo ('mordida') ni dejarte intimidar con la amenaza falsa de corralón.",
-                "3. Exigir que te indique el artículo exacto del Reglamento de Tránsito y, si procede, te entregue boleta oficial firmada.",
-                "4. Reportar el número de patrulla a Asuntos Internos e impugnar la boleta en los primeros 15 días hábiles."
-            ],
-            "alerta_fatal": "¡NUNCA CAIGAS EN PROVOCACIONES FÍSICAS NI DES DINERO EN EFECTIVO! Graba todo con calma; tienes 15 días hábiles para anular cualquier multa ilegal en el Tribunal Administrativo."
+            "oficina_ayuda": "Unidad de Asuntos Internos de la Policía / Defensoría del Tribunal de Justicia Administrativa (100% Gratis)"
         }
 
-    elif categoria_caso == "Casos Familiares":
+    elif categoria == "Casos Familiares":
         return {
-            "proceso": "Proceso Laboral / Civil / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez de lo Familiar de Primera Instancia",
-            "abogado": "Defensor Público Familiar / Procuraduría del DIF ($0 pesos) o Abogado Familiar",
-            "profesionales": "Trabajador Social + Perito en Psicología adscrito al Juzgado",
-            "medida_sugerida": "Fijación inmediata de Pensión Alimenticia Provisional y rastreo bancario ante el SAT/CNBV",
-            "recurso_clave": "Demanda inicial de Alimentos y Guarda y Custodia",
-            "radiografia_empatica": (
-                "Analicé tu caso familiar. Estás enfrentando el **incumplimiento de pensión alimenticia (gasto de los hijos) y/o disputa de guarda y custodia**, "
-                "incluyendo la maña común donde el deudor esconde su dinero o se sale de su trabajo formal para fingir que no tiene ingresos."
+            "titulo_guia": "Guía Paso a Paso para Exigir Pensión Alimenticia y Proteger a tus Hijos",
+            "radiografia_caso": [
+                "Detectamos un problema de falta de pago de pensión alimenticia (gasto de los hijos), custodia o separación familiar.",
+                "La alimentación, escuela, ropa y salud de los niños es prioridad absoluta para cualquier Juez en México."
+            ],
+            "explicacion_sencilla": (
+                "Muchos deudores creen que saliéndose de trabajar o cobrando en efectivo por fuera ya se libraron de dar gasto para sus hijos. "
+                "¡Eso es falso! El Juez Familiar tiene poder para fijar una **Pensión Alimenticia Provisional desde la primera semana** y pedirle al SAT y a los bancos todos los movimientos de dinero del papá o mamá que no quiere pagar."
             ),
-            "explicacion_sencilla_dinero": (
-                "**¿Qué pasa si el papá o mamá de tus hijos dice que 'no tiene trabajo' para no dar gasto?**\n\n"
-                "La ley mexicana protege primero a los niños por encima de cualquier pretexto:\n"
-                "• Aunque se haya salido de su empleo formal para no aparecer en el IMSS, **el Juez Familiar tiene poder para pedirle a todos los bancos (vía Comisión Nacional Bancaria) y al SAT** la lista de todas sus tarjetas, transferencias y depósitos en efectivo.\n"
-                "• Si no tiene cuenta de banco y cobra puro efectivo, el Juez le fija una pensión obligatoria basada en el **Salario Mínimo o en el nivel de vida** que han tenido los niños (usualmente del **15% al 20% por cada hijo**).\n"
-                "• Además, dejar de pagar alimentos sin justificación es un **delito penal (abandono de obligaciones alimenticias)** y hace que lo metan al **Registro Nacional de Deudores Alimentarios**, donde le bloquean el trámite de pasaporte, licencia de conducir y créditos."
-            ),
-            "fases_cronologicas": [
+            "fases_paso_a_paso": [
                 {
-                    "titulo_fase": "FASE 1: ¿Qué papeles y pruebas juntar hoy en tu casa?",
-                    "explicacion": (
-                        "1. **Actas de nacimiento originales** de tus hijos y acta de matrimonio (si estuvieron casados).\n"
-                        "2. **Lista y tickets de todo lo que gastan los niños al mes:** Supermercado, leche, ropa, colegiaturas, útiles, medicinas, renta, luz e internet.\n"
-                        "3. **Datos del deudor:** Su nombre completo, CURP o RFC (si lo tienes), domicilio donde vive o trabaja, fotos de sus redes sociales donde presuma negocios, carros, viajes o fiestas, y el número de tarjeta o banco donde sabes que mueve dinero."
-                    )
+                    "fase": "FASE 1: ¿Qué reunir HOY MISMO en tu casa?",
+                    "pasos": [
+                        "Busca las actas de nacimiento originales de tus hijos y, si estuvieron casados, el acta de matrimonio.",
+                        "Guarda todos los tickets y notas de lo que gastas en los niños: supermercado, colegiaturas, útiles, medicinas, ropa, renta y luz.",
+                        "Anota el nombre y dirección del trabajo del papá/mamá de tus hijos, o si tiene negocio propio, fotos del negocio, placas de su auto o capturas de sus redes sociales donde presume gastos."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 2: Ir al Juzgado Familiar o DIF por tu 'Pensión Provisional' (Esta semana)",
-                    "explicacion": (
-                        "• No necesitas esperar un año de juicio para recibir dinero. En cuanto presentas tu solicitud con un defensor gratuito del **DIF / Defensoría de Oficio** o con tu abogado, el Juez dicta en los primeros días una **Pensión Alimenticia Provisional** obligatoria mientras dura el proceso."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 3: Investigación de ingresos ocultos y Guarda y Custodia",
-                    "explicacion": (
-                        "• El Juez manda oficios al IMSS, SAT y Bancos para congelar o descontar directamente el porcentaje de los niños, y te otorga la **Guarda y Custodia Provisional** para que nadie te pueda quitar a tus hijos por la fuerza."
-                    )
+                    "fase": "FASE 2: ¿A dónde acudir ESTA SEMANA sin gastar dinero?",
+                    "pasos": [
+                        "Acude a la **Procuraduría del DIF** de tu municipio o a la **Defensoría Pública Familiar** en los Juzgados Familiares. Ahí te asignan un abogado familiar totalmente gratis.",
+                        "Pide que ingresen la demanda de pensión alimenticia solicitando **Pensión Provisional Urgente** para que el Juez ordene el descuento inmediato de su nómina o fije una cantidad mensual obligatoria."
+                    ]
                 }
             ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Qué responder cuando tu expareja te amenaza con 'no te voy a dar un peso porque ya me salí de trabajar y te voy a quitar a los niños':",
-                    "frase_exacta": "\"La pensión no es un favor para mí, es un derecho de nuestros hijos por ley. Aunque ocultes tu sueldo, el Juez Familiar va a revisar tus cuentas bancarias y tu nivel de vida, y la custodia solo la decide un Juez. Todo lo vamos a arreglar por escrito en el Juzgado Familiar.\""
-                }
+            "guiones_palabra_por_palabra": [
+                "🗣️ **Qué decir en la Defensoría Familiar o el DIF:**\n\"Vengo a solicitar un abogado gratuito para tramitar la pensión alimenticia provisional y guarda y custodia de mis hijos, ya que su progenitor dejó de aportar para sus gastos básicos.\""
             ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (Confiar en acuerdos de palabra):** Si te dice *'No me demandes, yo te doy $1,000 cuando pueda'*, te va a dar dos semanas y luego volverá a fallar. Todo acuerdo debe estar firmado ante el Juez Familiar.",
-                "🚫 **TRAMPA 2 (Prohibirle ver a los niños como venganza sin orden del Juez):** No mezcles la pensión con las visitas por tu propia mano; pide primero al Juez la custodia provisional para que todo esté respaldado legalmente."
+            "errores_fatales": [
+                "🚫 **ERROR 1 — Confiar en acuerdos de palabra:** Si no está firmado ante un Juez Familiar o Mediador oficial, el día de mañana vuelve a dejar de pagar sin consecuencias.",
+                "🚫 **ERROR 2 — Prohibirle ver a los niños como venganza sin avisar al Juez:** Todo debe hacerse mediante el Juez para que la otra parte no se haga la víctima en el juzgado."
             ],
-            "glosario_sencillo": {
-                "Pensión Provisional": "Es el dinero urgente que el Juez ordena que te empiecen a pagar desde el inicio de la demanda, sin esperar a que termine el juicio.",
-                "Guarda y Custodia": "Significa con quién viven y quién cuida todos los días a los hijos.",
-                "Deudor Alimentario Moroso": "Persona que debe más de 90 días de pensión y queda boletinada a nivel nacional."
-            },
-            "pasos_inmediatos": [
-                "1. Reunir actas de nacimiento de tus hijos y tickets/recibos de comida, escuela, médico y casa.",
-                "2. Anotar el domicilio, trabajo, RFC/CURP y bancos donde el deudor recibe dinero.",
-                "3. Acudir al DIF o Defensoría Familiar gratuita para pedir Pensión Alimenticia Provisional urgente.",
-                "4. Solicitar al Juez que gire oficios al SAT y Comisión Bancaria para detectar ingresos ocultos."
-            ],
-            "alerta_fatal": "¡No te quedes esperando promesas verbales! Cada mes que no demandas es dinero para tus hijos que cuesta mucho más trabajo cobrar hacia atrás."
-        }
-
-    elif categoria_caso == "Casos Penales":
-        return {
-            "proceso": "Proceso Penal (8 Etapas)",
-            "juez": "Juez de Control Penal / CONDUSEF (en caso de fraude bancario)",
-            "abogado": "Asesor Jurídico de Víctimas / CONDUSEF ($0 pesos) o Abogado Penalista",
-            "profesionales": "Fiscal del Ministerio Público + Perito en Informática Forense",
-            "medida_sugerida": "Reporte inmediato de folio bancario, descarga de CEP Banxico y denuncia con sello SHA-256",
-            "recurso_clave": "Reclamación en CONDUSEF y Querella Penal ante Fiscalía Ciberdelitos",
-            "radiografia_empatica": (
-                "Analicé tu emergencia penal/digital. Estás sufriendo un **Fraude Bancario (vaciado de cuenta por enlace falso/SPEI) o un delito que requiere preservar tus pruebas digitales intactas**."
-            ),
-            "explicacion_sencilla_dinero": (
-                "**¿El banco está obligado a devolverte tu dinero si te vaciaron la cuenta?**\n\n"
-                "¡Sí hay forma de recuperarlo! La Suprema Corte de Justicia de la Nación (SCJN) determinó que **los bancos tienen la obligación de cuidar los ahorros de sus clientes** y que, cuando ocurre una transferencia electrónica no reconocida, el banco no puede lavarse las manos diciendo *'fue tu culpa'* a menos que pruebe con peritajes técnicos que tú mismo autorizaste la operación de forma segura."
-            ),
-            "fases_cronologicas": [
-                {
-                    "titulo_fase": "FASE 1: Primeras 2 horas (Bloquear y rastrear a quién le cayó tu dinero)",
-                    "explicacion": (
-                        "1. Llama ya a tu banco, bloquea tu tarjeta/banca móvil y **exige que levanten un Folio de Aclaración por Transferencia o Cargo No Reconocido**. Anota el número de folio y el nombre de quien te atendió.\n"
-                        "2. **El truco maestro para saber quién te robó (CEP de Banxico):** Entra a la página oficial de Banxico (`banxico.org.mx/cep`) con la fecha, monto y clave de rastreo de la transferencia que te robaron. Ahí podrás descargar el comprobante oficial que revela el **nombre completo y RFC real del delincuente** que recibió tu dinero."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 2: Preservar tu celular sin borrar nada (Primeras 24 horas)",
-                    "explicacion": (
-                        "• **No borres el mensaje de texto (SMS), WhatsApp ni el historial de llamadas** donde entró el enlace falso. Toma capturas de pantalla completas (sin recortar la hora de arriba) y guárdalas."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 3: Queja gratuita en CONDUSEF y Denuncia en Fiscalía",
-                    "explicacion": (
-                        "• Si el banco te responde que 'tu reclamo no procede', entra al portal de la **CONDUSEF** (es 100% gratis). Ahí citan al banco y te dan un dictamen técnico para obligarlos a devolverte tu dinero más intereses."
-                    )
-                }
-            ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Qué decirle al ejecutivo del banco por teléfono:",
-                    "frase_exacta": "\"Quiero reportar transferencias electrónicas que yo jamás autoricé ni reconozco. Solicito el bloqueo preventivo de mi cuenta y que me proporcione en este momento mi número de folio de aclaración por cargos no reconocidos para presentarlo ante la CONDUSEF.\""
-                }
-            ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (Borrar el chat o formatear el celular por miedo):** Si borras el mensaje donde te engañaron, destruyes la prueba principal para el Ministerio Público.",
-                "🚫 **TRAMPA 2 (Rendirse cuando el banco te dice que 'no procede'):** Los bancos rechazan por sistema el primer reclamo esperando que la gente se rinda; el verdadero cobro se logra al llevar ese rechazo a la CONDUSEF."
-            ],
-            "glosario_sencillo": {
-                "CEP de Banxico": "Es el recibo oficial del Banco de México que te dice el nombre y RFC real de la persona a la que le llegó tu dinero robado.",
-                "Sello Criptográfico SHA-256": "Es una huella digital única que genera esta aplicación para demostrar ante un juez que tu relato y tus pruebas no fueron alterados."
-            },
-            "pasos_inmediatos": [
-                "1. Llamar al banco para bloquear la cuenta y exigir Folio de Aclaración por Cargo No Reconocido.",
-                "2. Descargar el comprobante CEP en la página de Banxico para obtener nombre y RFC del receptor.",
-                "3. NO borrar los mensajes SMS/WhatsApp falsos y tomar capturas de pantalla completas.",
-                "4. Presentar queja gratuita en CONDUSEF y denuncia en Fiscalía con los datos del CEP."
-            ],
-            "alerta_fatal": "¡No borres los mensajes de tu teléfono ni aceptes un 'no procede' del banco sin ir a la CONDUSEF!"
-        }
-
-    elif categoria_caso == "Casos Civiles":
-        return {
-            "proceso": "Proceso Laboral / Civil / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez Civil de Primera Instancia / CONDUSEF y Policía Cibernética (en cobranza abusiva)",
-            "abogado": "Abogado Litigante Civil o Defensoría Pública Civil ($0 pesos)",
-            "profesionales": "Actuario Judicial + Notario / Mediador Certificado",
-            "medida_sugerida": "Demanda de Controversia de Arrendamiento y Embargo de Bienes / Denuncia por Cobranza Ilegítima",
-            "recurso_clave": "Juicio de Desocupación y Cobro de Rentas / Denuncia Penal Art. 284 Bis (Cobranza Ilegítima)",
-            "radiografia_empatica": (
-                "Analicé tu problema civil/patrimonial. Se trata de un **conflicto de arrendamiento (inquilino que no paga y no se sale) o de amenazas ilegales por deudas y despachos de cobranza**."
-            ),
-            "explicacion_sencilla_dinero": (
-                "**Dos verdades legales que todo ciudadano debe saber en materia civil:**\n\n"
-                "1. **Si tienes un inquilino que no te paga la renta:** La única forma legal de sacarlo es con una orden del Juez Civil. Si tú vas con un cerrajero, le cambias la chapa o le sacas sus muebles a la banqueta, **el inquilino moroso te puede meter a la cárcel a ti por el delito de Despojo**.\n"
-                "2. **Si te amenazan por una deuda o préstamo de aplicación:** En México (Artículo 17 de la Constitución), **nadie puede ir a la cárcel por deber dinero civil o bancario**, y ningún cobrador de WhatsApp puede llegar mañana a embargarte tu casa sin que antes exista un juicio donde te notifique un Actuario oficial del Juzgado con identificación."
-            ),
-            "fases_cronologicas": [
-                {
-                    "titulo_fase": "FASE 1: Qué hacer hoy mismo según tu caso",
-                    "explicacion": (
-                        "• **Si eres dueño de casa rentada:** Busca tu contrato de arrendamiento (y si no hiciste contrato escrito, junta los recibos de transferencia, mensajes de WhatsApp donde le cobras la renta y testigos).\n"
-                        "• **Si te acosan cobradores o apps de préstamos:** Pon tus redes sociales en privado, avisa a tus contactos que tu teléfono sufrió robo de datos por una app fraudulenta y **bloquea/reporta** los números ante la Policía Cibernética y REDECO de CONDUSEF."
-                    )
-                },
-                {
-                    "titulo_fase": "FASE 2: Promover el trámite ante el Juez Civil o Centro de Mediación",
-                    "explicacion": (
-                        "• En arrendamiento, el Juez Civil admite tu demanda, ordena requerir el pago de todas las rentas atrasadas y le fija un plazo forzoso al inquilino para entregar las llaves o ser desalojado legalmente con fuerza pública."
-                    )
-                }
-            ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Qué responderle a un cobrador agresivo que amenaza con 'ir mañana a embargar y romper cerraduras':",
-                    "frase_exacta": "\"Sé perfectamente que en México ningún despacho privado puede embargar sin orden de un Juez y presencia de un Actuario judicial. Sus amenazas y papeles falsos constituyen el delito de Cobranza Ilegítima (Art. 284 Bis del Código Penal). Estoy guardando estas capturas para denunciarlos en Fiscalía y CONDUSEF.\""
-                }
-            ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (Cortarle el agua, la luz o cambiarle la chapa a tu inquilino):** Aunque sea tu propia casa, no lo hagas por tu cuenta sin orden del Juez; le darías armas al inquilino para denunciarte por despojo.",
-                "🚫 **TRAMPA 2 (Pedir otro préstamo en otra app ilegal para pagar la primera):** Las apps 'montadeudas' nunca dejan de extorsionar aunque les pagues; repórtalas al 089 y Policía Cibernética."
-            ],
-            "glosario_sencillo": {
-                "Lanzamiento Judicial": "Es cuando el Juez manda al Actuario y a la policía para sacar legalmente al inquilino que no quiso salirse por las buenas.",
-                "Cobranza Ilegítima": "Es el delito que cometen los cobradores cuando usan insultos, amenazas, sellos falsos de juzgados o molestan a tus familiares y amigos."
-            },
-            "pasos_inmediatos": [
-                "1. Reunir contrato, transferencias y mensajes de WhatsApp que comprueben el adeudo o las amenazas.",
-                "2. NO hacer justicia por propia mano (no cambiar chapas ni cortar servicios sin orden del Juez).",
-                "3. Si es cobranza abusiva, recordar que nadie puede embargarte por WhatsApp y reportar a REDECO/Policía Cibernética.",
-                "4. Acudir al Juzgado Civil o Centro de Mediación Pública para iniciar el juicio legal."
-            ],
-            "alerta_fatal": "¡Jamás te metas por la fuerza al inmueble rentado ni creas en 'embargos por WhatsApp' sin orden de un Juez!"
+            "oficina_ayuda": "Procuraduría de Protección de Niñas, Niños y Adolescentes (DIF) / Juzgados de lo Familiar"
         }
 
     else:
         return {
-            "proceso": "Proceso Laboral / Civil / Familiar / Mercantil (7 Etapas)",
-            "juez": "Juez Mercantil",
-            "abogado": "Abogado Litigante Mercantil",
-            "profesionales": "Actuario Ejecutor + Perito en Grafoscopía",
-            "medida_sugerida": "Juicio Ejecutivo Mercantil con embargo de bienes desde la primera visita",
-            "recurso_clave": "Demanda Ejecutiva Mercantil (Auto de Exequendo)",
-            "radiografia_empatica": (
-                "Analicé tu caso mercantil. Tienes un **pagaré, cheque o deuda comercial vencida** y la persona que te debe se esconde o se niega a pagarte."
+            "titulo_guia": f"Guía Ciudadana Paso a Paso para Resolver tu Caso ({categoria})",
+            "radiografia_caso": [
+                f"Analizamos tu problema clasificado dentro de **{categoria} ({tipo})**.",
+                "Tu caso requiere proteger tus pruebas documentales y acudir ante la instancia correcta sin cometer actos por cuenta propia."
+            ],
+            "explicacion_sencilla": (
+                "En problemas de fraudes bancarios, rentas o deudas de dinero (pagarés), gana quien conserva intactos sus documentos o evidencias digitales y actúa primero ante la autoridad correspondiente."
             ),
-            "explicacion_sencilla_dinero": (
-                "**¿Por qué un Pagaré firmado tiene tanta fuerza legal?**\n\n"
-                "Un pagaré es un documento especial que en la ley se llama *'Título que trae aparejada ejecución'*. En español simple: **con un pagaré no tienes que esperar un año de juicio para ver si el juez te da permiso de embargar**. Desde el primer día que metes la demanda, el Juez ordena que el Actuario vaya al domicilio del deudor a cobrarle y, si no paga en ese instante, **le embargan su carro, mercancía, cuentas o bienes ahí mismo**."
-            ),
-            "fases_cronologicas": [
+            "fases_paso_a_paso": [
                 {
-                    "titulo_fase": "FASE 1: Cuidar el pagaré original como oro",
-                    "explicacion": (
-                        "• Guarda el pagaré original en una mica protectora. **Por ningún motivo le anotes nada encima con otra pluma**, ni le remarques la fecha ni los intereses después de que te lo firmaron, porque si usas dos tintas diferentes el deudor puede meter un perito y anular el pagaré por alteración."
-                    )
+                    "fase": "FASE 1: Primeras 24 horas (Protección de tus pruebas)",
+                    "pasos": [
+                        "No borres conversaciones de WhatsApp, correos ni estados de cuenta; guárdalos íntegros sin recortar las capturas.",
+                        "Si tienes un contrato de renta o un pagaré firmado, guárdalo en una mica protectora sin rayarlo ni remarcarlo con otra pluma."
+                    ]
                 },
                 {
-                    "titulo_fase": "FASE 2: Diligencia de requerimiento de pago y embargo",
-                    "explicacion": (
-                        "• Ubica qué bienes tiene el deudor (placas de su vehículo, negocio o casa) y acude con un abogado mercantil para presentar la demanda antes de que pasen **3 años** desde que venció el pagaré."
-                    )
+                    "fase": "FASE 2: Esta semana (Acción oficial)",
+                    "pasos": [
+                        "Si fue un cargo o transferencia bancaria que no reconoces: llama hoy a tu banco para pedir el folio de aclaración y levanta tu queja gratuita en la **CONDUSEF**.",
+                        "Si es un inquilino que no paga o un deudor de pagaré: acude con un abogado civil/mercantil o a la Defensoría Pública para iniciar el juicio de embargo o desocupación legal."
+                    ]
                 }
             ],
-            "guiones_dialogo": [
-                {
-                    "situacion": "🗣️ Último aviso formal antes de meter el embargo con el Actuario:",
-                    "frase_exacta": "\"Te informo que el pagaré que me firmaste ya se encuentra vencido. Te doy de plazo hasta el viernes para liquidar por las buenas; de lo contrario, la próxima semana acudiré directamente con el Actuario del Juzgado Mercantil a realizar el embargo de bienes en tu domicilio por la deuda más los intereses y gastos del juicio.\""
-                }
+            "guiones_palabra_por_palabra": [
+                "🗣️ **Qué decir al presentar tu reclamación:**\n\"Solicito que se registre formalmente mi queja con número de folio y se conserven íntegros los registros electrónicos y documentales de mi caso.\""
             ],
-            "trampas_mortales": [
-                "🚫 **TRAMPA 1 (Rellenar espacios vacíos con otra tinta frente al deudor o después):** Si el pagaré tenía espacios en blanco, asesórate antes de tocarlo.",
-                "🚫 **TRAMPA 2 (Entregar el pagaré original a cambio de una promesa):** Nunca sueltes el papel original hasta que el dinero ya esté firme en tus manos o en tu cuenta."
+            "errores_fatales": [
+                "🚫 **ERROR 1 — Hacer justicia por tu propia mano:** Si eres dueño de una casa rentada, jamás cambies la chapa ni saques las cosas del inquilino a la banqueta sin orden del Juez, porque te pueden denunciar por despojo.",
+                "🚫 **ERROR 2 — Entregar documentos originales sin recibir tu pago:** Nunca entregues el pagaré original hasta que el dinero esté firme en tu cuenta."
             ],
-            "glosario_sencillo": {
-                "Auto de Exequendo": "Es la orden del Juez que permite ir a embargarle cosas al deudor desde la primera visita a su casa o negocio.",
-                "Interés Moratorio": "Es el dinero extra que se va sumando cada mes por haberse tardado en pagarte después de la fecha prometida."
-            },
-            "pasos_inmediatos": [
-                "1. Resguardar el pagaré o documento original intacto, sin hacerle rayones ni anotaciones con otra pluma.",
-                "2. Ubicar el domicilio exacto del deudor y qué bienes tiene a su nombre (vehículos, local, cuentas).",
-                "3. Iniciar Juicio Ejecutivo Mercantil solicitando embargo desde la primera diligencia.",
-                "4. No entregar jamás el pagaré original hasta haber recibido el pago completo."
-            ],
-            "alerta_fatal": "¡No alteres el pagaré con otra pluma ni dejes pasar 3 años desde su vencimiento!"
+            "oficina_ayuda": "CONDUSEF (800 999 8080) / Fiscalía / Defensoría Pública Civil y Mercantil"
         }
 
 # ==============================================================================
-# 7. AGENTE DE BÚSQUEDA EN VIVO EN INTERNET Y RED NEURONAL EVOLUTIVA
+# 7. AGENTE DE BÚSQUEDA EN VIVO EN INTERNET Y RED NEURONAL AUTO-EVOLUTIVA
 # ==============================================================================
-def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str, relato_usuario: str) -> dict:
+def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str) -> dict:
     resultados_web = []
     textos_para_entrenar = []
 
-    termino_wiki = f"{tipo_caso} derecho México"
-    if categoria_caso == "Tránsito, Multas y Abuso Policial":
-        termino_wiki = "Reglamento de tránsito infracción México derechos"
+    termino_wiki = f"{tipo_caso} Mexico"
+    if categoria_caso == "Casos de Tránsito y Policía":
+        termino_wiki = "Reglamento de transito infraccion Mexico"
+    elif categoria_caso == "Casos Laborales":
+        termino_wiki = "Despido laboral Ley Federal del Trabajo Mexico"
 
     try:
         url_wiki = (
@@ -1362,7 +1079,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
                 snip_w = re.sub(r"<[^>]+>", "", item.get("snippet", ""))
                 link_w = f"https://es.wikipedia.org/wiki/{urllib.parse.quote(titulo_w.replace(' ', '_'))}"
                 resultados_web.append({
-                    "fuente": "📖 Enciclopedia Jurídica / Wikipedia",
+                    "fuente": "📖 Enciclopedia Legal / Wikipedia",
                     "titulo": titulo_w,
                     "resumen": snip_w,
                     "url": link_w
@@ -1371,13 +1088,11 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
     except Exception:
         pass
 
-    palabras_clave_busqueda = f"{tipo_caso} ley derechos Mexico"
+    palabras_clave_busqueda = f"{tipo_caso} derechos Mexico"
     if categoria_caso == "Casos Laborales":
-        palabras_clave_busqueda = "despido injustificado liquidacion Ley Federal del Trabajo PROFEDET Mexico"
-    elif categoria_caso == "Tránsito, Multas y Abuso Policial":
-        palabras_clave_busqueda = "multas de transito corralon abuso policial reglamento Mexico derechos"
-    elif categoria_caso == "Casos Familiares":
-        palabras_clave_busqueda = "pension alimenticia guarda custodia Juez Familiar Mexico"
+        palabras_clave_busqueda = "despido injustificado liquidacion PROFEDET Ley Federal del Trabajo Mexico"
+    elif categoria_caso == "Casos de Tránsito y Policía":
+        palabras_clave_busqueda = "multas transito corralon policia derechos conductor Mexico"
 
     try:
         url_gnews = (
@@ -1386,16 +1101,15 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
         )
         req_g = urllib.request.Request(url_gnews, headers={"User-Agent": "ForensicMindLegalBot/8.0"})
         with urllib.request.urlopen(req_g, timeout=4.5) as resp_g:
-            xml_data = resp_g.read()
-            root = ET.fromstring(xml_data)
+            root = ET.fromstring(resp_g.read())
             for it in root.findall(".//item")[:3]:
-                tit = it.find("title").text if it.find("title") is not None else "Criterio Jurídico en Línea"
+                tit = it.find("title").text if it.find("title") is not None else "Noticia Jurídica"
                 lnk = it.find("link").text if it.find("link") is not None else "https://www.scjn.gob.mx"
                 pub = it.find("pubDate").text[:16] if it.find("pubDate") is not None else "Reciente"
                 resultados_web.append({
-                    "fuente": f"🌐 Google Noticias Jurídicas México ({pub})",
+                    "fuente": f"🌐 Google Noticias México ({pub})",
                     "titulo": tit,
-                    "resumen": f"Noticia o criterio reciente aplicable a {categoria_caso} ({tipo_caso}).",
+                    "resumen": f"Información reciente localizada en internet sobre {categoria_caso}.",
                     "url": lnk
                 })
                 textos_para_entrenar.append(tit)
@@ -1410,7 +1124,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str,
 def registrar_experiencia_en_memoria_autonoma(
     relato_original: str,
     clasificacion: dict,
-    fuente: str = "Consulta Ciudadana / Voz",
+    fuente: str = "Consulta Ciudadana",
     texto_web_extra: str = "",
     repo_gh: str = "",
     token_gh: str = "",
@@ -1479,31 +1193,498 @@ def entrenar_red_neuronal_evolutiva():
         textos_entrenamiento.append(str(m["relato_expandido"]))
         etiquetas_entrenamiento.append(f"{m['categoria_caso']}|{m['rama_derecho']}|{m['tipo_caso']}|{m['macro_rama']}")
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=2500)
+    vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=2400)
     X_vec = vectorizer.fit_transform(textos_entrenamiento)
 
     mlp = MLPClassifier(hidden_layer_sizes=(96, 48), activation='relu', max_iter=500, random_state=42)
     mlp.fit(X_vec, etiquetas_entrenamiento)
 
-    stats_modelo = {
+    return vectorizer, mlp, {
         "total_muestras": len(textos_entrenamiento),
         "experiencias_aprendidas": len(df_mem),
         "vocabulario_ngramas": len(vectorizer.vocabulary_)
     }
-    return vectorizer, mlp, stats_modelo
 
 def autoclasificar_caso_con_red_neuronal(relato: str, vectorizer_mlp, modelo_mlp) -> dict:
     relato_expandido = expandir_lenguaje_coloquial(relato)
     texto_low = relato_expandido.lower()
 
-    scores_ramas = {
+    scores = {
         "Casos Laborales": 0,
-        "Tránsito, Multas y Abuso Policial": 0,
+        "Casos de Tránsito y Policía": 0,
         "Casos Familiares": 0,
-        "Casos Penales": 0,
+        "Casos Penales y Fraudes": 0,
         "Casos Civiles": 0,
         "Casos Mercantiles": 0
     }
 
-    reglas_puntaje = {
-        "Casos
+    reglas = {
+        "Casos Laborales": [
+            "despid", "corrieron", "echaron", "chamba", "trabajo", "liquidaci", "finiquito",
+            "sueldo", "salario", "semanal", "quincenal", "vacaciones", "aguinaldo", "patron",
+            "jefe", "renuncia", "hoja en blanco", "dias libres", "bonos", "nomina"
+        ],
+        "Casos de Tránsito y Policía": [
+            "transito", "policia", "patrulla", "mordida", "corralon", "grua", "infraccion",
+            "multa", "placas", "licencia", "tarjeta de circulacion", "reten", "rutina", "moto", "oficial"
+        ],
+        "Casos Familiares": [
+            "pension", "alimentos", "alimenticia", "hijos", "custodia", "divorcio", "gasto de los niños", "manutencion"
+        ],
+        "Casos Penales y Fraudes": [
+            "fraude", "estafa", "phishing", "spei", "vaciaron", "robaron", "cobranza", "prestamo", "amenaza"
+        ],
+        "Casos Civiles": [
+            "inquilino", "renta", "arrendamiento", "departamento", "desalojar", "chapa", "casero"
+        ],
+        "Casos Mercantiles": [
+            "pagare", "cheque", "mercancia", "deudor comercial"
+        ]
+    }
+
+    for cat_k, kws in reglas.items():
+        for kw in kws:
+            if kw in texto_low:
+                scores[cat_k] += 20
+
+    cat_ganadora = max(scores, key=scores.get)
+
+    mapa_defaults = {
+        "Casos Laborales": ("Derecho Privado", "Derecho Laboral", "Casos Laborales", "Despido injustificado"),
+        "Casos de Tránsito y Policía": ("Derecho Público", "Derecho Administrativo y Vial", "Casos de Tránsito y Policía", "Intento de mordida o amenaza de llevar al corralón"),
+        "Casos Familiares": ("Derecho Privado", "Derecho de Familia", "Casos Familiares", "Pensión alimenticia (Papá o mamá que no da gasto)"),
+        "Casos Penales y Fraudes": ("Derecho Público", "Derecho Penal", "Casos Penales y Fraudes", "Fraude bancario, vaciado de cuenta o transferencia SPEI"),
+        "Casos Civiles": ("Derecho Privado", "Derecho Civil", "Casos Civiles", "Inquilino que no paga la renta ni se quiere salir"),
+        "Casos Mercantiles": ("Derecho Privado", "Derecho Mercantil", "Casos Mercantiles", "Cobro de pagaré firmado o dinero prestado")
+    }
+    macro, rama, cat, tipo = mapa_defaults[cat_ganadora]
+
+    confianza = 94.5
+    if modelo_mlp is not None and vectorizer_mlp is not None and scores[cat_ganadora] == 0:
+        try:
+            X_t = vectorizer_mlp.transform([relato_expandido])
+            pred = modelo_mlp.predict(X_t)[0].split("|")
+            if len(pred) == 4:
+                cat, rama, tipo, macro = pred[0], pred[1], pred[2], pred[3]
+        except Exception:
+            pass
+
+    return {
+        "macro_rama": macro,
+        "rama": rama,
+        "categoria": cat,
+        "tipo": tipo,
+        "confianza": confianza,
+        "hash_evidencia": hashlib.sha256(relato.encode("utf-8")).hexdigest()
+    }
+
+def tokenizar(texto: str) -> Counter:
+    palabras = re.findall(r'[a-zA-ZáéíóúñÁÉÍÓÚÑ0-9_./-]+', texto.lower())
+    stopwords = {'de', 'la', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un', 'para', 'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'que', 'es', 'sin'}
+    return Counter(w for w in palabras if w not in stopwords and len(w) > 2)
+
+def calcular_similitud_coseno(texto1: str, texto2: str) -> float:
+    vec1 = tokenizar(texto1)
+    vec2 = tokenizar(texto2)
+    inter = set(vec1.keys()) & set(vec2.keys())
+    num = sum([vec1[x] * vec2[x] for x in inter])
+    den = math.sqrt(sum([v ** 2 for v in vec1.values()])) * math.sqrt(sum([v ** 2 for v in vec2.values()]))
+    if not den:
+        return 0.0
+    return round((float(num) / den) * 100, 1)
+
+# ==============================================================================
+# 8. VOZ, WORD (.DOCX) EXHAUSTIVO Y FICHA 9:16 CON AUTO-AJUSTE SIN CORTAR PALABRAS
+# ==============================================================================
+def transcribir_audio_espanol(audio_bytes) -> str:
+    if sr is None or audio_bytes is None:
+        return ""
+    try:
+        r = sr.Recognizer()
+        audio_file = io.BytesIO(audio_bytes.getvalue() if hasattr(audio_bytes, "getvalue") else audio_bytes.read())
+        with sr.AudioFile(audio_file) as source:
+            audio_data = r.record(source)
+            return r.recognize_google(audio_data, language="es-MX")
+    except Exception:
+        return "⚠️ No se pudo transcribir el audio automáticamente. Escribe tu caso en el cuadro de texto."
+
+def generar_dictamen_word_docx(codigo: str, relato: str, clasificacion: dict, asesoria: dict, res_liq: dict, res_hon: dict) -> bytes:
+    if Document is None:
+        return b""
+    doc = Document()
+    doc.add_heading("GUÍA PERSONALIZADA DE DEFENSA CIUDADANA — FORENSICMIND v8.0", 0)
+    doc.add_paragraph(f"Autor del Sistema: {AUTOR_SISTEMA}")
+    doc.add_paragraph(f"Expediente: {codigo} | Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    doc.add_paragraph(f"Sello SHA-256: {clasificacion['hash_evidencia']}")
+
+    doc.add_heading("1. Tu Caso Explicado de Forma Sencilla", level=1)
+    doc.add_paragraph(relato)
+    for item_r in asesoria["radiografia_caso"]:
+        doc.add_paragraph(re.sub(r"\*", "", item_r), style="List Bullet")
+    doc.add_paragraph(re.sub(r"\*", "", asesoria["explicacion_sencilla"]))
+
+    if clasificacion["categoria"] == "Casos Laborales":
+        doc.add_heading("2. Resumen de tu Dinero por Ley (LFT)", level=1)
+        doc.add_paragraph(f"• Liquidación Total por Ley: ${res_liq['gran_total_bruto']:,.2f} MXN")
+        doc.add_paragraph(f"• Dinero Libre para Ti (descontando abogado): ${res_hon['monto_neto_libre_ciudadano']:,.2f} MXN")
+
+    doc.add_heading("3. Plan de Acción Paso a Paso", level=1)
+    for bloque_f in asesoria["fases_paso_a_paso"]:
+        doc.add_heading(bloque_f["fase"], level=2)
+        for p_f in bloque_f["pasos"]:
+            doc.add_paragraph(re.sub(r"\*", "", p_f), style="List Bullet")
+
+    doc.add_heading("4. Qué Decir Exactamente (Guiones Palabra por Palabra)", level=1)
+    for g_txt in asesoria["guiones_palabra_por_palabra"]:
+        doc.add_paragraph(re.sub(r"\*", "", g_txt))
+
+    doc.add_heading("5. Errores Fatales que NUNCA Debes Cometer", level=1)
+    for err_txt in asesoria["errores_fatales"]:
+        doc.add_paragraph(re.sub(r"\*", "", err_txt), style="List Bullet")
+
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+def limpiar_ascii(texto: str) -> str:
+    limpio = re.sub(r"\*", "", str(texto))
+    reemplazos = str.maketrans("áéíóúñÁÉÍÓÚÑüÜ", "aeiounAEIOUNuU")
+    limpio = limpio.translate(reemplazos)
+    return limpio.encode("ascii", "ignore").decode("ascii")
+
+def generar_ficha_vertical_9_16(codigo: str, clasificacion: dict, asesoria: dict, monto_bruto: float, monto_neto: float) -> np.ndarray:
+    """Genera una imagen vertical 1080x1920 usando textwrap.wrap para JAMÁS cortar palabras a la mitad."""
+    alto, ancho = 1920, 1080
+    img = np.zeros((alto, ancho, 3), dtype=np.uint8)
+    img[:] = (24, 15, 10)
+
+    cv2.rectangle(img, (25, 25), (1055, 1895), (240, 175, 50), 4)
+    cv2.rectangle(img, (40, 40), (1040, 225), (45, 28, 16), -1)
+    cv2.putText(img, "FORENSICMIND & LEXGUIA v8.0", (65, 105), cv2.FONT_HERSHEY_DUPLEX, 1.55, (100, 220, 255), 3)
+    cv2.putText(img, limpiar_ascii(f"AUTOR: {AUTOR_SISTEMA.upper()}"), (65, 165), cv2.FONT_HERSHEY_DUPLEX, 0.75, (140, 235, 255), 2)
+
+    cat_txt = limpiar_ascii(f"EXPEDIENTE: {codigo} | {clasificacion['categoria']}")
+    cv2.putText(img, cat_txt[:54], (65, 280), cv2.FONT_HERSHEY_DUPLEX, 0.85, (255, 255, 255), 2)
+
+    cv2.rectangle(img, (65, 315), (1015, 455), (25, 48, 38), -1)
+    if clasificacion["categoria"] == "Casos Laborales":
+        cv2.putText(img, limpiar_ascii(f"LIQUIDACION TOTAL POR LEY: ${monto_bruto:,.2f} MXN"), (85, 370), cv2.FONT_HERSHEY_DUPLEX, 0.82, (255, 255, 255), 2)
+        cv2.putText(img, limpiar_ascii(f"DINERO LIBRE PARA TI: ${monto_neto:,.2f} MXN"), (85, 425), cv2.FONT_HERSHEY_DUPLEX, 0.85, (120, 255, 180), 2)
+    else:
+        cv2.putText(img, limpiar_ascii(f"MODULO: {clasificacion['tipo'][:44]}"), (85, 370), cv2.FONT_HERSHEY_DUPLEX, 0.80, (255, 255, 255), 2)
+        cv2.putText(img, "ASESORIA CIUDADANA PASO A PASO (VIA GRATUITA DISPONIBLE)", (85, 425), cv2.FONT_HERSHEY_DUPLEX, 0.68, (120, 255, 180), 2)
+
+    cv2.putText(img, "GUIA PASO A PASO (SIN PALABRAS CORTADAS):", (65, 520), cv2.FONT_HERSHEY_DUPLEX, 0.90, (100, 220, 255), 2)
+
+    y_cursor = 575
+    contador_paso = 1
+    for fase_obj in asesoria["fases_paso_a_paso"][:2]:
+        for paso_str in fase_obj["pasos"][:2]:
+            texto_paso = limpiar_ascii(f"{contador_paso}. {paso_str}")
+            lineas_envueltas = textwrap.wrap(texto_paso, width=54)
+            for lin in lineas_envueltas[:3]:
+                cv2.putText(img, lin, (65, y_cursor), cv2.FONT_HERSHEY_SIMPLEX, 0.72, (235, 235, 235), 2)
+                y_cursor += 38
+            y_cursor += 18
+            contador_paso += 1
+
+    cv2.putText(img, "QUE NO DEBES HACER JAMAS:", (65, y_cursor + 20), cv2.FONT_HERSHEY_DUPLEX, 0.88, (120, 140, 255), 2)
+    y_cursor += 65
+    for err_str in asesoria["errores_fatales"][:2]:
+        lineas_err = textwrap.wrap(limpiar_ascii(err_str), width=54)
+        for lin_e in lineas_err[:3]:
+            cv2.putText(img, lin_e, (65, y_cursor), cv2.FONT_HERSHEY_SIMPLEX, 0.70, (210, 210, 255), 2)
+            y_cursor += 36
+        y_cursor += 16
+
+    cv2.putText(img, "DONDE ACUDIR GRATIS:", (65, 1520), cv2.FONT_HERSHEY_DUPLEX, 0.82, (100, 220, 255), 2)
+    for lin_of in textwrap.wrap(limpiar_ascii(asesoria["oficina_ayuda"]), width=54)[:2]:
+        cv2.putText(img, lin_of, (65, 1565), cv2.FONT_HERSHEY_SIMPLEX, 0.72, (180, 255, 200), 2)
+
+    cv2.putText(img, "SELLO CRIPTOGRAFICO SHA-256:", (65, 1660), cv2.FONT_HERSHEY_DUPLEX, 0.80, (100, 220, 255), 2)
+    cv2.putText(img, clasificacion["hash_evidencia"][:38], (65, 1705), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (160, 255, 160), 2)
+    cv2.putText(img, limpiar_ascii(f"ARQUITECTURA: {AUTOR_SISTEMA.upper()}"), (65, 1825), cv2.FONT_HERSHEY_DUPLEX, 0.72, (100, 255, 218), 2)
+
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# ==============================================================================
+# 9. ENCABEZADO Y NAVEGACIÓN (PÚBLICO VS ADMINISTRADOR)
+# ==============================================================================
+st.markdown(f"""
+<div class="author-banner">
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;">
+        <div>
+            <span style="color:#fbbf24 !important; font-weight:800; font-size:13px;">🏛️ ASESORÍA CIUDADANA PASO A PASO • LABORAL, TRÁNSITO Y FAMILIAR v8.0</span><br>
+            <span style="color:#ffffff !important; font-size:21px; font-weight:900;">{MARCA_SISTEMA}</span>
+        </div>
+        <div>
+            <span class="gold-badge">⚙️ AUTOR: {AUTOR_SISTEMA}</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
+
+if st.session_state["es_admin"]:
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🧠 1. Asesoría Paso a Paso (Público)",
+        "💰 2. Calculadora de Liquidación LFT",
+        "🔬 3. Casos Ganados vs. Perdidos",
+        "📬 4. [ADMIN] Buzón de Usuarios",
+        "☁️ 5. [ADMIN] Cerebro & GitHub Sync"
+    ])
+else:
+    tab1, tab2, tab3 = st.tabs([
+        "🧠 1. Mi Asesoría Paso a Paso",
+        "💰 2. Calcular mi Liquidación y Abogado",
+        "🔬 3. Casos Reales (Qué Hacer y Qué No Hacer)"
+    ])
+
+# ------------------------------------------------------------------------------
+# PESTAÑA 1: ASESORÍA EXHAUSTIVA PASO A PASO + TRÁNSITO + BUZÓN CIUDADANO
+# ------------------------------------------------------------------------------
+with tab1:
+    st.markdown("### 🗣️ Cuéntame qué te pasó con tus propias palabras (Te guiaré paso a paso y sin palabras complicadas)")
+
+    col_esc, col_voz = st.columns([1.35, 1])
+    with col_esc:
+        escenario_sel = st.selectbox(
+            "💡 Elige una situación parecida a la tuya o escribe tu caso abajo:",
+            list(ESCENARIOS_FRECUENTES.keys())
+        )
+    with col_voz:
+        audio_input = st.audio_input("🎙️ Si prefieres, graba tu problema con tu voz:")
+        texto_transcrito = ""
+        if audio_input is not None:
+            with st.spinner("Escuchando tu audio y preparando tu guía paso a paso..."):
+                texto_transcrito = transcribir_audio_espanol(audio_input)
+                if texto_transcrito and "⚠️" not in texto_transcrito:
+                    st.success("✅ Audio escuchado correctamente.")
+                elif texto_transcrito:
+                    st.warning(texto_transcrito)
+
+    valor_inicial_relato = ESCENARIOS_FRECUENTES[escenario_sel]
+    if texto_transcrito and "⚠️" not in texto_transcrito:
+        valor_inicial_relato = texto_transcrito
+
+    relato_usuario = st.text_area(
+        "📝 Describe todo lo que te sucedió (tu sueldo, cuánto te quieren dar, si no te daban vacaciones/descansos, o qué te dijo la patrulla):",
+        value=valor_inicial_relato,
+        height=135
+    )
+
+    btn_analizar = st.button("🧠 Generar mi Guía Completa Paso a Paso", use_container_width=True)
+
+    clasificacion = autoclasificar_caso_con_red_neuronal(relato_usuario, VECTORIZER_VIVO, MODELO_VIVO)
+    cat_activa = clasificacion["categoria"]
+    tipo_activo = clasificacion["tipo"]
+
+    info_web_vivo = {"resultados": [], "corpus_web_extraido": ""}
+    if buscar_web_switch:
+        info_web_vivo = buscar_informacion_juridica_en_internet(cat_activa, tipo_activo)
+
+    if auto_entrenar_switch and (btn_analizar or audio_input is not None or len(relato_usuario) > 25):
+        res_auto = registrar_experiencia_en_memoria_autonoma(
+            relato_original=relato_usuario,
+            clasificacion=clasificacion,
+            fuente="Consulta Ciudadana v8.0",
+            texto_web_extra=info_web_vivo.get("corpus_web_extraido", ""),
+            repo_gh=gh_repo_input,
+            token_gh=gh_token_input,
+            branch_gh=gh_branch_input
+        )
+        if res_auto["aprendio"]:
+            VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
+
+    datos_sueldo = normalizar_texto_coloquial(relato_usuario)
+    dias_vac_auto = 12 if datos_sueldo["sin_vacaciones"] else 0
+    dias_desc_auto = 24 if datos_sueldo["sin_dias_libres"] else 0
+
+    res_liq_rapido = calcular_liquidacion_y_derechos_lft(
+        salario_mensual=datos_sueldo["salario_mensual"],
+        anios_antiguedad=1,
+        meses_adicionales=0,
+        motivo_separacion="Despido Injustificado",
+        dias_vacaciones_no_gozadas=dias_vac_auto,
+        dias_descanso_trabajados=dias_desc_auto
+    )
+    tabulador_activo = TABULADOR_HONORARIOS_RAMA.get(cat_activa, TABULADOR_HONORARIOS_RAMA["Casos Laborales"])
+    res_hon_rapido = calcular_cotizacion_honorarios_dual(
+        monto_en_disputa=res_liq_rapido["gran_total_bruto"],
+        costo_asesoria=0.0,
+        anticipo_fijo=float(tabulador_activo["anticipo_sug"]),
+        pct_litis=float(tabulador_activo["pct_sugerido"]),
+        gastos_periciales=float(tabulador_activo["gastos_periciales_sug"])
+    )
+
+    asesoria = construir_asesoria_exhaustiva_ciudadana(
+        categoria=cat_activa,
+        tipo=tipo_activo,
+        relato=relato_usuario,
+        datos_sueldo=datos_sueldo,
+        res_liq=res_liq_rapido,
+        res_hon=res_hon_rapido
+    )
+
+    # BLOQUE 1: ALERTA SI ES ENGAÑO PATRONAL O ABUSO VIAL
+    if cat_activa == "Casos Laborales" and datos_sueldo["oferta_patronal"] > 0 and datos_sueldo["oferta_patronal"] < res_liq_rapido["gran_total_bruto"]:
+        faltante_dinero = round(res_liq_rapido["gran_total_bruto"] - datos_sueldo["oferta_patronal"], 2)
+        st.markdown(f"""
+        <div class="alert-box">
+            <h3 style="margin-top:0;">🚨 ¡CUIDADO! TE QUIEREN DAR MUCHO MENOS DE LO QUE TE CORRESPONDE POR LEY</h3>
+            • <b>Lo que la empresa te ofrece hoy:</b> ${datos_sueldo['oferta_patronal']:,.2f} pesos.<br>
+            • <b>Lo que realmente te pertenece por Ley (incluyendo tus 3 meses de liquidación, aguinaldo, vacaciones y descansos):</b> <b>${res_liq_rapido['gran_total_bruto']:,.2f} pesos</b>.<br>
+            • <b>Dinero que perderías si firmas su hoja:</b> <b>${faltante_dinero:,.2f} pesos de menos</b>.<br>
+            👉 <b>Regla de oro:</b> NO firmes ninguna hoja de renuncia ni aceptes esos ${datos_sueldo['oferta_patronal']:,.0f} pesos como pago final. Sigue los pasos de abajo.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # BLOQUE 2: RADIOGRAFÍA DE LO QUE ENTENDIÓ LA IA Y EXPLICACIÓN HUMANA
+    st.markdown(f"## 📋 {asesoria['titulo_guia']}")
+    lista_radiografia_html = "".join([f"<li>{item}</li>" for item in asesoria["radiografia_caso"]])
+    st.markdown(f"""
+    <div class="card-box">
+        <h4 style="margin-top:0;">🔎 1. Lo que analicé de tu problema ({cat_activa}):</h4>
+        <ul>{lista_radiografia_html}</ul>
+        <h4>💡 2. Explicación en español simple (Sin palabras complicadas):</h4>
+        <p style="margin-bottom:0;">{asesoria['explicacion_sencilla']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # BLOQUE 3: DESGLOSE DE DINERO SI ES CASO LABORAL, O SEMÁFORO DE CORRALÓN SI ES TRÁNSITO
+    if cat_activa == "Casos Laborales":
+        c_din1, c_din2 = st.columns(2)
+        with c_din1:
+            st.markdown(f"""
+            <div class="money-box">
+                <h4 style="margin-top:0;">💵 ¿De dónde sale el dinero que te deben?</h4>
+                • <b>Tu sueldo calculado:</b> {datos_sueldo['periodicidad']} (${res_liq_rapido['sd']:,.2f} pesos al día).<br>
+                • <b>Finiquito (Aguinaldo + Vacaciones + Descansos no dados):</b> ${res_liq_rapido['subtotal_finiquito']:,.2f} MXN<br>
+                • <b>Indemnización por correrte (90 días + Antigüedad):</b> ${res_liq_rapido['subtotal_indemnizacion']:,.2f} MXN<br>
+                • <b>TOTAL QUE MARCA LA LEY:</b> <span style="font-size:1.25rem; font-weight:900;">${res_liq_rapido['gran_total_bruto']:,.2f} MXN</span>
+            </div>
+            """, unsafe_allow_html=True)
+        with c_din2:
+            st.markdown(f"""
+            <div class="lawyer-box">
+                <h4 style="margin-top:0;">⚖️ ¿Cuánto te queda libre y dónde te defienden GRATIS?</h4>
+                • <b>Opción 1 (100% GRATIS — $0 pesos):</b> Acude a la <b>PROFEDET o Centro de Conciliación</b>. Ahí no te cobran ni un peso y recibes tus <b>${res_liq_rapido['gran_total_bruto']:,.2f} MXN</b> íntegros.<br>
+                • <b>Opción 2 (Con Abogado Particular):</b> No pagas por adelantado; el abogado cobra alrededor del 25% al ganar y a ti te quedan libres <b>${res_hon_rapido['monto_neto_libre_ciudadano']:,.2f} MXN</b> en tu bolsa.
+            </div>
+            """, unsafe_allow_html=True)
+    elif cat_activa == "Casos de Tránsito y Policía":
+        c_v1, c_v2 = st.columns(2)
+        with c_v1:
+            st.markdown("""
+            <div class="money-box">
+                <h4 style="margin-top:0;">🟢 ¿Cuándo NO se pueden llevar tu carro o moto al corralón?</h4>
+                • Por una supuesta <b>"revisión de rutina"</b>.<br>
+                • Por pasarte un semáforo, vuelta prohibida o exceso de velocidad (eso solo amerita boleta de multa, <b>no grúa</b>).<br>
+                • Si traes tu tarjeta de circulación, licencia vigente y placas bien puestas.<br>
+                • Tampoco pueden quitarte tu celular ni obligarte a desbloquearlo sin orden de un Juez.
+            </div>
+            """, unsafe_allow_html=True)
+        with c_v2:
+            st.markdown("""
+            <div class="alert-box">
+                <h4 style="margin-top:0;">🔴 ¿Cuándo SÍ marca el reglamento llevar al corralón?</h4>
+                • Si conduces en estado de ebriedad (alcoholímetro).<br>
+                • Si el vehículo circula <b>sin placas</b> ni permiso vigente.<br>
+                • Si participaste en un choque con personas lesionadas.<br>
+                • Si el vehículo tiene reporte de robo.
+            </div>
+            """, unsafe_allow_html=True)
+
+    # BLOQUE 4: PLAN CRONOLÓGICO PASO A PASO
+    st.markdown("### 🧭 3. Tu Plan de Acción Paso a Paso (Qué hacer en orden)")
+    for bloque_f in asesoria["fases_paso_a_paso"]:
+        pasos_html = "".join([f"<li style='margin-bottom:8px;'>{p}</li>" for p in bloque_f["pasos"]])
+        st.markdown(f"""
+        <div class="card-box">
+            <span class="step-badge">{bloque_f['fase']}</span>
+            <ul style="margin-top:12px; margin-bottom:0;">{pasos_html}</ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # BLOQUE 5: GUIONES PALABRA POR PALABRA Y ERRORES FATALES
+    col_script, col_err = st.columns(2)
+    with col_script:
+        st.markdown("### 🗣️ 4. Qué decir exactamente (Guiones listos para leer)")
+        for g_item in asesoria["guiones_palabra_por_palabra"]:
+            st.markdown(f"""
+            <div class="script-box">
+                {g_item.replace(chr(10), '<br>')}
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col_err:
+        st.markdown("### 🚫 5. Trampas y Errores que NUNCA debes cometer")
+        for err_item in asesoria["errores_fatales"]:
+            st.markdown(f"""
+            <div class="alert-box">
+                {err_item}
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.info(f"🏛️ **Oficina Pública Gratuita donde debes acudir:** {asesoria['oficina_ayuda']}")
+
+    # BLOQUE 6: NOTICIAS Y CRITERIOS EN VIVO DE INTERNET
+    if buscar_web_switch and info_web_vivo["resultados"]:
+        st.markdown("#### 🌐 Información Relacionada Consultada en Tiempo Real en Internet")
+        for item_w in info_web_vivo["resultados"][:3]:
+            st.markdown(f"""
+            <div class="web-box">
+                <b>{item_w['fuente']}</b> — <a href="{item_w['url']}" target="_blank" style="font-weight:bold; color:#0284c7;">{item_w['titulo']} (Ver fuente ↗)</a><br>
+                <span>{item_w['resumen']}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # BLOQUE 7: DESCARGA DE GUÍA EN WORD Y FICHA VERTICAL 9:16 CORREGIDA
+    col_dl1, col_dl2 = st.columns(2)
+    with col_dl1:
+        bytes_docx = generar_dictamen_word_docx("SAOR-2026-V8", relato_usuario, clasificacion, asesoria, res_liq_rapido, res_hon_rapido)
+        if bytes_docx:
+            st.download_button(
+                label="📄 Descargar mi Guía Completa en Word (.docx)",
+                data=bytes_docx,
+                file_name="Mi_Guia_Legal_Paso_a_Paso.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+    with col_dl2:
+        with st.expander("📱 Ver y Descargar Ficha para Celular (Imagen 9:16 sin letras cortadas)", expanded=False):
+            img_9_16 = generar_ficha_vertical_9_16(
+                "SAOR-2026-V8", clasificacion, asesoria,
+                res_liq_rapido["gran_total_bruto"], res_hon_rapido["monto_neto_libre_ciudadano"]
+            )
+            st.image(img_9_16, caption=f"Ficha 9:16 — {AUTOR_SISTEMA}", use_container_width=True)
+            _, buffer_png = cv2.imencode(".png", cv2.cvtColor(img_9_16, cv2.COLOR_RGB2BGR))
+            st.download_button(
+                "📥 Guardar Imagen en mi Teléfono (.png)",
+                buffer_png.tobytes(),
+                "Guia_Celular_9_16.png",
+                "image/png",
+                use_container_width=True
+            )
+
+    # BLOQUE 8: BUZÓN CIUDADANO "¿NO ENCONTRASTE TU CASO?" DIRECTO AL ING. SAÚL
+    st.markdown("---")
+    st.markdown("### 📬 ¿Tu problema es diferente o no encontraste exactamente lo que buscabas?")
+    st.write("Cuéntanos qué te pasó aquí abajo. Tu mensaje le llegará directamente al administrador (**Ing. Saúl Ángel Ortiz Rogel**) para agregar esa guía a la aplicación:")
+
+    with st.form("form_buzon_ciudadano"):
+        cb1, cb2, cb3 = st.columns(3)
+        nombre_bz = cb1.text_input("Tu nombre o apodo (opcional):", placeholder="Ej. Juan Pérez")
+        contacto_bz = cb2.text_input("Tu correo o WhatsApp (opcional, por si quieres respuesta):", placeholder="Ej. 55 1234 5678")
+        cat_bz = cb3.selectbox("¿De qué tema es tu duda?", list(TIPOS_CASOS.keys()) + ["Otro tema diferente"])
+        duda_bz = st.text_area(
+            "Explica qué información te hizo falta o qué problema tienes:",
+            placeholder="Ej. No encontré qué hacer cuando una grúa ya se llevó mi moto sin infracción..."
+        )
+        enviar_bz = st.form_submit_button("📨 Enviar mi Caso al Administrador para que lo agregue", use_container_width=True)
+
+        if enviar_bz:
+            if duda_bz and len(duda_bz.strip()) > 5:
+                h_msg = hashlib.sha256(duda_bz.strip().lower
