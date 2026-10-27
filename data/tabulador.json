@@ -1,0 +1,48 @@
+{
+  "aviso": "Valores de REFERENCIA sugeridos para cotizar; no son tarifa oficial ni obligatoria. Ajusta a tu despacho y pacta siempre por escrito.",
+  "costo_hora_despacho": 350,
+  "ramas": {
+    "Casos Laborales": {
+      "asesoria_min": 500, "asesoria_sug": 1000, "asesoria_max": 2000,
+      "anticipo_sug": 0, "pct_sugerido": 25.0, "gastos_periciales_sug": 1000,
+      "horas_promedio_despacho": 35,
+      "esquema_cobro": "Porcentaje al ganar (20% a 30% de lo recuperado; $0 de anticipo inicial)",
+      "via_gratuita": "PROFEDET / Procuraduría de la Defensa del Trabajo — $0 MXN (100% gratuito)"
+    },
+    "Tránsito y Abuso Policial": {
+      "asesoria_min": 500, "asesoria_sug": 800, "asesoria_max": 1800,
+      "anticipo_sug": 2500, "pct_sugerido": 0.0, "gastos_periciales_sug": 500,
+      "horas_promedio_despacho": 15,
+      "esquema_cobro": "Defensa en Asuntos Internos, Fiscalía Anticorrupción y juicio de nulidad",
+      "via_gratuita": "Asuntos Internos / Fiscalía Anticorrupción / Derechos Humanos — $0 MXN"
+    },
+    "Acoso de Cobranza y Deudas": {
+      "asesoria_min": 500, "asesoria_sug": 900, "asesoria_max": 1500,
+      "anticipo_sug": 2000, "pct_sugerido": 0.0, "gastos_periciales_sug": 500,
+      "horas_promedio_despacho": 15,
+      "esquema_cobro": "Queja por cobranza ilegítima y bloqueo de créditos por robo de identidad",
+      "via_gratuita": "CONDUSEF / REDECO y Policía Cibernética — $0 MXN"
+    },
+    "Casos Familiares": {
+      "asesoria_min": 800, "asesoria_sug": 1200, "asesoria_max": 2500,
+      "anticipo_sug": 5000, "pct_sugerido": 0.0, "gastos_periciales_sug": 2500,
+      "horas_promedio_despacho": 45,
+      "esquema_cobro": "Pago fijo en partes conforme avanza el juicio familiar",
+      "via_gratuita": "DIF / Defensoría Pública Familiar del Estado — $0 MXN"
+    },
+    "Casos Penales y Fraudes": {
+      "asesoria_min": 1000, "asesoria_sug": 1800, "asesoria_max": 4000,
+      "anticipo_sug": 10000, "pct_sugerido": 15.0, "gastos_periciales_sug": 4000,
+      "horas_promedio_despacho": 60,
+      "esquema_cobro": "Denuncia en Fiscalía, bloqueo en Buró de Crédito y reclamación CONDUSEF",
+      "via_gratuita": "CONDUSEF, Fiscalía Cibernética y Asesoría Jurídica de Víctimas — $0 MXN"
+    },
+    "Casos Civiles y Mercantiles": {
+      "asesoria_min": 800, "asesoria_sug": 1500, "asesoria_max": 3000,
+      "anticipo_sug": 6000, "pct_sugerido": 20.0, "gastos_periciales_sug": 3500,
+      "horas_promedio_despacho": 40,
+      "esquema_cobro": "Anticipo inicial + porcentaje de lo cobrado o recuperado",
+      "via_gratuita": "Defensoría Pública Civil — $0 MXN"
+    }
+  }
+}

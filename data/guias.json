@@ -1,0 +1,208 @@
+{
+  "Tránsito y Abuso Policial": {
+    "radiografia": "Detecté una posible situación de **abuso policial, extorsión vial, siembra de pruebas o retiro ilegal de tu vehículo o pertenencias**. Es tu **prioridad #1** porque involucra tu libertad, tu integridad y tus bienes.",
+    "explicacion_sencilla": [
+      "🔹 **Si te sembraron algo o te quitaron tu celular y tu vehículo:** eso no es una infracción de tránsito; pueden ser delitos cometidos por servidores públicos (abuso de autoridad, extorsión, robo). La autoridad solo puede molestarte con una orden escrita que funde y motive la causa (Art. 16 constitucional).",
+      "🔹 **Aquí no aplica una «liquidación»:** lo que se busca es la liberación de tu vehículo sin pagar extorsión, la devolución de tus pertenencias, la sanción a los responsables y la reparación del daño.",
+      "🔹 **Las patrullas tienen GPS y muchas calles tienen cámaras (C4/C5):** la hora exacta y la esquina permiten identificar la unidad y pedir los videos antes de que se borren (suelen conservarse pocos días: actúa rápido)."
+    ],
+    "fase_1_hoy": [
+      "**1. Si sigues detenido o en peligro:** llama al **911**. Pide la llamada a la que tienes derecho, avisa a tu familia dónde estás y **no firmes nada** sin tu abogado o defensor público.",
+      "**2. Anota en papel (o pide a alguien que lo anote)** hora, calle y esquina, número de patrulla, placas, número de elementos y descripción. Si hubo testigos, pide su contacto.",
+      "**3. Si te quitaron el celular:** pide prestado un teléfono, **suspende tu chip (SIM)** con tu compañía, congela tus tarjetas y cuentas bancarias y cambia contraseñas desde otro equipo.",
+      "**4. Fotografía o graba** el estado de tu vehículo y cualquier boleta, folio o documento que te hayan dado."
+    ],
+    "fase_2_semana": [
+      "**1. Presenta la denuncia** en la Fiscalía Anticorrupción (o la Fiscalía de tu estado) y la queja en **Asuntos Internos**: abuso de autoridad, extorsión, robo y fabricación de delito. Con la carpeta de investigación se solicita el resguardo urgente de videos del C4/C5 y del GPS de la unidad.",
+      "**2. Recupera tu vehículo sin pagar mordidas:** pide la liberación con el oficio de la autoridad que corresponda, acreditando que el retiro fue ilegal. Solicita por escrito el desglose de cualquier cobro de grúa y corralón.",
+      "**3. Presenta queja ante la Comisión de Derechos Humanos de tu estado:** puede dictar medidas de protección si temes represalias."
+    ],
+    "fase_3_autoridad": [
+      "**1. Ante Asuntos Internos, la Fiscalía o el juez:** solicita que se exhiban la bitácora de radio y el GPS de las patrullas que circularon por la zona a esa hora.",
+      "**2. Exige la reparación del daño:** grúa, corralón, el valor del teléfono y los gastos que hayas tenido deben incluirse en la reparación."
+    ],
+    "guion": "💬 **Qué decir al presentar la denuncia:**\n\n*«Vengo a presentar denuncia por abuso de autoridad, extorsión y robo de mis pertenencias contra los elementos de la patrulla que me detuvieron en [calle y esquina] a las [hora]. Solicito que de manera urgente se solicite al C4/C5 el resguardo de las videograbaciones y el registro GPS de las unidades en esa zona.»*",
+    "errores_fatales": [
+      "🚫 **Ir solo a «negociar» con los mismos policías** o entregar dinero en efectivo. Todo debe hacerse en oficinas oficiales y con recibo.",
+      "🚫 **Esperar más de unos días para pedir los videos:** muchas cámaras sobrescriben sus grabaciones rápidamente.",
+      "🚫 **Insultar, forcejear o grabar de forma agresiva:** puede darles pretexto para acusarte de resistencia. Mantén la calma y documenta.",
+      "🚫 **Pagar el corralón sin dejar constancia escrita del abuso:** primero presenta tu queja o denuncia."
+    ],
+    "autoridad": "Fiscalía Anticorrupción de tu estado / Unidad de Asuntos Internos / Comisión de Derechos Humanos",
+    "abogado_req": "Asesor Jurídico de Víctimas en Fiscalía o defensor en justicia administrativa ($0 MXN)"
+  },
+
+  "Casos Penales y Fraudes": {
+    "radiografia": "Detecté un problema de **robo de identidad (uso de tu INE), pérdida de acceso a cuentas o criptoactivos, o fraude digital**. Lo urgente es blindar tus cuentas y tu identidad para que no vacíen tu dinero ni te atribuyan deudas ajenas.",
+    "explicacion_sencilla": [
+      "🔹 **Si te robaron el celular donde tenías bancos o criptomonedas:** tus criptoactivos no viven dentro del aparato, sino en la blockchain. Si tienes tu **frase semilla (12 o 24 palabras)** guardada fuera del celular, puedes restaurarla en una billetera nueva desde un equipo limpio y mover tus fondos. **Nunca compartas esa frase con nadie ni la escribas en páginas web:** quienes la piden son estafadores.",
+      "🔹 **Si usaron una copia de tu INE para sacar créditos:** es usurpación de identidad. No estás obligado a pagar créditos que no firmaste ni autorizaste, pero debes documentarlo con denuncia y aclaración con la institución.",
+      "🔹 **Si fue un enlace o llamada falsa (phishing):** reporta de inmediato al banco; cada hora cuenta para intentar frenar o rastrear las transferencias."
+    ],
+    "fase_1_hoy": [
+      "**1. Llama a tu banco ya** (número oficial al reverso de tu tarjeta): bloquea tarjetas y banca móvil, desconoce movimientos y pide tu **folio de reporte**.",
+      "**2. Bloquea tu chip (SIM) y el IMEI del celular robado** con tu compañía y usa «Encontrar mi dispositivo» (Google/Apple) para bloquear o borrar de forma remota.",
+      "**3. Si tienes criptoactivos:** desde un equipo limpio y de confianza, restaura tu billetera con tu frase semilla en una billetera nueva y mueve los fondos.",
+      "**4. Activa alertas y bloqueo en Buró de Crédito** para frenar nuevos créditos a tu nombre y cambia contraseñas de correo y redes desde otro equipo."
+    ],
+    "fase_2_semana": [
+      "**1. Presenta denuncia en la Fiscalía** (o Policía Cibernética) por robo de identidad, robo de equipo o fraude, y conserva copia sellada de tu carpeta de investigación.",
+      "**2. Presenta reclamación ante CONDUSEF** con tu denuncia, tu identificación y los folios del banco. Pide que las instituciones suspendan el cobro y cancelen créditos que no reconoces.",
+      "**3. Reúne evidencia:** capturas del mensaje o enlace falso, números de teléfono, estados de cuenta y comprobantes de las transferencias no autorizadas."
+    ],
+    "fase_3_autoridad": [
+      "**1. En la audiencia o mesa de aclaración:** exige que la financiera exhiba contrato, validación biométrica, geolocalización y la cuenta de destino del supuesto préstamo; si no puede acreditar que tú lo solicitaste, puedes pedir su cancelación."
+    ],
+    "guion": "💬 **Qué decir al banco y a CONDUSEF:**\n\n*«Solicito el bloqueo total de mi banca electrónica y desconozco cualquier crédito o transferencia realizada tras el robo de mi equipo y el uso no autorizado de mi identificación. Presento mi carpeta de investigación por usurpación de identidad y solicito mi folio oficial de aclaración.»*",
+    "errores_fatales": [
+      "🚫 **Dejar tus criptomonedas en la billetera del celular robado:** muévelas cuanto antes a una billetera nueva.",
+      "🚫 **No denunciar:** sin denuncia formal las instituciones tardan más en cancelar créditos por robo de identidad.",
+      "🚫 **Guardar frase semilla o contraseñas en el bloc de notas del celular** sin cifrar.",
+      "🚫 **Pagar a «gestores» o «recuperadores de fondos» que te contactan por redes:** suelen ser una segunda estafa."
+    ],
+    "autoridad": "Fiscalía Especializada / Policía Cibernética de tu estado y CONDUSEF",
+    "abogado_req": "Asesoría gratuita de CONDUSEF y Asesor Jurídico de Víctimas ($0 MXN)"
+  },
+
+  "Casos Laborales": {
+    "radiografia_template": "En la parte **laboral** de tu caso: {sueldo_txt}{oferta_txt}",
+    "radiografia": "En la parte **laboral** de tu caso: revisaré tus derechos por despido, retención de sueldo o presión para renunciar. Con tu sueldo y antigüedad puedo estimar cuánto te corresponde por ley.",
+    "explicacion_sencilla": [
+      "🔹 **Aunque no tuvieras contrato ni IMSS** puede existir relación de trabajo: si alguien te daba órdenes a cambio de un pago, la ley la presume (Art. 20 y 21 LFT). Tus depósitos, mensajes y correos sirven de prueba.",
+      "🔹 **¿Cómo le cobras a una empresa informal?** El nombre o razón social que aparece en tus **transferencias SPEI** (y su RFC/CLABE) identifica a quién citar ante el Centro de Conciliación.",
+      "🔹 **Una hoja de renuncia o un finiquito firmado no siempre cierra el asunto:** para ser válido un convenio debe constar por escrito y ratificarse ante la autoridad laboral (Art. 33 LFT), y los derechos laborales son irrenunciables (Art. 5 LFT).",
+      "🔹 **Retener sueldos ya trabajados es ilegal** y es causa para exigir la indemnización (Art. 51 y 52 LFT).",
+      "🔹 **Los plazos corren:** por despido injustificado tienes **2 meses** desde la separación para reclamar (Art. 518 LFT); pedir cita en el Centro de Conciliación a tiempo interrumpe el plazo."
+    ],
+    "fase_1_hoy": [
+      "**1. Descarga tus estados de cuenta** donde recibías pagos: ahí aparece quién te pagaba (nombre, RFC, CLABE).",
+      "**2. Respalda tus chats** con jefe o recursos humanos (órdenes de trabajo, reclamo de pagos, amenazas, ofertas de dinero) y fotos de horarios, uniformes, credenciales o tareas.",
+      "**3. No firmes** renuncia, finiquito ni hojas en blanco, y no aceptes acuerdos solo verbales.",
+      "**4. Anota la fecha exacta del despido o separación:** de ahí cuenta el plazo de 2 meses."
+    ],
+    "fase_2_semana": [
+      "**1. Acude a la PROFEDET o al Centro de Conciliación Laboral** con tu identificación y las pruebas para iniciar la solicitud de conciliación (es gratuita) y generar el citatorio.",
+      "**2. Si la empresa usó tus datos o tu INE para defraudarte,** agrega esa información a una denuncia penal aparte."
+    ],
+    "fase_3_autoridad": [
+      "**1. En la audiencia de conciliación o en el juicio:** reclama sueldos retenidos, aguinaldo y vacaciones proporcionales y, si hubo despido, la indemnización de tres meses, los 20 días por año, la prima de antigüedad y los salarios vencidos. Si la empresa no se presenta, se continúa el juicio y pueden pedirse medidas para asegurar el pago."
+    ],
+    "guion": "💬 **Qué decir al patrón o a recursos humanos:**\n\n*«Retener salarios ya trabajados viola la Ley Federal del Trabajo. Voy a acudir al Centro de Conciliación Laboral y a la PROFEDET para reclamar mis pagos pendientes y lo que me corresponde por ley. No voy a firmar renuncia ni finiquito sin revisión de la autoridad laboral.»*",
+    "errores_fatales": [
+      "🚫 **Dejar pasar los 2 meses (≈60 días) desde el despido** sin iniciar el trámite de conciliación.",
+      "🚫 **Firmar renuncia o finiquito por una cantidad menor** con la promesa de que «después te pagan el resto».",
+      "🚫 **Creer que sin contrato o trabajando remoto no tienes derechos:** tus depósitos y mensajes prueban la relación.",
+      "🚫 **Borrar chats o perder estados de cuenta:** son tu mejor prueba."
+    ],
+    "autoridad": "Centro de Conciliación Laboral y PROFEDET (Procuraduría Federal de la Defensa del Trabajo)",
+    "abogado_req": "Procurador gratuito de la PROFEDET ($0 MXN) o abogado laboralista"
+  },
+
+  "Acoso de Cobranza y Deudas": {
+    "radiografia": "En el tema de **cobranza y apps de préstamos**: te exigen pagar una deuda (o un crédito que quizá ni pediste) con amenazas de embargo y hostigamiento.",
+    "explicacion_sencilla": [
+      "🔹 **Ningún despacho puede embargarte por mensaje:** un embargo solo lo ordena un juez dentro de un juicio (Art. 14 y 16 constitucionales). Las amenazas de «ir mañana con cerrajero» sin orden judicial son intimidación.",
+      "🔹 **Si el crédito nunca lo pediste (o abrieron con datos robados):** no pagues y documenta el robo de identidad.",
+      "🔹 **Si la deuda sí es tuya:** el cobro debe hacerse sin acoso, sin llamar a terceros ni difundir tu información, y debe haber una carta convenio oficial antes de cualquier pago.",
+      "🔹 **Puedes verificar** si un despacho está registrado en el REDECO de CONDUSEF."
+    ],
+    "fase_1_hoy": [
+      "**1. No deposites dinero a cuentas de personas físicas** «para que dejen de molestar».",
+      "**2. Guarda capturas** de mensajes, números, fechas y cuentas de depósito que te pidan.",
+      "**3. Avisa a tus contactos** si te están hostigando que ignoren cualquier mensaje pidiendo dinero a tu nombre.",
+      "**4. No envíes más copias de tu INE ni comprobantes** para «aclarar»."
+    ],
+    "fase_2_semana": [
+      "**1. Presenta queja en CONDUSEF** (consulta el REDECO) y reporta a la **Policía Cibernética** si hay amenazas, difusión de tus datos o llamadas a tus contactos.",
+      "**2. Si hubo robo de identidad,** presenta denuncia en la Fiscalía y activa bloqueo en Buró de Crédito."
+    ],
+    "fase_3_autoridad": [
+      "**1. Con tus folios de CONDUSEF y de denuncia,** exige por escrito que cese el hostigamiento y que presenten el contrato y el desglose de la supuesta deuda."
+    ],
+    "guion": "💬 **Qué responder una sola vez antes de bloquear al cobrador:**\n\n*«No reconozco esta deuda. Cualquier cobro debe hacerse por escrito y con carta convenio oficial. Ya presenté queja ante CONDUSEF y reporte por hostigamiento. Cualquier amenaza o contacto con terceros será denunciado.»*",
+    "errores_fatales": [
+      "🚫 **Transferir dinero a cuentas de personas desconocidas** por miedo a un embargo.",
+      "🚫 **Mandar fotos nuevas de tu INE o comprobante de domicilio.**",
+      "🚫 **Ignorar una notificación judicial real:** si te llega un citatorio de un juzgado, sí debes atenderlo con un abogado."
+    ],
+    "autoridad": "CONDUSEF / REDECO y Policía Cibernética",
+    "abogado_req": "Trámite gratuito ante CONDUSEF y Policía Cibernética ($0 MXN)"
+  },
+
+  "Casos Familiares": {
+    "radiografia": "Analicé tu caso de **derecho familiar**. Cuando quien debe alimentos deja de aportar para comida, escuela y salud de los hijos, se puede solicitar una **pensión provisional** desde el inicio del juicio.",
+    "explicacion_sencilla": [
+      "🔹 **Los alimentos son un derecho irrenunciable de los hijos y de orden público.** Aunque el deudor oculte ingresos o trabaje en efectivo, el juez puede pedir información al IMSS, SAT y bancos para determinar sus ingresos reales.",
+      "🔹 **Los detalles varían por estado:** forma de calcular (porcentaje, salarios mínimos), pruebas y plazos dependen del código de tu entidad."
+    ],
+    "fase_1_hoy": [
+      "**1. Reúne** actas de nacimiento de tus hijos, comprobantes de escuela y salud y una lista de gastos mensuales.",
+      "**2. Guarda** pruebas del abandono de obligación (mensajes, transferencias que dejaron de llegar) y datos del trabajo o ingresos del deudor."
+    ],
+    "fase_2_semana": [
+      "**1. Acude al DIF o a la Defensoría Pública Familiar** para solicitar gratis la demanda de pensión alimenticia con petición de pensión provisional.",
+      "**2. Si tienes custodia pendiente,** pregunta por la vía para regularizarla en el mismo juicio."
+    ],
+    "fase_3_autoridad": [
+      "**1. En el juzgado familiar:** solicita que se giren oficios al IMSS, SAT y a bancos para transparentar los ingresos del deudor y pide el aseguramiento de la pensión."
+    ],
+    "guion": "💬 **Qué decirle a quien debe la pensión:**\n\n*«Los alimentos de nuestros hijos son un derecho irrenunciable y se fijarán formalmente ante el juez de lo familiar. Si hay voluntad de cumplir, hagámoslo por convenio ante la autoridad.»*",
+    "errores_fatales": [
+      "🚫 **Esperar meses confiando en promesas verbales:** inicia el trámite formal y reúne comprobantes.",
+      "🚫 **Aceptar un convenio informal** sin que lo apruebe un juez."
+    ],
+    "autoridad": "Juzgado de lo Familiar y Procuraduría del DIF de tu estado",
+    "abogado_req": "Defensoría Pública Familiar o abogado familiar ($0 MXN en DIF/Defensoría)"
+  },
+
+  "Casos Civiles y Mercantiles": {
+    "radiografia": "Analicé tu caso de **derecho civil o mercantil** (arrendamiento o cobro de un pagaré o deuda). La clave es asegurar el pago o la recuperación del bien por la vía judicial.",
+    "explicacion_sencilla": [
+      "🔹 **En rentas:** no puedes sacar al inquilino, cambiar chapas ni cortar servicios por tu cuenta; necesitas demandar y obtener orden de juez, y el procedimiento varía por estado.",
+      "🔹 **En pagarés:** conserva el original sin alterarlo; la acción contra el suscriptor prescribe en tres años desde el vencimiento (Art. 165 LGTOC), y puedes pedir embargo precautorio al demandar.",
+      "🔹 **Siempre que se pueda,** un convenio ratificado ante el juez o centro de mediación es más rápido y barato."
+    ],
+    "fase_1_hoy": [
+      "**1. Resguarda** el contrato o el pagaré original, sin rayar ni alterar, y reúne recibos, mensajes y estados de cuenta.",
+      "**2. Calcula** con fechas cuánto se debe y desde cuándo."
+    ],
+    "fase_2_semana": [
+      "**1. Acude a la Defensoría Pública Civil o a un abogado** para demandar; en rentas, solicita medidas para recuperar el inmueble por orden judicial.",
+      "**2. Envía un requerimiento escrito** (de preferencia notarial o con acuse) antes de demandar, si tu abogado lo recomienda."
+    ],
+    "fase_3_autoridad": [
+      "**1. En la diligencia judicial:** no entregues el documento original ni firmes recibos hasta que el pago esté acreditado."
+    ],
+    "guion": "💬 **Qué decirle al inquilino o deudor:**\n\n*«Venció el plazo sin recibir el pago. Te invito a regularizar por convenio; de lo contrario el asunto se resolverá por la vía judicial.»*",
+    "errores_fatales": [
+      "🚫 **Cortar servicios, cambiar la chapa o sacar pertenencias por tu cuenta:** puedes ser denunciado por despojo o daños.",
+      "🚫 **Dejar pasar los plazos de prescripción.**"
+    ],
+    "autoridad": "Juzgado Civil o Mercantil y Centro de Mediación de tu estado",
+    "abogado_req": "Defensoría Pública Civil o abogado mercantil"
+  },
+
+  "Indeterminado": {
+    "radiografia": "Todavía **no logré identificar con claridad de qué materia es tu caso**. Para no darte una guía equivocada, necesito un poco más de detalle.",
+    "explicacion_sencilla": [
+      "🔹 Cuéntame **quién** te hizo qué, **cuándo** pasó y **qué dinero o documentos** están involucrados.",
+      "🔹 Si es una emergencia (peligro, detención, violencia), llama al **911**. Para denuncia anónima, **089**."
+    ],
+    "fase_1_hoy": [
+      "**1. Escribe una línea de tiempo** con fechas, personas y montos.",
+      "**2. Guarda pruebas:** mensajes, fotos, estados de cuenta, documentos."
+    ],
+    "fase_2_semana": [
+      "**1. Si no sabes a dónde acudir,** una defensoría pública o un colegio de abogados de tu ciudad pueden orientarte sin costo."
+    ],
+    "fase_3_autoridad": [
+      "**1. Con una orientación inicial** podrás elegir la autoridad correcta."
+    ],
+    "guion": "💬 **Tip:** describe tu caso con hechos concretos (qué pasó, cuándo, cuánto dinero, qué papeles tienes).",
+    "errores_fatales": [
+      "🚫 **Firmar documentos** o **pagar dinero** sin entender qué estás aceptando."
+    ],
+    "autoridad": "Defensoría pública de tu estado / Colegio de abogados local",
+    "abogado_req": "Defensoría pública (gratuita) o abogado particular"
+  }
+}

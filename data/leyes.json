@@ -1,0 +1,80 @@
+{
+  "version": "2026-10-27",
+  "vigencia_anio": 2026,
+  "aviso": "Valores editables sin tocar código. Cada enero (y cuando CONASAMI/INEGI publiquen cambios) actualiza este archivo y la fecha 'verificado'. La prueba automática falla si 'vigencia_anio' no coincide con el año en curso.",
+  "salario_minimo": {
+    "general": 315.04,
+    "frontera_norte": 440.87,
+    "vigente_desde": "2026-01-01",
+    "verificado": "2026-10-27",
+    "fuente": "CONASAMI / DOF (incremento 2026)"
+  },
+  "uma": {
+    "diaria": 117.31,
+    "mensual": 3566.22,
+    "anual": 42794.64,
+    "vigente_desde": "2026-02-01",
+    "verificado": "2026-10-27",
+    "fuente": "INEGI / DOF 9-ene-2026"
+  },
+  "vacaciones_dias": [
+    {"desde": 1, "hasta": 1, "dias": 12},
+    {"desde": 2, "hasta": 2, "dias": 14},
+    {"desde": 3, "hasta": 3, "dias": 16},
+    {"desde": 4, "hasta": 4, "dias": 18},
+    {"desde": 5, "hasta": 5, "dias": 20},
+    {"desde": 6, "hasta": 10, "dias": 22},
+    {"desde": 11, "hasta": 15, "dias": 24},
+    {"desde": 16, "hasta": 20, "dias": 26},
+    {"desde": 21, "hasta": 25, "dias": 28},
+    {"desde": 26, "hasta": 30, "dias": 30},
+    {"desde": 31, "hasta": 35, "dias": 32},
+    {"desde": 36, "hasta": 40, "dias": 34},
+    {"desde": 41, "hasta": 45, "dias": 36},
+    {"desde": 46, "hasta": 50, "dias": 38}
+  ],
+  "aguinaldo_dias_minimos": 15,
+  "prima_vacacional_pct": 25,
+  "indemnizacion": {
+    "dias_constitucional": 90,
+    "dias_por_anio_art50": 20,
+    "prima_antiguedad_dias_por_anio": 12,
+    "prima_antiguedad_tope_veces_minimo": 2,
+    "prima_antiguedad_renuncia_min_anios": 15,
+    "salarios_vencidos_max_meses": 12,
+    "interes_mensual_pct_tras_12_meses": 2
+  },
+  "descanso_trabajado_pago_extra_veces": 2,
+  "prescripcion": {
+    "despido_meses": 2,
+    "despido_dias_aprox": 60,
+    "aviso_por_vencer_dias": 15,
+    "otras_acciones_meses": 12,
+    "rescision_trabajador_meses": 1
+  },
+  "isr": {
+    "exento_uma_por_anio_servicio": 90,
+    "aviso": "Estimación informativa de la parte exenta de ISR en pagos por separación (Art. 93 fr. XIII LISR). El cálculo real lo hace el patrón/contador."
+  },
+  "contactos": {
+    "emergencias": "911",
+    "denuncia_anonima": "089",
+    "profedet": "800 911 7877",
+    "condusef": "55 5340 0999 / 800 999 8080",
+    "policia_cibernetica": "088 (Guardia Nacional)",
+    "cndh": "800 715 2000",
+    "linea_de_la_vida": "800 911 2000",
+    "nota": "Verifica siempre los teléfonos en los sitios oficiales; pueden cambiar o variar por estado."
+  },
+  "fuentes_oficiales": [
+    {"nombre": "Ley Federal del Trabajo (texto vigente, Cámara de Diputados)", "url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFT.pdf"},
+    {"nombre": "PROFEDET – Procuraduría Federal de la Defensa del Trabajo", "url": "https://www.gob.mx/profedet"},
+    {"nombre": "Centro Federal de Conciliación y Registro Laboral", "url": "https://www.gob.mx/cfcrl"},
+    {"nombre": "CONDUSEF – Protección al usuario de servicios financieros", "url": "https://www.condusef.gob.mx"},
+    {"nombre": "Buró de Crédito – Alertas y bloqueo", "url": "https://www.burodecredito.com.mx"},
+    {"nombre": "CNDH – Comisión Nacional de los Derechos Humanos", "url": "https://www.cndh.org.mx"},
+    {"nombre": "CONASAMI – Salarios mínimos", "url": "https://www.gob.mx/conasami"},
+    {"nombre": "INEGI – Valor de la UMA", "url": "https://www.inegi.org.mx/temas/uma/"},
+    {"nombre": "Diario Oficial de la Federación", "url": "https://www.dof.gob.mx"}
+  ]
+}
