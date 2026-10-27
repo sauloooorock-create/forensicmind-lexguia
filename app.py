@@ -33,10 +33,10 @@ except ImportError:
     TfidfVectorizer = None
 
 # ==============================================================================
-# CONFIGURACIÓN GLOBAL Y CREDENCIALES SEGURAS v9.0
+# CONFIGURACIÓN GLOBAL Y CREDENCIALES SEGURAS v10.0
 # ==============================================================================
 AUTOR_SISTEMA = "Ing. Industrial y de Sistemas Saúl Ángel Ortiz Rogel"
-MARCA_SISTEMA = "ForensicMind & LexGuía CBR v9.0 — Triage Multi-Materia & Auto-Sync"
+MARCA_SISTEMA = "ForensicMind & LexGuía CBR v10.0 — Triage Multi-Materia, Despacho & Auto-Sync"
 
 st.set_page_config(
     page_title=f"{MARCA_SISTEMA} | {AUTOR_SISTEMA}",
@@ -45,7 +45,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-DB_NAME = "boveda_juridica_cbr_v9.db"
+DB_NAME = "boveda_juridica_cbr_v10.db"
 BACKUP_JSON_FILE = "cerebro_autonomo_backup.json"
 
 DEFAULT_GH_TOKEN = ""
@@ -53,6 +53,7 @@ DEFAULT_GH_REPO = "sauloooorock-create/forensicmind-lexguia"
 DEFAULT_GH_BRANCH = "main"
 DEFAULT_ADMIN_PASS = "admin2026"
 DEFAULT_ADMIN_EMAIL = "contacto@forensicmind.mx"
+DEFAULT_WHATSAPP_DESPACHO = "527220000000" # Sustituye con tu número personal para recibir clientes
 
 try:
     DEFAULT_GH_TOKEN = st.secrets.get("GITHUB_TOKEN", "")
@@ -60,11 +61,24 @@ try:
     DEFAULT_GH_BRANCH = st.secrets.get("GITHUB_BRANCH", "main")
     DEFAULT_ADMIN_PASS = st.secrets.get("ADMIN_PASSWORD", "admin2026")
     DEFAULT_ADMIN_EMAIL = st.secrets.get("ADMIN_EMAIL", DEFAULT_ADMIN_EMAIL)
+    DEFAULT_WHATSAPP_DESPACHO = st.secrets.get("WHATSAPP_DESPACHO", DEFAULT_WHATSAPP_DESPACHO)
 except Exception:
     pass
 
 if "es_admin" not in st.session_state:
     st.session_state["es_admin"] = False
+
+# REGISTRO AUTOMÁTICO DE VISITANTES ÚNICOS POR SESIÓN
+if "visit_registrada" not in st.session_state:
+    st.session_state["visit_registrada"] = True
+    try:
+        conn_v = sqlite3.connect(DB_NAME)
+        conn_v.execute("CREATE TABLE IF NOT EXISTS visitas_pagina (id INTEGER PRIMARY KEY AUTOINCREMENT, fecha_hora TEXT)")
+        conn_v.execute("INSERT INTO visitas_pagina (fecha_hora) VALUES (?)", (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),))
+        conn_v.commit()
+        conn_v.close()
+    except Exception:
+        pass
 
 # ==============================================================================
 # BARRA LATERAL: ACCESO ADMIN Y PREFERENCIAS
@@ -159,7 +173,7 @@ if "Claro" in modo_visual:
         ".lawyer-box { background-color: #eef2ff; border: 1px solid #a5b4fc; border-left: 6px solid #4f46e5; border-radius: 12px; padding: 18px; margin: 10px 0; }",
         ".alert-box { background-color: #fef2f2; border: 1px solid #fca5a5; border-left: 6px solid #dc2626; border-radius: 12px; padding: 18px; margin: 10px 0; }",
         ".script-box { background-color: #fffbeb; border: 1px solid #fcd34d; border-left: 6px solid #d97706; border-radius: 12px; padding: 18px; margin: 10px 0; }",
-        ".web-box { background-color: #f0f9ff; border: 1px solid #7dd3fc; border-left: 6px solid #0284c7; border-radius: 12px; padding: 16px; margin: 10px 0; }",
+        ".web-box { background-color: #f0f9ff; border: 1px solid #7dd3fc; border-left: 6px solid #0284c7; border-radius: 16px; padding: 16px; margin: 10px 0; }",
         "div.stButton > button:first-child {",
         "  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%) !important;",
         "  color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;",
@@ -437,7 +451,7 @@ def descargar_cerebro_desde_github(repo: str, token: str, branch: str = "main") 
     headers = {
         "Authorization": f"token {token.strip()}",
         "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "ForensicMindAutoSync/9.0"
+        "User-Agent": "ForensicMindAutoSync/10.0"
     }
     try:
         req = urllib.request.Request(url, headers=headers)
@@ -485,7 +499,7 @@ def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", bran
         "Authorization": f"token {token.strip()}",
         "Accept": "application/vnd.github.v3+json",
         "Content-Type": "application/json",
-        "User-Agent": "ForensicMindAutoSync/9.0"
+        "User-Agent": "ForensicMindAutoSync/10.0"
     }
 
     sha_actual = None
@@ -498,7 +512,7 @@ def guardar_y_sincronizar_cerebro_autonomo(repo: str = "", token: str = "", bran
         sha_actual = None
 
     body_put = {
-        "message": f"Auto-Sync ForensicMind v9.0 ({len(df_mem)} memorias | {len(df_casos)} casos)",
+        "message": f"Auto-Sync ForensicMind v10.0 ({len(df_mem)} memorias | {len(df_casos)} casos)",
         "content": base64.b64encode(raw_bytes).decode("utf-8"),
         "branch": branch.strip()
     }
@@ -556,6 +570,12 @@ def init_db_and_autoinject(repo_gh: str = "", token_gh: str = "", branch_gh: str
         "estado TEXT, fecha_envio TEXT)"
     ])
     c.execute(sql_create_buzon)
+
+    sql_create_visitas = " ".join([
+        "CREATE TABLE IF NOT EXISTS visitas_pagina (",
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, fecha_hora TEXT)"
+    ])
+    c.execute(sql_create_visitas)
 
     semillas = [
         (
@@ -713,7 +733,6 @@ def obtener_guia_humana_exhaustiva(
     sueldo_str = f"${datos_sueldo['salario_mensual']:,.2f} MXN al mes ({datos_sueldo['periodicidad']})"
     oferta_val = datos_sueldo["oferta_patronal"]
     total_ley = res_liq["gran_total_bruto"]
-    faltante = max(0.0, total_ley - oferta_val)
 
     if categoria_caso == "Tránsito y Abuso Policial":
         radiografia = (
@@ -1029,7 +1048,7 @@ def diagnosticar_triage_multimateria(relato: str, vectorizer_mlp, modelo_mlp) ->
             "fraude", "estafa", "phishing", "vaciaron", "robaron mi cuenta",
             "clonaron", "criptomonedas", "llaves privadas", "copia de mi ine",
             "usaron mi ine", "sin mi consentimiento", "abrir creditos a mi nombre",
-            "abrir créditos a mi nombre", "quitaron mi celular", "robo de identidad"
+            "abrir créditos a mi nombre", "quitaron mi celular", "robo de identidad", "e.firma"
         ],
         "Casos Laborales": [
             "despid", "corrieron", "echaron", "chamba", "trabajaba", "trabajo",
@@ -1047,7 +1066,7 @@ def diagnosticar_triage_multimateria(relato: str, vectorizer_mlp, modelo_mlp) ->
             "papá de mis hijos", "custodia", "divorcio", "gasto de los niños", "manutencion"
         ],
         "Casos Civiles y Mercantiles": [
-            "inquilino", "renta", "arrendamiento", "pagare", "pagaré", "desocupar"
+            "inquilino", "renta", "arrendamiento", "pagare", "pagaré", "desocupar", "cerraduras"
         ]
     }
 
@@ -1078,7 +1097,6 @@ def diagnosticar_triage_multimateria(relato: str, vectorizer_mlp, modelo_mlp) ->
                 pass
         categorias_activas = [cat_fallback]
 
-    # Ordenar estrictamente por jerarquía de urgencia vital (Prioridad 1 a 6)
     categorias_ordenadas = sorted(categorias_activas, key=lambda c: PRIORIDAD_TRIAGE.get(c, (99, ""))[0])
 
     cat_principal = categorias_ordenadas[0]
@@ -1123,7 +1141,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str)
             "https://es.wikipedia.org/w/api.php?action=query&list=search"
             f"&srsearch={urllib.parse.quote(q_wiki)}&utf8=&format=json&srlimit=2"
         )
-        req_w = urllib.request.Request(url_wiki, headers={"User-Agent": "ForensicMindBot/9.0"})
+        req_w = urllib.request.Request(url_wiki, headers={"User-Agent": "ForensicMindBot/10.0"})
         with urllib.request.urlopen(req_w, timeout=3.5) as resp_w:
             data_w = json.loads(resp_w.read().decode("utf-8"))
             for item in data_w.get("query", {}).get("search", []):
@@ -1153,7 +1171,7 @@ def buscar_informacion_juridica_en_internet(categoria_caso: str, tipo_caso: str)
             "https://news.google.com/rss/search?"
             f"q={urllib.parse.quote(q_news)}&hl=es-419&gl=MX&ceid=MX:es-419"
         )
-        req_g = urllib.request.Request(url_gnews, headers={"User-Agent": "ForensicMindBot/9.0"})
+        req_g = urllib.request.Request(url_gnews, headers={"User-Agent": "ForensicMindBot/10.0"})
         with urllib.request.urlopen(req_g, timeout=4.0) as resp_g:
             root = ET.fromstring(resp_g.read())
             for it in root.findall(".//item")[:3]:
@@ -1315,7 +1333,7 @@ def calcular_cotizacion_honorarios_dual(
     }
 
 # ==============================================================================
-# DICTADO POR VOZ, WORD (.DOCX) Y FICHA 9:16 CON COORDENADAS Y CANDADO CORREGIDOS
+# DICTADO POR VOZ, WORD (.DOCX) Y FICHA 9:16
 # ==============================================================================
 def transcribir_audio_espanol(audio_bytes) -> str:
     if sr is None or audio_bytes is None:
@@ -1348,7 +1366,7 @@ def generar_ficha_vertical_9_16(
     cv2.rectangle(img, (25, 25), (1055, 1895), (240, 175, 50), 4)
     cv2.rectangle(img, (40, 40), (1040, 235), (45, 28, 16), -1)
 
-    cv2.putText(img, "FORENSICMIND & LEXGUIA v9.0", (65, 105), cv2.FONT_HERSHEY_DUPLEX, 1.55, (100, 220, 255), 3)
+    cv2.putText(img, "FORENSICMIND & LEXGUIA v10.0", (65, 105), cv2.FONT_HERSHEY_DUPLEX, 1.45, (100, 220, 255), 3)
     cv2.putText(img, limpiar_ascii(f"AUTOR: {AUTOR_SISTEMA.upper()}"), (65, 160), cv2.FONT_HERSHEY_DUPLEX, 0.75, (120, 230, 255), 2)
 
     etiqueta_rama = triage_info["rama"]
@@ -1397,7 +1415,7 @@ def generar_dictamen_word_docx(
     if Document is None:
         return b""
     doc = Document()
-    doc.add_heading("FORENSICMIND & LEXGUÍA v9.0 — MANUAL DE TRIAGE PASO A PASO", 0)
+    doc.add_heading("FORENSICMIND & LEXGUÍA v10.0 — MANUAL DE TRIAGE PASO A PASO", 0)
     doc.add_paragraph(f"Autoría del Sistema: {AUTOR_SISTEMA}")
     doc.add_paragraph(f"Expediente: {codigo} | Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     doc.add_paragraph(f"Materias Detectadas ({len(guias_por_modulo)}): {', '.join(triage_info['categorias_ordenadas'])}")
@@ -1440,7 +1458,7 @@ banner_html = " ".join([
     "<div class='author-banner'>",
     "<div style='display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;'>",
     "<div>",
-    "<span style='color:#fbbf24 !important; font-weight:800; font-size:13px;'>🏛️ SISTEMA DE TRIAGE LEGAL MULTI-MATERIA PASO A PASO • GITHUB AUTO-SYNC</span><br>",
+    "<span style='color:#fbbf24 !important; font-weight:800; font-size:13px;'>🏛️ SISTEMA DE TRIAGE LEGAL MULTI-MATERIA & DESPACHO • GITHUB AUTO-SYNC</span><br>",
     f"<span style='color:#ffffff !important; font-size:21px; font-weight:900;'>{MARCA_SISTEMA}</span>",
     "</div>",
     "<div>",
@@ -1454,13 +1472,15 @@ st.markdown(banner_html, unsafe_allow_html=True)
 VECTORIZER_VIVO, MODELO_VIVO, STATS_IA = entrenar_red_neuronal_evolutiva()
 
 if st.session_state["es_admin"]:
-    tab1, tab2, tab4, tab3, tab5, tab6 = st.tabs([
+    tab1, tab2, tab4, tab3, tab5, tab6, tab7, tab8 = st.tabs([
         "🧠 1. Guía Paso a Paso (Triage)",
         "💰 2. Calculadora LFT y Honorarios",
         "🔬 3. Casos Ganados vs. Perdidos",
-        "☁️ 4. [ADMIN] Cerebro & GitHub Sync",
-        "➕ 5. [ADMIN] Enseñar Caso a la IA",
-        "📬 6. [ADMIN] Buzón de Usuarios"
+        "☁️ 4. [ADMIN] Cerebro & GitHub",
+        "➕ 5. [ADMIN] Enseñar Caso",
+        "📬 6. [ADMIN] Buzón Usuarios",
+        "🛠️ 7. [ADMIN] Cotizador Despacho",
+        "👥 8. [ADMIN] Tráfico & Visitas"
     ])
 else:
     tab1, tab2, tab4 = st.tabs([
@@ -1470,7 +1490,7 @@ else:
     ])
 
 # ==============================================================================
-# PESTAÑA 1: TRIAGE MULTI-MATERIA PASO A PASO + CANDADO FINANCIERO
+# PESTAÑA 1: TRIAGE MULTI-MATERIA PASO A PASO + COTIZADOR CLIENTE Y WHATSAPP
 # ==============================================================================
 with tab1:
     st.markdown("### 🗣️ Cuéntame todo lo que te pasó (Aunque sean varios problemas mezclados)")
@@ -1519,7 +1539,7 @@ with tab1:
         res_auto = registrar_experiencia_en_memoria_autonoma(
             relato_original=relato_usuario,
             clasificacion=triage_res,
-            fuente="Triage Multi-Materia v9.0",
+            fuente="Triage Multi-Materia v10.0",
             texto_web_extra=info_web.get("corpus_web_extraido", ""),
             repo_gh=gh_repo_input,
             token_gh=gh_token_input,
@@ -1551,7 +1571,6 @@ with tab1:
         pct_litis=float(tabulador_act["pct_sugerido"])
     )
 
-    # ALERTA ESPECIAL SI ES UN CASO MULTI-MATERIA COMPLEJO
     if triage_res["es_multimateria"]:
         lista_etiquetas_html = "<br>".join([f"• <b>{m['titulo_prioridad']}</b>" for m in triage_res["modulos_triage"]])
         triage_html = " ".join([
@@ -1565,7 +1584,6 @@ with tab1:
         ])
         st.markdown(triage_html, unsafe_allow_html=True)
 
-    # CANDADO FINANCIERO INTELIGENTE: SOLO MOSTRAR LIQUIDACIÓN LFT SI HAY PROBLEMA LABORAL
     if triage_res["tiene_componente_laboral"]:
         if datos_sueldo["oferta_patronal"] > 0 and datos_sueldo["oferta_patronal"] < res_liq_rapido["gran_total_bruto"]:
             dif_robo = round(res_liq_rapido["gran_total_bruto"] - datos_sueldo["oferta_patronal"], 2)
@@ -1595,7 +1613,6 @@ with tab1:
         ])
         st.markdown(escudo_no_lab, unsafe_allow_html=True)
 
-    # RENDERIZAR CADA MÓDULO DETECTADO PASO A PASO
     guias_acumuladas = []
     for idx_mod, mod_info in enumerate(triage_res["modulos_triage"], 1):
         cat_m = mod_info["categoria"]
@@ -1659,7 +1676,37 @@ with tab1:
                 ])
                 st.markdown(aut_box, unsafe_allow_html=True)
 
-    # NOTICIAS Y CRITERIOS EN VIVO DE INTERNET
+    # --------------------------------------------------------------------------
+    # SECCIÓN NUEVA v10.0: COTIZADOR TRANSPARENTE Y CONTACTO DIRECTO AL DESPACHO
+    # --------------------------------------------------------------------------
+    st.markdown("---")
+    st.markdown("### ⚖️ Asesoría Profesional y Contratación Privada con el Despacho")
+    st.write("Si prefieres llevar tu caso con el respaldo de un abogado experto en lugar de hacerlo solo, aquí tienes las opciones de contratación transparente y el enlace directo:")
+
+    col_cot1, col_cot2 = st.columns(2)
+    with col_cot1:
+        st.markdown(f"""
+        <div class='lawyer-box'>
+            <b>💼 Esquema de Honorarios Estimados ({cat_principal}):</b><br>
+            • <b>Asesoría Inicial:</b> ${tabulador_act['asesoria_sug']:,.2f} MXN<br>
+            • <b>Anticipo Inicial:</b> ${tabulador_act['anticipo_sug']:,.2f} MXN ({tabulador_act['esquema_cobro']})<br>
+            • <b>Vía Institucional Gratuita:</b> {tab_m['via_gratuita']}
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_cot2:
+        texto_wa = urllib.parse.quote(
+            f"Hola Ing. Saúl / Equipo Legal. Analicé mi caso en ForensicMind (Folio: SAOR-2026-V10 | Materia: {cat_principal}). Me interesa agendar una asesoría privada."
+        )
+        link_whatsapp = f"https://wa.me/{DEFAULT_WHATSAPP_DESPACHO}?text={texto_wa}"
+        st.markdown(f"""
+        <div class='money-box' style='text-align:center;'>
+            <b>💬 ¿Deseas atención personalizada inmediata?</b><br>
+            Envía tu expediente y resumen de caso directamente al WhatsApp profesional del despacho.<br><br>
+            <a href='{link_whatsapp}' target='_blank' style='background-color:#059669; color:white; padding:12px 24px; border-radius:10px; font-weight:bold; text-decoration:none; display:inline-block;'>📱 Contactar al Despacho por WhatsApp ↗</a>
+        </div>
+        """, unsafe_allow_html=True)
+
     if buscar_web_switch and info_web["resultados"]:
         st.markdown("---")
         st.markdown("#### 🌐 Información Verificada en Internet para tu Caso")
@@ -1672,7 +1719,6 @@ with tab1:
             ])
             st.markdown(w_html, unsafe_allow_html=True)
 
-    # DESCARGAR GUÍA COMPLETA EN WORD Y FICHA 9:16 CORREGIDA
     st.markdown("---")
     hash_evidencia = hashlib.sha256(relato_usuario.encode("utf-8")).hexdigest()
     guia_primaria = guias_acumuladas[0]["guia"]
@@ -1680,23 +1726,23 @@ with tab1:
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
         bytes_docx = generar_dictamen_word_docx(
-            "SAOR-2026-V9", relato_usuario, triage_res, guias_acumuladas, res_liq_rapido, res_hon_rapido, hash_evidencia
+            "SAOR-2026-V10", relato_usuario, triage_res, guias_acumuladas, res_liq_rapido, res_hon_rapido, hash_evidencia
         )
         if bytes_docx:
             st.download_button(
                 label="📄 Descargar Manual Completo Multi-Materia en Word (.docx)",
                 data=bytes_docx,
-                file_name="Manual_Triage_Paso_a_Paso_v9.docx",
+                file_name="Manual_Triage_Paso_a_Paso_v10.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True
             )
     with col_dl2:
-        with st.expander("📱 Ver y Descargar Ficha Resumen 9:16 para Celular (Sin letras encimadas)", expanded=False):
+        with st.expander("📱 Ver y Descargar Ficha Resumen 9:16 para Celular", expanded=False):
             img_9_16 = generar_ficha_vertical_9_16(
-                "SAOR-2026-V9", triage_res, guia_primaria,
+                "SAOR-2026-V10", triage_res, guia_primaria,
                 res_liq_rapido["gran_total_bruto"], res_hon_rapido["monto_neto_libre_ciudadano"], hash_evidencia
             )
-            st.image(img_9_16, caption=f"Ficha 9:16 v9.0 — {AUTOR_SISTEMA}", use_container_width=True)
+            st.image(img_9_16, caption=f"Ficha 9:16 v10.0 — {AUTOR_SISTEMA}", use_container_width=True)
             _, buf_png = cv2.imencode(".png", cv2.cvtColor(img_9_16, cv2.COLOR_RGB2BGR))
             st.download_button(
                 "📥 Descargar Imagen 9:16 (.png)",
@@ -1706,7 +1752,6 @@ with tab1:
                 use_container_width=True
             )
 
-    # BUZÓN CIUDADANO "¿NO ENCONTRASTE LO QUE BUSCABAS?"
     st.markdown("---")
     st.markdown("### 📬 ¿No encontraste exactamente tu problema o tienes una duda especial?")
     st.write("Envíale tu caso directamente al **Ing. Saúl Ángel Ortiz Rogel** para analizarlo e integrarlo a la inteligencia artificial:")
@@ -1732,7 +1777,7 @@ with tab1:
                 conn.commit()
                 conn.close()
                 guardar_y_sincronizar_cerebro_autonomo(gh_repo_input, gh_token_input, gh_branch_input)
-                asunto_mail = urllib.parse.quote("Nuevo Caso Ciudadano - ForensicMind v9.0")
+                asunto_mail = urllib.parse.quote("Nuevo Caso Ciudadano - ForensicMind v10.0")
                 cuerpo_mail = urllib.parse.quote(f"Nombre: {nom_bz}\nContacto: {con_bz}\n\nCaso:\n{duda_bz}")
                 st.success("✅ ¡Tu caso quedó guardado en el buzón del Administrador y sincronizado en GitHub!")
                 st.markdown(
@@ -1742,7 +1787,7 @@ with tab1:
                 st.warning("Por favor escribe una breve descripción de tu duda.")
 
 # ==============================================================================
-# PESTAÑA 2: CALCULADORA EXHAUSTIVA DE LIQUIDACIÓN (CON DÍAS DE DESCANSO)
+# PESTAÑA 2: CALCULADORA EXHAUSTIVA DE LIQUIDACIÓN
 # ==============================================================================
 with tab2:
     st.subheader("💰 Calculadora Fácil de Liquidación Laboral y Costo de Abogado")
@@ -1809,7 +1854,7 @@ with tab2:
     st.dataframe(res_det["tabla_conceptos"].style.format({"Monto (MXN)": "${:,.2f}"}), use_container_width=True, hide_index=True)
 
 # ==============================================================================
-# PESTAÑA 3 (PÚBLICA): COMPARATIVA VISUAL LADO A LADO (GANADO VS. PERDIDO)
+# PESTAÑA 3: COMPARATIVA VISUAL LADO A LADO (GANADO VS. PERDIDO)
 # ==============================================================================
 with tab4:
     st.subheader("🔬 Comparativa Real: Estrategia Ganadora vs. Error Fatal")
@@ -1982,6 +2027,66 @@ if st.session_state["es_admin"]:
                     sync_bz = guardar_y_sincronizar_cerebro_autonomo(gh_repo_input, gh_token_input, gh_branch_input)
                     st.success(f"✅ Caso #{id_sel} integrado a la Red Neuronal y respaldado. {sync_bz['msg']}")
                     st.rerun()
+
+    with tab7:
+        st.subheader("🛠️ [ADMIN] Cotizador Privado de Honorarios & Tarifas de Despacho")
+        st.write("Usa esta herramienta privada para calcular presupuestos formales para tus clientes según la materia:")
+
+        mat_sel_adm = st.selectbox("Selecciona la Materia Jurídica:", list(TABULADOR_HONORARIOS_RAMA.keys()))
+        tab_adm = TABULADOR_HONORARIOS_RAMA[mat_sel_adm]
+
+        c_adm1, c_adm2 = st.columns(2)
+        monto_disp_adm = c_adm1.number_input("Monto aproximado en disputa ($ MXN):", min_value=0.0, value=50000.0, step=5000.0)
+        pct_exito_adm = c_adm2.number_input("Porcentaje de éxito (Cuota Litis %):", min_value=0.0, max_value=50.0, value=float(tab_adm["pct_sugerido"]), step=1.0)
+
+        anticipo_adm = st.number_input("Anticipo inicial requerido ($ MXN):", min_value=0.0, value=float(tab_adm["anticipo_sug"]), step=500.0)
+        asesoria_adm = st.number_input("Costo de consulta/asesoría ($ MXN):", min_value=0.0, value=float(tab_adm["asesoria_sug"]), step=100.0)
+
+        res_cot_priv = calcular_cotizacion_honorarios_dual(
+            monto_en_disputa=monto_disp_adm,
+            costo_asesoria=asesoria_adm,
+            anticipo_fijo=anticipo_adm,
+            pct_litis=pct_exito_adm
+        )
+
+        st.markdown(f"""
+        <div class='money-box'>
+            <b>📊 Propuesta Económica Calculada para el Cliente:</b><br>
+            • <b>Anticipo / Retainer Inicial:</b> ${anticipo_adm:,.2f} MXN<br>
+            • <b>Comisión por Éxito ({pct_exito_adm}%):</b> ${monto_disp_adm * (pct_exito_adm/100.0):,.2f} MXN<br>
+            • <b>Total de Honorarios del Despacho:</b> ${res_cot_priv['honorarios_totales_abogado']:,.2f} MXN<br>
+            • <b>Neto Libre para el Cliente:</b> ${res_cot_priv['monto_neto_libre_ciudadano']:,.2f} MXN
+        </div>
+        """, unsafe_allow_html=True)
+
+        propuesta_whatsapp = (
+            f"Estimado cliente, respecto a su asunto de {mat_sel_adm}, la propuesta de honorarios del despacho es la siguiente:\n"
+            f"- Asesoría inicial: ${asesoria_adm:,.2f} MXN\n"
+            f"- Anticipo inicial para gestiones: ${anticipo_adm:,.2f} MXN\n"
+            f"- Comisión por éxito (Cuota Litis): {pct_exito_adm}% sobre lo recuperado.\n"
+            f"Quedamos a sus órdenes para iniciar con la defensa jurídica."
+        )
+        st.text_area("📋 Texto listo para copiar y enviar por WhatsApp al cliente:", value=propuesta_whatsapp, height=120)
+
+    with tab8:
+        st.subheader("👥 [ADMIN] Tráfico y Analítica de Visitantes en la Página")
+        conn = sqlite3.connect(DB_NAME)
+        df_visitas = pd.read_sql_query("SELECT * FROM visitas_pagina ORDER BY id DESC", conn)
+        conn.close()
+
+        total_visitas = len(df_visitas)
+        hoy_str = datetime.now().strftime("%Y-%m-%d")
+        visitas_hoy = len(df_visitas[df_visitas["fecha_hora"].str.startswith(hoy_str)]) if not df_visitas.empty else 0
+
+        v1, v2 = st.columns(2)
+        v1.metric("Visitas Totales Acumuladas", f"{total_visitas}")
+        v2.metric("Visitas Registradas Hoy", f"{visitas_hoy}")
+
+        st.markdown("#### 🕒 Registro Cronológico de Sesiones")
+        if df_visitas.empty:
+            st.info("Aún no hay visitas registradas.")
+        else:
+            st.dataframe(df_visitas, use_container_width=True, hide_index=True)
 
 st.markdown("---")
 st.caption(f"⚙️ Arquitectura y Desarrollo: {AUTOR_SISTEMA} • {MARCA_SISTEMA}")
