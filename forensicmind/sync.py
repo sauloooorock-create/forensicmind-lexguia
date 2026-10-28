@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import time
 import urllib.error
 import urllib.request
 
 from . import config, db
+
+log = logging.getLogger("forensicmind.sync")
 
 API = "https://api.github.com"
 INTERVALO_MIN_SEG = 60
@@ -144,7 +147,7 @@ def restaurar(ajustes: config.Ajustes) -> dict:
         if ruta.exists():
             fuentes.append(json.loads(ruta.read_text(encoding="utf-8")))
     except Exception:
-        pass
+        log.exception("No se pudo leer el respaldo local %s", ruta)
     if ajustes.gh_repo and ajustes.gh_token:
         remoto = descargar_respaldo(ajustes.gh_repo, ajustes.gh_token, ajustes.gh_branch)
         if remoto:

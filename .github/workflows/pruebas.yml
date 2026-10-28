@@ -1,0 +1,23 @@
+name: Pruebas y vigencia legal
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Lunes 09:00 UTC: detecta si data/leyes.json quedó desactualizado.
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt pytest
+      - name: Ejecutar pruebas
+        run: python -m pytest tests -q
