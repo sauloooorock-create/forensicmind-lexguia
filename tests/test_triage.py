@@ -46,6 +46,11 @@ def test_amenaza_de_golpes_del_cliente_activa_alerta():
     assert "agresion_cliente" in tipos
 
 
+def test_amenaza_de_correr_al_trabajador_es_laboral():
+    texto = "La tienda me amenaza con correrme si no pago los danos del refrigerador, y no tengo contrato."
+    assert triage.diagnosticar(texto)["categoria"] == "Casos Laborales"
+
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in list(globals().items()):

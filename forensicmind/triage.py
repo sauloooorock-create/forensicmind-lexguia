@@ -50,6 +50,7 @@ REGLAS: dict[str, list[tuple[str, float]]] = {
         (r"\b(?:cargador|acomodador|diablito|montacargas|rampa)\b", 1.5),
         (r"\bme (?:quiere|quieren|cobrar|cobren|descontar|descuenten)\b|\bcobrar(?:me)? (?:los )?danos?\b", 2.5),
         (r"\bdescuent\w* (?:de|del|por) (?:mi )?(?:sueldo|salario|quincena|pago)\b", 3),
+        (r"\bcorrerme\b|\bme (?:van|quieren) (?:a )?(?:correr|despedir)\b|\bamenazan? con (?:correr|despedir)\w*\b", 3),
     ],
     "Acoso de Cobranza y Deudas": [
         (r"\bcobranza\b", 3), (r"\bembarg\w+\b", 2.5), (r"\bapps? de prestamos?\b|\bmontadeudas\b|\bprestamos? en linea\b", 3),

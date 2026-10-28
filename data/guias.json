@@ -218,10 +218,15 @@
       "🔹 **Si te amenaza con demandarte:** amenazar con una demanda no es un cobro. Solo un juez puede obligarte a pagar, y el cliente tendría que probar tu culpa y el monto. Si llega un citatorio o una demanda, no lo ignores: acude de inmediato a PROFEDET o a una defensoría.",
       "🔹 **Un contrato de palabra también es válido:** la falta de contrato escrito y de alta en el IMSS es responsabilidad del patrón, no tuya (Art. 20 y 21 LFT). Que la tienda diga «no hay relación» no la borra por sí solo: importa cómo funcionaba el apoyo en la práctica.",
       "🔹 **No tienes que arreglarte solo con el cliente:** la compra fue con la tienda, así que el reclamo lo debe atender la tienda (reposición, reembolso o reporte a su aseguradora). Tú no tienes que negociar en solitario ni pagar bajo amenaza.",
-      "💡 **Propuesta de solución para presentar por escrito:** (1) que la tienda atienda al cliente con reposición o reembolso; (2) que reporte el daño a su aseguradora y te diga el número de póliza; (3) que se haga un peritaje independiente del refrigerador con dos cotizaciones; (4) que, si se requiere tu participación, sea por acuerdo escrito con monto razonable, pagos en cuotas y un finiquito que libere a ti y a la tienda."
+      "💡 **Propuesta de solución para presentar por escrito:** (1) que la tienda atienda al cliente con reposición o reembolso; (2) que reporte el daño a su aseguradora y te diga el número de póliza; (3) que se haga un peritaje independiente del refrigerador con dos cotizaciones; (4) que, si se requiere tu participación, sea por acuerdo escrito con monto razonable, pagos en cuotas y un finiquito que libere a ti y a la tienda.",
+      "🔹 **Si te amenazan con correrte:** no tienes que firmar nada para que eso ocurra. Que no haya contrato no quita que te puedan despedir si eres trabajador: la relación de trabajo existe por los hechos (Art. 20 y 21 LFT). Y la empresa debe probar la causa; no basta con decirla.",
+      "🔹 **Aviso de despido por escrito:** si te despiden, la empresa debe darte el aviso por escrito con la fecha y la causa dentro de los 5 días siguientes (Art. 47 LFT). Si no lo hace, eso también cuenta a tu favor.",
+      "🔹 **Qué puedes pedir:** si el despido es injustificado, puedes elegir entre que te reinstalen o que te paguen la indemnización (Art. 48 LFT). No aceptes un «finiquito» sin revisarlo antes.",
+      "🔹 **Si la tienda dice que no eres su trabajador:** debe presentar sus registros (contratos, asistencias, nómina). Si no los presenta, la autoridad puede tomar como ciertos tus datos (Art. 784 LFT)."
     ],
     "fase_1_hoy": [
       "**0. Tu seguridad primero:** si hay golpes o amenazas, aléjate, pide ayuda a seguridad o a un compañero y llama al 911.",
+      "**Anota la fecha y la hora de cualquier amenaza de despido** y guarda el mensaje o audio donde te la hicieron.",
       "**1. No pagues** al cliente hoy, no transfieras dinero y no aceptes que te descuenten tus propinas.",
       "**2. No firmes** convenio, pagaré, carta de responsabilidad ni renuncia.",
       "**3. Pide por escrito** a gerencia el reporte del incidente, si te consideran trabajador o no, y el monto que reclaman con su fundamento.",
@@ -229,6 +234,7 @@
       "**5. Anota tus propinas y turnos de cada semana:** sirven para calcular lo que te deben y para acreditar tu relación de trabajo."
     ],
     "fase_2_semana": [
+      "**Plazo de 2 meses desde el despido** para iniciar la conciliación (Art. 518 LFT). Si te corren, no esperes: la app te dirá cuántos días te quedan.",
       "**1. Acude a PROFEDET** (800 911 7877, gratuito) con tu identificación y tus pruebas. Pueden decirte si eres trabajador y orientarte sobre el reclamo del cliente.",
       "**2. Si te quieren despedir o quitar propinas,** pide que lo pongan por escrito y llévalo a PROFEDET o al Centro de Conciliación Laboral antes de firmar cualquier cosa.",
       "**3. Si el cliente insiste,** que presente su queja ante PROFECO (Concilianet) o con la tienda. No es tu trámite.",
@@ -245,7 +251,9 @@
       "🚫 **Borrar mensajes o chats** con supervisores: son tu mejor prueba.",
       "🚫 **No pedir nada por escrito:** lo que no queda escrito es difícil de probar después.",
       "🚫 **Negociar a solas con el cliente bajo amenazas** o aceptar ir a su casa o a un lugar que no conoces.",
-      "🚫 **Responder con agresiones** o grabar de forma provocadora: puede usarse en tu contra."
+      "🚫 **Responder con agresiones** o grabar de forma provocadora: puede usarse en tu contra.",
+      "🚫 **Firmar renuncia o finiquito** para «evitar el pleito» o porque te presionan.",
+      "🚫 **Dejar de ir sin avisar:** la empresa podría alegar abandono. Si no puedes asistir, avísale por escrito."
     ],
     "autoridad": "PROFEDET y Centro de Conciliación Laboral (si eres trabajador); PROFECO para la queja del cliente.",
     "abogado_req": "PROFEDET te orienta sin costo. Un abogado laboralista solo si hay despido o demanda civil."
