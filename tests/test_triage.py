@@ -41,6 +41,11 @@ def test_despido_no_usa_el_subtipo_de_danos():
     assert triage.subtipo_laboral("Me despidieron sin pagarme finiquito ni vacaciones.") is None
 
 
+def test_amenaza_de_golpes_del_cliente_activa_alerta():
+    tipos = [a["tipo"] for a in triage.detectar_alertas("El cliente me quiere pegar y dice que me va a demandar")]
+    assert "agresion_cliente" in tipos
+
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in list(globals().items()):
