@@ -44,6 +44,12 @@ REGLAS: dict[str, list[tuple[str, float]]] = {
         (r"\bchamba\b", 2), (r"\bempleo\b", 1.5), (r"\b(?:trabajaba|trabaje|trabajando|trabajo)\b", 1),
         (r"\bempresa\b", 1), (r"\b(?:jefe|encargado|supervisor)\b", 1), (r"\bdias? (?:libres?|de descanso)\b", 1.5),
         (r"\bboletin\w*\b", 1.5),
+        # Daños ocasionados en el trabajo (producto, mercancía o cliente) y descuentos al sueldo
+        (r"\bdanos?\b", 1.5), (r"\bgerencia\b|\bgerente\b", 2), (r"\bmercancias?\b|\brefri\w*\b", 1.5),
+        (r"\bse me (?:cayo|callo|rompio|quebro)\b|\bse (?:cayo|callo|rompio|quebro)\b", 2),
+        (r"\b(?:cargador|acomodador|diablito|montacargas|rampa)\b", 1.5),
+        (r"\bme (?:quiere|quieren|cobrar|cobren|descontar|descuenten)\b|\bcobrar(?:me)? (?:los )?danos?\b", 2.5),
+        (r"\bdescuent\w* (?:de|del|por) (?:mi )?(?:sueldo|salario|quincena|pago)\b", 3),
     ],
     "Acoso de Cobranza y Deudas": [
         (r"\bcobranza\b", 3), (r"\bembarg\w+\b", 2.5), (r"\bapps? de prestamos?\b|\bmontadeudas\b|\bprestamos? en linea\b", 3),
