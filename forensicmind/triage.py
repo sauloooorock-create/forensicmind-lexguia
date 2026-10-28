@@ -89,6 +89,8 @@ def subtipo_laboral(relato: str) -> str | None:
 ALERTAS_URGENCIA = [
     ("peligro", re.compile(r"\b(?:me van a matar|amenazas? de muerte|me amenazan de muerte|secuestr\w+|me (?:golpe\w+|agred\w+)|violencia|con (?:un )?arma|me apunt\w+)\b"),
      "Si tú o alguien más está en peligro inmediato, llama al **911**. Para denuncia anónima: **089**."),
+    ("agresion_cliente", re.compile(r"\b(?:golpear(?:me)?|madrear(?:me)?|agredir(?:me)?|pegarme|me pegue|me va a pegar|me quiere pegar|me van a pegar)\b"),
+     "Tu seguridad va primero: **aléjate**, busca a seguridad de la tienda o a un compañero y no te quedes a solas con la persona. Si hay golpes o amenazas inmediatas, llama al **911**. No respondas con violencia. Guarda evidencia (fotos, testigos, grabaciones de cámaras) y denuncia ante el Ministerio Público si te agreden."),
     ("detencion", re.compile(r"\b(?:estoy detenid[oa]|me tienen detenid[oa]|me detuvieron|me llevaron (?:a la|al) (?:comandancia|ministerio|mp|carcel))\b"),
      "Si estás detenido: tienes derecho a guardar silencio, a una llamada y a un defensor. **No firmes nada** sin abogado. Avisa a un familiar tu ubicación. Emergencias: **911**."),
     ("fraude_en_curso", re.compile(r"\b(?:me estan (?:vaciando|robando)|acaban de (?:vaciar|robar|clonar)|hace (?:unos? )?(?:minutos|una hora))\b"),

@@ -40,6 +40,16 @@ def test_guia_laboral_normal_no_cambia_con_el_subtipo_nuevo():
     assert normal["abogado_req"] != guias.obtener_guia("Casos Laborales", subtipo="danos_en_trabajo")["abogado_req"]
 
 
+def test_guia_danos_incluye_seguridad_y_propuesta_de_solucion():
+    g = guias.obtener_guia("Casos Laborales", subtipo="danos_en_trabajo")
+    texto = _texto(g)
+    assert "Tu seguridad va primero" in texto or "Tu seguridad primero" in texto
+    assert "Propuesta de solución" in texto
+    assert "aseguradora" in texto
+    assert "peritaje independiente" in texto
+    assert "Si el cliente te amenaza" in texto
+
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in list(globals().items()):

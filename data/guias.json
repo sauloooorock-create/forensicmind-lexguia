@@ -213,9 +213,15 @@
       "🔹 **Si eres trabajador:** la empresa asume los riesgos normales del trabajo. Los descuentos a tu pago tienen límite (Art. 110 LFT: hasta el 30 % del salario) y no pueden quitarte tus propinas para cubrir el daño sin acuerdo por escrito.",
       "🔹 **Si apoyas por tu cuenta:** el cliente podría reclamar daños causados por culpa (Código Civil). Debe probar la culpa y el monto; no es un cobro directo ni inmediato. Puede haber responsabilidad compartida con la tienda si te pidió ese apoyo.",
       "🔹 **Qué prueba define tu caso:** mensajes de WhatsApp con supervisores, rol de turnos, uniforme o gafete, indicaciones de cómo y dónde trabajar y quién te pedía apoyar.",
-      "🔹 **Ojo con los intermediarios:** si te contrató otra empresa para ese apoyo, la reforma de 2021 limita la subcontratación de personal (Art. 15-A LFT); la tienda podría ser la verdadera patrona."
+      "🔹 **Ojo con los intermediarios:** si te contrató otra empresa para ese apoyo, la reforma de 2021 limita la subcontratación de personal (Art. 15-A LFT); la tienda podría ser la verdadera patrona.",
+      "🔹 **Si el cliente se pone agresivo:** tu seguridad va primero. No discutas a gritos, aléjate, busca a seguridad o a un compañero y no vayas solo a negociar con el cliente.",
+      "🔹 **Si te amenaza con demandarte:** amenazar con una demanda no es un cobro. Solo un juez puede obligarte a pagar, y el cliente tendría que probar tu culpa y el monto. Si llega un citatorio o una demanda, no lo ignores: acude de inmediato a PROFEDET o a una defensoría.",
+      "🔹 **Un contrato de palabra también es válido:** la falta de contrato escrito y de alta en el IMSS es responsabilidad del patrón, no tuya (Art. 20 y 21 LFT). Que la tienda diga «no hay relación» no la borra por sí solo: importa cómo funcionaba el apoyo en la práctica.",
+      "🔹 **No tienes que arreglarte solo con el cliente:** la compra fue con la tienda, así que el reclamo lo debe atender la tienda (reposición, reembolso o reporte a su aseguradora). Tú no tienes que negociar en solitario ni pagar bajo amenaza.",
+      "💡 **Propuesta de solución para presentar por escrito:** (1) que la tienda atienda al cliente con reposición o reembolso; (2) que reporte el daño a su aseguradora y te diga el número de póliza; (3) que se haga un peritaje independiente del refrigerador con dos cotizaciones; (4) que, si se requiere tu participación, sea por acuerdo escrito con monto razonable, pagos en cuotas y un finiquito que libere a ti y a la tienda."
     ],
     "fase_1_hoy": [
+      "**0. Tu seguridad primero:** si hay golpes o amenazas, aléjate, pide ayuda a seguridad o a un compañero y llama al 911.",
       "**1. No pagues** al cliente hoy, no transfieras dinero y no aceptes que te descuenten tus propinas.",
       "**2. No firmes** convenio, pagaré, carta de responsabilidad ni renuncia.",
       "**3. Pide por escrito** a gerencia el reporte del incidente, si te consideran trabajador o no, y el monto que reclaman con su fundamento.",
@@ -225,18 +231,21 @@
     "fase_2_semana": [
       "**1. Acude a PROFEDET** (800 911 7877, gratuito) con tu identificación y tus pruebas. Pueden decirte si eres trabajador y orientarte sobre el reclamo del cliente.",
       "**2. Si te quieren despedir o quitar propinas,** pide que lo pongan por escrito y llévalo a PROFEDET o al Centro de Conciliación Laboral antes de firmar cualquier cosa.",
-      "**3. Si el cliente insiste,** que presente su queja ante PROFECO (Concilianet) o con la tienda. No es tu trámite."
+      "**3. Si el cliente insiste,** que presente su queja ante PROFECO (Concilianet) o con la tienda. No es tu trámite.",
+      "**4. Pide por escrito a la tienda:** número de póliza de su aseguradora, reporte del incidente y peritaje del refrigerador."
     ],
     "fase_3_autoridad": [
       "**1. En conciliación o juicio laboral (si eres trabajador):** reclama las propinas retenidas, pagos pendientes y cualquier descuento indebido.",
       "**2. En la vía civil (si te demandan):** el cliente debe probar la culpa, el daño y el monto. Pide tiempo para revisar el caso con PROFEDET antes de contestar."
     ],
-    "guion": "💬 **Qué decir a gerencia:**\n\n*«Quiero que me den por escrito el reporte del incidente y si me consideran trabajador. No voy a pagar ni firmar nada sin revisarlo. Mis propinas no se descuentan para cubrir un daño sin acuerdo escrito.»*",
+    "guion": "💬 **Qué decir a gerencia:**\n\n*«Quiero que me den por escrito el reporte del incidente y si me consideran trabajador. No voy a pagar ni firmar nada sin revisarlo. Mis propinas no se descuentan para cubrir un daño sin acuerdo escrito.»*\n\n💬 **Si el cliente te amenaza:**\n\n*«Entiendo su molestia. Atiendo este reclamo por escrito con la tienda. No voy a pagar ni firmar nada bajo amenazas. Si quiere demandar, lo hará por la vía legal.»*\n\n💬 **Propuesta a gerencia:**\n\n*«Propongo que la tienda reporte el daño a su aseguradora y atienda el reclamo del cliente con reposición o reembolso. Si se requiere mi participación, que sea por acuerdo escrito, con monto basado en un peritaje independiente, pagos en cuotas y un finiquito que libere a ambas partes.»*",
     "errores_fatales": [
       "🚫 **Pagar o firmar el mismo día** bajo presión de gerencia o del cliente.",
       "🚫 **Aceptar que te quiten tus propinas** o te descuenten sin un papel que lo explique.",
       "🚫 **Borrar mensajes o chats** con supervisores: son tu mejor prueba.",
-      "🚫 **No pedir nada por escrito:** lo que no queda escrito es difícil de probar después."
+      "🚫 **No pedir nada por escrito:** lo que no queda escrito es difícil de probar después.",
+      "🚫 **Negociar a solas con el cliente bajo amenazas** o aceptar ir a su casa o a un lugar que no conoces.",
+      "🚫 **Responder con agresiones** o grabar de forma provocadora: puede usarse en tu contra."
     ],
     "autoridad": "PROFEDET y Centro de Conciliación Laboral (si eres trabajador); PROFECO para la queja del cliente.",
     "abogado_req": "PROFEDET te orienta sin costo. Un abogado laboralista solo si hay despido o demanda civil."
