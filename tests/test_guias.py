@@ -50,6 +50,14 @@ def test_guia_danos_incluye_seguridad_y_propuesta_de_solucion():
     assert "Si el cliente te amenaza" in texto
 
 
+def test_guia_danos_explica_despido_sin_contrato():
+    texto = _texto(guias.obtener_guia("Casos Laborales", subtipo="danos_en_trabajo"))
+    assert "Art. 47" in texto
+    assert "Art. 48" in texto
+    assert "Art. 784" in texto
+    assert "Plazo de 2 meses" in texto
+
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in list(globals().items()):
