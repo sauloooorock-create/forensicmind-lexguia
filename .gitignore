@@ -6,3 +6,5 @@ data/*.db-*
 data/*backup*.json
 .streamlit/secrets.toml
 .env
+data/ajustes_legales.json
+data/ajustes_legales.tmp

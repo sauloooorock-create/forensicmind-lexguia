@@ -200,10 +200,67 @@ def cargar_ajustes() -> Ajustes:
 # --------------------------------------------------------------------------------------
 # Reglas legales versionadas
 # --------------------------------------------------------------------------------------
-@lru_cache(maxsize=1)
-def leyes() -> dict:
+def _ruta_ajustes() -> Path:
+    """Ajustes de cifras legales que el administrador cambia desde la app (configurable para pruebas)."""
+    return Path(os.environ.get("FM_AJUSTES_PATH", str(DATA_DIR / "ajustes_legales.json")))
+
+
+def _fusionar(base: dict, cambios: dict) -> dict:
+    """Mezcla recursiva: los diccionarios se combinan; las listas (p. ej. vacaciones) se reemplazan."""
+    salida = dict(base)
+    for clave, valor in cambios.items():
+        if isinstance(valor, dict) and isinstance(salida.get(clave), dict):
+            salida[clave] = _fusionar(salida[clave], valor)
+        else:
+            salida[clave] = valor
+    return salida
+
+
+def leyes_base() -> dict:
+    """Reglas tal como vienen en data/leyes.json, sin ajustes del administrador."""
     with open(DATA_DIR / "leyes.json", "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def ajustes_legales_actuales() -> dict:
+    """Cambios hechos por el administrador (vacío si no hay ninguno)."""
+    ruta = _ruta_ajustes()
+    if not ruta.exists():
+        return {}
+    try:
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+        return datos if isinstance(datos, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+@lru_cache(maxsize=1)
+def leyes() -> dict:
+    return _fusionar(leyes_base(), ajustes_legales_actuales())
+
+
+def guardar_ajustes_legales(cambios: dict) -> list[str]:
+    """Valida y guarda los cambios. Devuelve los problemas encontrados (vacío = guardado)."""
+    candidato = _fusionar(leyes_base(), _fusionar(ajustes_legales_actuales(), cambios))
+    problemas = validar_leyes(candidato)
+    if problemas:
+        return problemas
+    ruta = _ruta_ajustes()
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    tmp = ruta.with_suffix(".tmp")
+    tmp.write_text(json.dumps(_fusionar(ajustes_legales_actuales(), cambios), ensure_ascii=False, indent=2),
+                   encoding="utf-8")
+    tmp.replace(ruta)
+    leyes.cache_clear()
+    return []
+
+
+def restablecer_ajustes_legales() -> None:
+    """Quita todos los cambios del administrador y vuelve a los valores de leyes.json."""
+    ruta = _ruta_ajustes()
+    if ruta.exists():
+        ruta.unlink()
+    leyes.cache_clear()
 
 
 @lru_cache(maxsize=1)
