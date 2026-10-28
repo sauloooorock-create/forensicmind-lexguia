@@ -6,6 +6,7 @@ informativas: el monto final lo determina el convenio ratificado o la autoridad 
 from __future__ import annotations
 
 import calendar
+import math
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -36,7 +37,10 @@ def dias_vacaciones(anio_servicio: int) -> int:
     for tramo in tabla:
         if tramo["desde"] <= anio <= tramo["hasta"]:
             return int(tramo["dias"])
-    return int(tabla[-1]["dias"])
+    # Después del último tramo de la tabla (art. 76 LFT reformado): +2 días cada 5 años.
+    ultimo = tabla[-1]
+    extra = 2 * math.ceil((anio - int(ultimo["hasta"])) / 5)
+    return int(ultimo["dias"]) + extra
 
 
 def vacaciones_no_gozadas_sugeridas(anios_completos: int) -> int:
