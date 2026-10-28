@@ -12,7 +12,8 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from forensicmind import config, db
+from forensicmind import config, db, ia_respaldo
+from forensicmind.security import anonimizar
 
 # Campos numéricos editables de leyes.json: (ruta con puntos, etiqueta, tipo)
 CAMPOS_LEY = [
@@ -207,6 +208,37 @@ def _buzon() -> None:
     if st.button("🗑️ Borrar mensaje", disabled=not confirmo, key=f"ctl_borrar_b_{sel}"):
         db.eliminar_buzon(sel)
         st.success("Mensaje borrado.")
+
+    st.markdown("##### ✨ Proponer un caso con IA")
+    ajustes = config.cargar_ajustes()
+    if not ajustes.anthropic_key:
+        st.caption("Para usar esta función configura ANTHROPIC_API_KEY en los secretos.")
+        return
+    st.caption("La IA redacta una propuesta a partir del mensaje anonimizado. No se guarda hasta que la revises aquí.")
+    if st.button("✨ Generar propuesta", key=f"ctl_prop_gen_{sel}"):
+        with st.spinner("Redactando propuesta..."):
+            st.session_state[f"ctl_prop_{sel}"] = ia_respaldo.proponer_caso(
+                b["relato_anonimo"] or "", ajustes.anthropic_key, ajustes.anthropic_model)
+        if not st.session_state[f"ctl_prop_{sel}"]:
+            st.warning("La IA no devolvió una propuesta válida. Intenta de nuevo o escribe el caso a mano.")
+    prop = st.session_state.get(f"ctl_prop_{sel}")
+    if not prop:
+        return
+    categorias = list(config.TIPOS_CASOS)
+    c1, c2 = st.columns([2, 1])
+    titulo = c1.text_input("Título", value=prop["titulo"], key=f"ctl_pt_{sel}")
+    categoria = c2.selectbox("Categoría", categorias, index=categorias.index(prop["categoria_caso"]), key=f"ctl_pc_{sel}")
+    resultado = st.selectbox("Resultado", ia_respaldo.RESULTADOS, index=ia_respaldo.RESULTADOS.index(prop["resultado"]),
+                             key=f"ctl_pr_{sel}")
+    campos = {}
+    for clave, etiqueta in (("evidencia_logs", "Hechos"), ("estrategia_ganadora", "Estrategia"),
+                            ("que_hacer_ciudadano", "Qué debe hacer"), ("que_no_hacer_ciudadano", "Qué NO debe hacer")):
+        campos[clave] = st.text_area(etiqueta, value=prop.get(clave, ""), key=f"ctl_p_{clave}_{sel}")
+    if st.button("💾 Guardar como caso ilustrativo", type="primary", key=f"ctl_pg_{sel}"):
+        db.agregar_caso({"titulo": titulo, "categoria_caso": categoria, "resultado": resultado, "ilustrativo": 1,
+                         "origen": "ia-revisada", **{k: anonimizar(v) for k, v in campos.items()}})
+        st.session_state.pop(f"ctl_prop_{sel}", None)
+        st.success("Caso guardado. Quedó marcado como ilustrativo y con origen IA revisada.")
 
 
 def render() -> None:

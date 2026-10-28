@@ -19,7 +19,7 @@ from forensicmind import (
     base_legal, config, db, docs, extraction, extraction_llm, guias, honorarios, lft, ml, security, sync, triage, web,
 )
 from forensicmind.security import esc, fmt_inline
-from forensicmind import control_admin
+from forensicmind import control_admin, ia_respaldo
 
 log = logging.getLogger("forensicmind")
 
@@ -421,6 +421,9 @@ def ejecutar_analisis(relato: str, consentimiento: bool) -> dict:
         extra = extraction_llm.extraer_con_llm(relato, AJUSTES.anthropic_key, AJUSTES.anthropic_model)
         if extra:
             datos = extraction_llm.fusionar(datos, extra)
+    sugerencia = {}
+    if t["indeterminado"] and usar_llm and AJUSTES.anthropic_key:
+        sugerencia = ia_respaldo.clasificar_indeterminado(relato, AJUSTES.anthropic_key, AJUSTES.anthropic_model)
     web_res = []
     if buscar_web and not t["indeterminado"]:
         web_res = web_cacheado(t["categoria"], t["tipo"])
@@ -435,6 +438,7 @@ def ejecutar_analisis(relato: str, consentimiento: bool) -> dict:
     folio = f"{config.FOLIO_BASE}-{datetime.now():%Y%m%d}-{hashlib.sha256(relato.encode()).hexdigest()[:6].upper()}"
     return {
         "relato": relato, "triage": t, "datos": datos, "web": web_res, "guardado": guardado, "folio": folio,
+        "sugerencia_ia": sugerencia,
         "firma": hashlib.sha256(relato.encode()).hexdigest()[:8],
     }
 
@@ -485,6 +489,11 @@ def mostrar_analisis(a: dict) -> None:
     if t["indeterminado"]:
         g = guias.obtener_guia("Indeterminado")
         caja("card-box", f"<b>🔍 {fmt_inline(g['radiografia'])}</b>")
+        sug = a.get("sugerencia_ia") or {}
+        if sug:
+            caja("card-box", f"<b>🤖 Sugerencia de la IA (no verificada):</b> parece un caso de "
+                             f"<b>{esc(sug['categoria'])}</b>. {esc(sug.get('motivo', ''))} "
+                             "Revisa la guía de esa materia y agrega detalles.")
         for e in g["explicacion_sencilla"]:
             st.markdown(mk(e))
         st.caption("Agrega detalles en el recuadro de arriba (por ejemplo: qué autoridad, empresa o institución, cuánto dinero y qué fecha) y vuelve a analizar.")
