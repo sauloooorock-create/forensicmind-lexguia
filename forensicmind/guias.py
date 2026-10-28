@@ -16,9 +16,17 @@ def _dinero(x: float) -> str:
     return f"${x:,.2f} MXN"
 
 
-def obtener_guia(categoria: str, datos: dict | None = None, resultado=None, oferta: float = 0.0, plazo: dict | None = None) -> dict:
-    """Devuelve una copia de la guía de la categoría (o la de «Indeterminado»), personalizada si aplica."""
+SUBTIPOS = {"danos_en_trabajo": "Daños en el trabajo (sin contrato o por propinas)"}
+
+
+def obtener_guia(categoria: str, datos: dict | None = None, resultado=None, oferta: float = 0.0, plazo: dict | None = None,
+                 subtipo: str | None = None) -> dict:
+    """Devuelve una copia de la guía de la categoría (o la de «Indeterminado»), personalizada si aplica.
+    Si se indica un subtipo conocido, usa su guía específica."""
     guias = _base()
+    clave_sub = SUBTIPOS.get(subtipo or "")
+    if clave_sub and clave_sub in guias:
+        return copy.deepcopy(guias[clave_sub])
     guia = copy.deepcopy(guias.get(categoria) or guias["Indeterminado"])
     if categoria == "Casos Laborales":
         _personalizar_laboral(guia, datos or {}, resultado, oferta, plazo)

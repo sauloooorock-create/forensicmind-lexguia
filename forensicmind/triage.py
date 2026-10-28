@@ -72,6 +72,20 @@ _REGLAS_COMPILADAS = {
     cat: [(re.compile(p), w) for p, w in reglas] for cat, reglas in REGLAS.items()
 }
 
+DANOS_EVENTO = re.compile(r"\bdanos?\b|\bse (?:me )?(?:cayo|callo|rompio|quebro)\b|\bcobrar(?:me)?\b")
+CONTEXTO_TRABAJO = re.compile(
+    r"\b(?:cliente|clientes|mercancias?|refri\w*|producto|gerencia|gerente|diablito|cargador|acomodador|"
+    r"rampa|propinas?|apoyo)\b")
+
+
+def subtipo_laboral(relato: str) -> str | None:
+    """Subtipo dentro de «Casos Laborales». Hoy: daños ocurridos al apoyar en el trabajo (propinas o sin contrato)."""
+    t = norm(relato)
+    if DANOS_EVENTO.search(t) and CONTEXTO_TRABAJO.search(t):
+        return "danos_en_trabajo"
+    return None
+
+
 ALERTAS_URGENCIA = [
     ("peligro", re.compile(r"\b(?:me van a matar|amenazas? de muerte|me amenazan de muerte|secuestr\w+|me (?:golpe\w+|agred\w+)|violencia|con (?:un )?arma|me apunt\w+)\b"),
      "Si tú o alguien más está en peligro inmediato, llama al **911**. Para denuncia anónima: **089**."),

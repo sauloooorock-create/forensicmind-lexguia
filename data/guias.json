@@ -204,5 +204,41 @@
     ],
     "autoridad": "Defensoría pública de tu estado / Colegio de abogados local",
     "abogado_req": "Defensoría pública (gratuita) o abogado particular"
+  },
+  "Daños en el trabajo (sin contrato o por propinas)": {
+    "radiografia": "Detecté un **daño ocurrido mientras apoyabas en el trabajo** (llevar o bajar mercancía para clientes), posiblemente sin contrato y con pago en propinas. Lo que define tus derechos es si la tienda te dirigía y se beneficiaba de tu trabajo. **No tienes que pagar de tu bolsillo ni firmar nada en este momento.**",
+    "explicacion_sencilla": [
+      "🔹 **Quién responde ante el cliente:** la compra fue con la tienda, y la tienda es quien debe resolver el reclamo. Que gerencia te diga «arréglate tú» no te obliga a pagar.",
+      "🔹 **¿Puedes ser trabajador aunque no tengas contrato?** Sí. La ley presume la relación de trabajo cuando prestas un servicio personal y recibes órdenes de quien te lo pide (Art. 20 y 21 LFT). Que te paguen con propinas no la descarta por sí solo.",
+      "🔹 **Si eres trabajador:** la empresa asume los riesgos normales del trabajo. Los descuentos a tu pago tienen límite (Art. 110 LFT: hasta el 30 % del salario) y no pueden quitarte tus propinas para cubrir el daño sin acuerdo por escrito.",
+      "🔹 **Si apoyas por tu cuenta:** el cliente podría reclamar daños causados por culpa (Código Civil). Debe probar la culpa y el monto; no es un cobro directo ni inmediato. Puede haber responsabilidad compartida con la tienda si te pidió ese apoyo.",
+      "🔹 **Qué prueba define tu caso:** mensajes de WhatsApp con supervisores, rol de turnos, uniforme o gafete, indicaciones de cómo y dónde trabajar y quién te pedía apoyar.",
+      "🔹 **Ojo con los intermediarios:** si te contrató otra empresa para ese apoyo, la reforma de 2021 limita la subcontratación de personal (Art. 15-A LFT); la tienda podría ser la verdadera patrona."
+    ],
+    "fase_1_hoy": [
+      "**1. No pagues** al cliente hoy, no transfieras dinero y no aceptes que te descuenten tus propinas.",
+      "**2. No firmes** convenio, pagaré, carta de responsabilidad ni renuncia.",
+      "**3. Pide por escrito** a gerencia el reporte del incidente, si te consideran trabajador o no, y el monto que reclaman con su fundamento.",
+      "**4. Guarda evidencia:** mensajes, rol de turnos, fotos de uniforme o gafete, fecha, hora, sección, quién te pidió bajar la mercancía y testigos. Pide que conserven las grabaciones de cámaras.",
+      "**5. Anota tus propinas y turnos de cada semana:** sirven para calcular lo que te deben y para acreditar tu relación de trabajo."
+    ],
+    "fase_2_semana": [
+      "**1. Acude a PROFEDET** (800 911 7877, gratuito) con tu identificación y tus pruebas. Pueden decirte si eres trabajador y orientarte sobre el reclamo del cliente.",
+      "**2. Si te quieren despedir o quitar propinas,** pide que lo pongan por escrito y llévalo a PROFEDET o al Centro de Conciliación Laboral antes de firmar cualquier cosa.",
+      "**3. Si el cliente insiste,** que presente su queja ante PROFECO (Concilianet) o con la tienda. No es tu trámite."
+    ],
+    "fase_3_autoridad": [
+      "**1. En conciliación o juicio laboral (si eres trabajador):** reclama las propinas retenidas, pagos pendientes y cualquier descuento indebido.",
+      "**2. En la vía civil (si te demandan):** el cliente debe probar la culpa, el daño y el monto. Pide tiempo para revisar el caso con PROFEDET antes de contestar."
+    ],
+    "guion": "💬 **Qué decir a gerencia:**\n\n*«Quiero que me den por escrito el reporte del incidente y si me consideran trabajador. No voy a pagar ni firmar nada sin revisarlo. Mis propinas no se descuentan para cubrir un daño sin acuerdo escrito.»*",
+    "errores_fatales": [
+      "🚫 **Pagar o firmar el mismo día** bajo presión de gerencia o del cliente.",
+      "🚫 **Aceptar que te quiten tus propinas** o te descuenten sin un papel que lo explique.",
+      "🚫 **Borrar mensajes o chats** con supervisores: son tu mejor prueba.",
+      "🚫 **No pedir nada por escrito:** lo que no queda escrito es difícil de probar después."
+    ],
+    "autoridad": "PROFEDET y Centro de Conciliación Laboral (si eres trabajador); PROFECO para la queja del cliente.",
+    "abogado_req": "PROFEDET te orienta sin costo. Un abogado laboralista solo si hay despido o demanda civil."
   }
 }

@@ -33,6 +33,14 @@ def test_cargo_no_reconocido_no_se_vuelve_laboral():
     assert triage.diagnosticar(texto)["categoria"] != "Casos Laborales"
 
 
+def test_subtipo_danos_en_trabajo_se_detecta():
+    assert triage.subtipo_laboral(CASO_DANOS_EN_TRABAJO) == "danos_en_trabajo"
+
+
+def test_despido_no_usa_el_subtipo_de_danos():
+    assert triage.subtipo_laboral("Me despidieron sin pagarme finiquito ni vacaciones.") is None
+
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in list(globals().items()):
