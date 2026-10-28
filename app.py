@@ -190,6 +190,8 @@ _PALETAS = {
         "script_bg": "#fffbeb", "script_bd": "#fcd34d", "script_ac": "#d97706",
         "web_bg": "#f0f9ff", "web_bd": "#7dd3fc", "web_ac": "#0284c7",
         "aviso_bg": "#fef9c3", "aviso_bd": "#facc15",
+        "hero_ini": "#6d28d9", "hero_mid": "#db2777", "hero_fin": "#f59e0b", "tab_ac": "#7c3aed",
+        "paso_bg": "#ffffff", "paso_bd": "#c4b5fd", "paso_on": "#7c3aed",
     },
     "oscuro": {
         "bg": "#0b0f19", "txt": "#f8fafc", "input_bg": "#ffffff", "input_txt": "#0f172a", "input_borde": "#38bdf8",
@@ -201,6 +203,8 @@ _PALETAS = {
         "script_bg": "#272011", "script_bd": "#f59e0b", "script_ac": "#fbbf24",
         "web_bg": "#0c192c", "web_bd": "#38bdf8", "web_ac": "#0284c7",
         "aviso_bg": "#3a3210", "aviso_bd": "#facc15",
+        "hero_ini": "#4c1d95", "hero_mid": "#9d174d", "hero_fin": "#b45309", "tab_ac": "#c4b5fd",
+        "paso_bg": "#131c2e", "paso_bd": "#6d28d9", "paso_on": "#c4b5fd",
     },
 }
 _CSS = """
@@ -234,6 +238,28 @@ div.stButton > button:first-child, div.stDownloadButton > button:first-child {
   background: linear-gradient(90deg, #2563eb 0%%, #1d4ed8 100%%) !important; color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important; font-weight: 800 !important; border-radius: 10px !important; padding: 10px 18px !important; }
 .wa-link { background-color: #059669; color: #ffffff !important; padding: 12px 24px; border-radius: 10px; font-weight: 800; text-decoration: none; display: inline-block; }
+.ob-hero { background: linear-gradient(120deg, %(hero_ini)s 0%%, %(hero_mid)s 55%%, %(hero_fin)s 100%%);
+  border-radius: 18px; padding: 20px 22px; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+.ob-hero, .ob-hero * { color: #ffffff !important; }
+.ob-hero h2 { margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 900; }
+.ob-pasos { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 14px 0; }
+.ob-paso { flex: 1 1 200px; background: %(paso_bg)s; border: 2px solid %(paso_bd)s; border-radius: 14px;
+  padding: 10px 14px; font-weight: 700; }
+.ob-paso b { color: %(paso_on)s !important; }
+.stTabs [data-baseweb="tab-list"] { gap: 6px; flex-wrap: wrap; }
+.stTabs [data-baseweb="tab"] { border-radius: 10px 10px 0 0; font-weight: 700; padding: 10px 14px; }
+.stTabs [aria-selected="true"] { color: %(tab_ac)s !important; }
+.stTabs [data-baseweb="tab-highlight"] { background: linear-gradient(90deg, %(hero_ini)s, %(hero_mid)s) !important; height: 4px !important; }
+.stButton > button, .stDownloadButton > button { min-height: 48px; font-weight: 800 !important; border-radius: 12px !important;
+  transition: transform .15s ease, box-shadow .15s ease; }
+.stButton > button:hover, .stDownloadButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.15); }
+.stButton > button[kind="primary"] { background: linear-gradient(90deg, %(hero_ini)s, %(hero_mid)s) !important; border: none !important; }
+.stButton > button[kind="primary"], .stButton > button[kind="primary"] * { color: #ffffff !important; }
+@media (max-width: 640px) {
+  .ob-hero h2 { font-size: 1.2rem; }
+  .block-container { padding-left: 16px !important; padding-right: 16px !important; }
+  .stTabs [data-baseweb="tab"] { padding: 8px 10px; font-size: 0.9rem; }
+}
 </style>
 """
 st.markdown(_CSS % _PALETAS["claro" if "Claro" in modo_visual else "oscuro"], unsafe_allow_html=True)
@@ -248,6 +274,11 @@ st.markdown(
     f"<div><span class='badge gold-badge'>⚙️ {esc(config.AUTOR_SISTEMA)}</span></div></div></div>",
     unsafe_allow_html=True,
 )
+caja("ob-hero", "<h2>🧭 Entiende tus derechos en 3 pasos</h2>"
+    "<div>Cuéntanos qué te pasó, revisa qué te corresponde y decide tu siguiente paso. Es orientación preliminar, no sustituye a un abogado.</div>")
+caja("ob-pasos", "<div class='ob-paso'><b>Paso 1</b> · Cuéntanos tu caso</div>"
+    "<div class='ob-paso'><b>Paso 2</b> · Calcula tu liquidación</div>"
+    "<div class='ob-paso'><b>Paso 3</b> · Decide tu siguiente paso</div>")
 _c = config.leyes()["contactos"]
 caja(
     "aviso-box",
@@ -274,14 +305,14 @@ if problemas_leyes and ES_ADMIN:
 
 if ES_ADMIN:
     t_guia, t_calc, t_casos, t_fuentes, t_sistema, t_revision, t_ensenar, t_cotiz, t_trafico, t_control = st.tabs([
-        "🧠 1. Guía paso a paso", "💰 2. Calculadora LFT", "🔬 3. Casos ganados vs. perdidos", "📚 4. Fuentes y datos legales",
+        "🗣️ 1. Cuéntame tu caso", "💰 2. ¿Cuánto me toca?", "🏆 3. Casos parecidos", "📚 4. Leyes y fuentes",
         "☁️ 5. [ADMIN] Sistema y respaldo", "✅ 6. [ADMIN] Revisión y buzón", "➕ 7. [ADMIN] Enseñar caso",
         "🛠️ 8. [ADMIN] Cotizador", "👥 9. [ADMIN] Tráfico y calidad", "🛡️ 10. [ADMIN] Control total",
     ])
 else:
     t_guia, t_calc, t_casos, t_fuentes = st.tabs([
-        "🧠 1. Guía paso a paso de tu caso", "💰 2. Calculadora de liquidación",
-        "🔬 3. Casos ganados vs. perdidos", "📚 4. Fuentes y datos legales",
+        "🗣️ 1. Cuéntame tu caso", "💰 2. ¿Cuánto me toca?",
+        "🏆 3. Casos parecidos", "📚 4. Leyes y fuentes",
     ])
 
 
@@ -586,7 +617,8 @@ def _cargar_escenario() -> None:
 
 
 with t_guia:
-    st.markdown("### 🗣️ Cuéntame qué te pasó (aunque sean varios problemas mezclados)")
+    st.markdown("### 🗣️ Paso 1 de 3 · Cuéntame qué te pasó")
+    st.caption("Puedes mezclar varios problemas. Entre más detalles des (fechas, qué te dijeron, qué firmaste), mejor será la guía.")
     col_esc, col_voz = st.columns([1.3, 1])
     with col_esc:
         st.selectbox("💡 Elige un ejemplo o escribe tu caso:", list(config.ESCENARIOS_FRECUENTES), key="escenario", on_change=_cargar_escenario)
@@ -606,7 +638,9 @@ with t_guia:
             else:
                 st.warning("No pude transcribir el audio. Escribe tu caso en el recuadro.")
 
-    st.text_area("📝 Describe con tus palabras qué ocurrió (evita poner nombres o datos personales):", key="relato", height=150, max_chars=4000)
+    st.text_area("📝 Escribe con tus palabras qué ocurrió", key="relato", height=150, max_chars=4000,
+                 placeholder="Ej.: Me despidieron el 3 de octubre sin pagarme finiquito ni vacaciones...",
+                 help="Evita nombres y datos personales; el texto se anonimiza antes de guardarse.")
     consentimiento = st.checkbox(
         "Autorizo guardar una versión anonimizada de mi caso para que el administrador la revise y mejore el sistema (opcional)",
         key="consent_guardar",
@@ -659,7 +693,7 @@ with t_guia:
 # PESTAÑA 2
 # ==============================================================================
 with t_calc:
-    st.subheader("💰 Calculadora de liquidación laboral y costo de abogado")
+    st.subheader("💰 Paso 2 de 3 · ¿Cuánto me toca?")
     st.write("Para asuntos de trabajo: estima cuánto te corresponde por despido o renuncia según la LFT.")
     res2, datos2, oferta2, plazo2 = render_calculadora("t2", {"periodicidad": "Semanal"}, "")
     if res2 is not None:
@@ -680,7 +714,7 @@ with t_calc:
 # PESTAÑA 3: casos
 # ==============================================================================
 with t_casos:
-    st.subheader("🔬 Estrategia ganadora vs. error fatal")
+    st.subheader("🏆 Paso 3 · Casos parecidos: qué funcionó y qué no")
     st.write("Casos **ilustrativos** (construidos para orientar; no son sentencias reales) que comparan qué acciones ayudan y qué errores perjudican.")
     cat_comp = st.selectbox("Tema a comparar:", list(config.TIPOS_CASOS), key="filtro_comp")
     casos = db.listar_casos(cat_comp)
