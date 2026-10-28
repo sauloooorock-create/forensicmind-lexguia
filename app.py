@@ -19,6 +19,7 @@ from forensicmind import (
     base_legal, config, db, docs, extraction, extraction_llm, guias, honorarios, lft, ml, security, sync, triage, web,
 )
 from forensicmind.security import esc, fmt_inline
+from forensicmind import control_admin
 
 log = logging.getLogger("forensicmind")
 
@@ -252,10 +253,10 @@ if problemas_leyes and ES_ADMIN:
         st.warning("⚙️ Reglas legales: " + mk(p))
 
 if ES_ADMIN:
-    t_guia, t_calc, t_casos, t_fuentes, t_sistema, t_revision, t_ensenar, t_cotiz, t_trafico = st.tabs([
+    t_guia, t_calc, t_casos, t_fuentes, t_sistema, t_revision, t_ensenar, t_cotiz, t_trafico, t_control = st.tabs([
         "🧠 1. Guía paso a paso", "💰 2. Calculadora LFT", "🔬 3. Casos ganados vs. perdidos", "📚 4. Fuentes y datos legales",
         "☁️ 5. [ADMIN] Sistema y respaldo", "✅ 6. [ADMIN] Revisión y buzón", "➕ 7. [ADMIN] Enseñar caso",
-        "🛠️ 8. [ADMIN] Cotizador", "👥 9. [ADMIN] Tráfico y calidad",
+        "🛠️ 8. [ADMIN] Cotizador", "👥 9. [ADMIN] Tráfico y calidad", "🛡️ 10. [ADMIN] Control total",
     ])
 else:
     t_guia, t_calc, t_casos, t_fuentes = st.tabs([
@@ -900,3 +901,11 @@ if ES_ADMIN:
 
 st.markdown("---")
 st.caption(f"⚙️ Arquitectura y desarrollo: {config.AUTOR_SISTEMA} · {config.MARCA_SISTEMA} · reglas legales v{config.leyes()['version']}")
+
+
+# ==============================================================================
+# CONTROL TOTAL (solo administrador)
+# ==============================================================================
+if ES_ADMIN:
+    with t_control:
+        control_admin.render()

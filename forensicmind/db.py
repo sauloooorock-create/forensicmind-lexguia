@@ -147,6 +147,54 @@ def agregar_caso(caso: dict) -> bool:
         return bool(_insertar_caso(conn, c))
 
 
+ACTUALIZABLES_CASO = [
+    "titulo", "categoria_caso", "tipo_caso", "resultado", "evidencia_logs", "accion_abogado",
+    "resolucion_obtenida", "causa_raiz_fallo", "estrategia_ganadora",
+    "que_hacer_ciudadano", "que_no_hacer_ciudadano", "ilustrativo",
+]
+_TEXTOS_CASO = {"evidencia_logs", "accion_abogado", "resolucion_obtenida", "causa_raiz_fallo",
+                "estrategia_ganadora", "que_hacer_ciudadano", "que_no_hacer_ciudadano", "titulo"}
+
+
+def obtener_caso(id_caso: int) -> dict | None:
+    with conexion() as conn:
+        fila = conn.execute("SELECT * FROM casos_juridicos_cbr WHERE id=?", (int(id_caso),)).fetchone()
+    return dict(fila) if fila else None
+
+
+def actualizar_caso(id_caso: int, cambios: dict) -> bool:
+    """Edita solo campos permitidos. Los textos libres se anonimizan antes de guardarse."""
+    limpios = {}
+    for k, v in cambios.items():
+        if k not in ACTUALIZABLES_CASO:
+            continue
+        if k in _TEXTOS_CASO:
+            v = anonimizar(str(v or "")).strip()
+        limpios[k] = v
+    if not limpios:
+        return False
+    sets = ", ".join(f"{k}=?" for k in limpios)
+    with conexion() as conn:
+        cur = conn.execute(f"UPDATE casos_juridicos_cbr SET {sets} WHERE id=?", [*limpios.values(), int(id_caso)])
+        return cur.rowcount > 0
+
+
+def eliminar_caso(id_caso: int) -> bool:
+    """Borra un caso. Los casos semilla vuelven a crearse al reiniciar (son parte del catálogo)."""
+    with conexion() as conn:
+        return conn.execute("DELETE FROM casos_juridicos_cbr WHERE id=?", (int(id_caso),)).rowcount > 0
+
+
+def eliminar_memoria(id_mem: int) -> bool:
+    with conexion() as conn:
+        return conn.execute("DELETE FROM memoria_aprendizaje WHERE id=?", (int(id_mem),)).rowcount > 0
+
+
+def eliminar_buzon(id_bz: int) -> bool:
+    with conexion() as conn:
+        return conn.execute("DELETE FROM buzon_casos WHERE id=?", (int(id_bz),)).rowcount > 0
+
+
 # ----------------------------------------------------------------------------- visitas / feedback
 def registrar_visita() -> None:
     with conexion() as conn:
@@ -282,6 +330,7 @@ def exportar_respaldo() -> dict:
         "memoria_aprendizaje": mem,
         "buzon_casos": buz,
         "feedback": fb,
+        "ajustes_legales": config.ajustes_legales_actuales(),
     }
 
 
@@ -333,6 +382,11 @@ def importar_respaldo(data: dict) -> dict:
                 (texto[:4000], hash_texto(texto), b.get("estado") or "Pendiente de revisión", b.get("fecha_envio") or ahora_str()),
             )
             nuevos["buzon"] += cur.rowcount
+    ajustes = data.get("ajustes_legales")
+    nuevos["ajustes_legales"] = False
+    if isinstance(ajustes, dict) and ajustes:
+        # Solo se aceptan si pasan la misma validación que el formulario del administrador.
+        nuevos["ajustes_legales"] = not config.guardar_ajustes_legales(ajustes)
     return nuevos
 
 
