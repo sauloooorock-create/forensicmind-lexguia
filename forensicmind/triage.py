@@ -44,6 +44,12 @@ REGLAS: dict[str, list[tuple[str, float]]] = {
         (r"\bchamba\b", 2), (r"\bempleo\b", 1.5), (r"\b(?:trabajaba|trabaje|trabajando|trabajo)\b", 1),
         (r"\bempresa\b", 1), (r"\b(?:jefe|encargado|supervisor)\b", 1), (r"\bdias? (?:libres?|de descanso)\b", 1.5),
         (r"\bboletin\w*\b", 1.5),
+        # Daños ocasionados en el trabajo (producto, mercancía o cliente) y descuentos al sueldo
+        (r"\bdanos?\b", 1.5), (r"\bgerencia\b|\bgerente\b", 2), (r"\bmercancias?\b|\brefri\w*\b", 1.5),
+        (r"\bse me (?:cayo|callo|rompio|quebro)\b|\bse (?:cayo|callo|rompio|quebro)\b", 2),
+        (r"\b(?:cargador|acomodador|diablito|montacargas|rampa)\b", 1.5),
+        (r"\bme (?:quiere|quieren|cobrar|cobren|descontar|descuenten)\b|\bcobrar(?:me)? (?:los )?danos?\b", 2.5),
+        (r"\bdescuent\w* (?:de|del|por) (?:mi )?(?:sueldo|salario|quincena|pago)\b", 3),
     ],
     "Acoso de Cobranza y Deudas": [
         (r"\bcobranza\b", 3), (r"\bembarg\w+\b", 2.5), (r"\bapps? de prestamos?\b|\bmontadeudas\b|\bprestamos? en linea\b", 3),
@@ -65,6 +71,20 @@ REGLAS: dict[str, list[tuple[str, float]]] = {
 _REGLAS_COMPILADAS = {
     cat: [(re.compile(p), w) for p, w in reglas] for cat, reglas in REGLAS.items()
 }
+
+DANOS_EVENTO = re.compile(r"\bdanos?\b|\bse (?:me )?(?:cayo|callo|rompio|quebro)\b|\bcobrar(?:me)?\b")
+CONTEXTO_TRABAJO = re.compile(
+    r"\b(?:cliente|clientes|mercancias?|refri\w*|producto|gerencia|gerente|diablito|cargador|acomodador|"
+    r"rampa|propinas?|apoyo)\b")
+
+
+def subtipo_laboral(relato: str) -> str | None:
+    """Subtipo dentro de «Casos Laborales». Hoy: daños ocurridos al apoyar en el trabajo (propinas o sin contrato)."""
+    t = norm(relato)
+    if DANOS_EVENTO.search(t) and CONTEXTO_TRABAJO.search(t):
+        return "danos_en_trabajo"
+    return None
+
 
 ALERTAS_URGENCIA = [
     ("peligro", re.compile(r"\b(?:me van a matar|amenazas? de muerte|me amenazan de muerte|secuestr\w+|me (?:golpe\w+|agred\w+)|violencia|con (?:un )?arma|me apunt\w+)\b"),

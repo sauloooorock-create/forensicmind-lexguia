@@ -526,7 +526,8 @@ def mostrar_analisis(a: dict) -> None:
     # ---- Guías por módulo -----------------------------------------------------------
     guias_acum = []
     for idx, mod in enumerate(t["modulos_triage"], 1):
-        g = guias.obtener_guia(mod["categoria"], datos, resultado, oferta, plazo)
+        g = guias.obtener_guia(mod["categoria"], datos, resultado, oferta, plazo,
+                               subtipo=triage.subtipo_laboral(relato) if mod["categoria"] == "Casos Laborales" else None)
         guias_acum.append({"categoria": mod["categoria"], "titulo_prioridad": mod["titulo_prioridad"], "guia": g})
         mostrar_modulo(idx, mod, g, expandido=(idx == 1 or not t["es_multimateria"]))
 
