@@ -118,21 +118,8 @@ try:
 except Exception:
     log.exception("Sincronización pendiente falló")
 
-# ==============================================================================
-# Barra lateral
-# ==============================================================================
-with st.sidebar:
-    st.markdown("### 🎨 Apariencia")
-    modo_visual = st.radio("Modo de lectura:", ["☀️ Claro (fácil lectura en celular)", "🌙 Oscuro"], index=0)
-    buscar_web = st.checkbox("🌐 Consultar noticias y criterios en internet", value=True)
-    usar_llm = False
-    if AJUSTES.anthropic_key:
-        usar_llm = st.checkbox(
-            "🤖 Leer mejor mi caso con IA (envía tu texto anonimizado a Anthropic)", value=False,
-            help="Opcional. Se quitan nombres, teléfonos, cuentas y datos de identificación antes de enviar.",
-        )
-
-    st.markdown("---")
+def _bloque_admin() -> None:
+    """Acceso del administrador: contraseña o aviso de configuración."""
     st.markdown("### 🔐 Administrador")
     habilitado, motivo_admin = security.estado_admin(AJUSTES.admin_password)
     if not st.session_state["es_admin"]:
@@ -164,6 +151,28 @@ with st.sidebar:
         if ui_button("🔒 Cerrar sesión", use_container_width=True):
             st.session_state["es_admin"] = False
             st.rerun()
+
+
+# ==============================================================================
+# Barra lateral
+# ==============================================================================
+with st.sidebar:
+    st.markdown("### 🎨 Apariencia")
+    modo_visual = st.radio("Modo de lectura:", ["☀️ Claro (fácil lectura en celular)", "🌙 Oscuro"], index=0)
+    buscar_web = st.checkbox("🌐 Consultar noticias y criterios en internet", value=True)
+    usar_llm = False
+    if AJUSTES.anthropic_key:
+        usar_llm = st.checkbox(
+            "🤖 Leer mejor mi caso con IA (envía tu texto anonimizado a Anthropic)", value=False,
+            help="Opcional. Se quitan nombres, teléfonos, cuentas y datos de identificación antes de enviar.",
+        )
+
+    st.markdown("---")
+    st.markdown("---")
+    if st.session_state.get("ver_admin"):
+        st.caption("🔐 El panel de administrador está en la pantalla principal.")
+    else:
+        _bloque_admin()
 
 ES_ADMIN = bool(st.session_state["es_admin"])
 
@@ -246,6 +255,17 @@ caja(
 )
 with st.expander("🔒 Aviso de privacidad"):
     st.markdown(mk(config.AVISO_PRIVACIDAD))
+
+if not ES_ADMIN:
+    if st.session_state.get("ver_admin"):
+        with st.container(border=True):
+            _bloque_admin()
+            if ui_button("⬅️ Ocultar panel de administrador", key="ocultar_admin"):
+                st.session_state["ver_admin"] = False
+                st.rerun()
+    elif ui_button("🔐 Ir al panel de administrador", key="ir_admin"):
+        st.session_state["ver_admin"] = True
+        st.rerun()
 
 problemas_leyes = config.validar_leyes()
 if problemas_leyes and ES_ADMIN:
